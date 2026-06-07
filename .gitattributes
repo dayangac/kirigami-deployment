@@ -1,0 +1,7 @@
+data/corpus/k3a_500.json filter=lfs diff=lfs merge=lfs -text
+data/corpus/e1_900.json filter=lfs diff=lfs merge=lfs -text
+data/corpus/k2c_500.json filter=lfs diff=lfs merge=lfs -text
+data/corpus/**/*.json filter=lfs diff=lfs merge=lfs -text
+data/corpus/*.json filter=lfs diff=lfs merge=lfs -text
+results/**/*.json filter=lfs diff=lfs merge=lfs -text
+results/**/*.csv filter=lfs diff=lfs merge=lfs -text
