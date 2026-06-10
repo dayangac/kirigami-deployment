@@ -1,0 +1,2 @@
+[22] voronoi_torus_1_n28        tgt=0 hit=2.2e-16 cert=1 eps=0.40988 thmax=0.40988 minq=1.35e+00
+[22] voronoi_torus_1_n28        tgt=1 hit=2.2e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-8.58e+00

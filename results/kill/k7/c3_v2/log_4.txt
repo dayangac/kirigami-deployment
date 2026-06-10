@@ -1,0 +1,4 @@
+[16] trunc_square_488_3x2       tgt=0 hit=1.1e-16 cert=0 eps=0.00000 thmax=0.00000 minq=3.56e-01
+[16] trunc_square_488_3x2       tgt=1 hit=2.2e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-1.19e+00
+[28] voronoi_torus_7_n100       tgt=0 hit=1.7e-16 cert=0 eps=0.00000 thmax=0.00000 minq=2.49e-01
+[28] voronoi_torus_7_n100       tgt=1 hit=4.4e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-2.15e+00

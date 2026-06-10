@@ -1,0 +1,4 @@
+[14] snub_square_3x3            tgt=0 hit=2.2e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-7.09e-03
+[14] snub_square_3x3            tgt=1 hit=7.8e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-2.96e+01
+[26] voronoi_torus_5_n70        tgt=0 hit=4.4e-16 cert=0 eps=0.00000 thmax=0.00000 minq=4.02e-01
+[26] voronoi_torus_5_n70        tgt=1 hit=2.2e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-1.71e+00

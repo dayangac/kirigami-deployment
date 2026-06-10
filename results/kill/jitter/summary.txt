@@ -1,0 +1,59 @@
+A3 -- jitter transition. 6416 (design, sigma) rows from /private/tmp/claude-501/-Users-emredayangac-Documents-kirigami-experiments/ff5735b4-e5aa-4374-8da7-df85b59880d6/scratchpad/jit_new.csv
+
+=== the ladder: fraction with a POSITIVE exact Theta_max, and fraction CERTIFIED (eps = 0.006) ===
+(a = 0 is the unjittered authored tiling; amplitudes are in median edge lengths)
+
+tiling                 rule   a*(Theta_max > 0)      a*(certified)
+  hexagons_auto          mc    0.2773                 0.2722
+  hexagons_auto          def    0.1877                 0.1877
+  kagome_3636            mc    survives a=1.0         survives a=1.0
+  kagome_3636            def    survives a=1.0         survives a=1.0
+  periodic_squares_4x4   mc    survives a=1.0         survives a=1.0
+  periodic_squares_4x4   def    survives a=1.0         survives a=1.0
+  rotating_squares       mc    survives a=1.0         survives a=1.0
+  rotating_squares       def    survives a=1.0         survives a=1.0
+  snub_square_33434      mc    0.1632                 0.1632
+  snub_square_33434      def    0.0707                 0.0707
+  tiling_3_4_3_12        mc    0.5217                 0.5217
+  tiling_3_4_3_12        def    DEAD at a=0.005        DEAD at a=0.005
+  triangles_alternating  mc    survives a=1.0         survives a=1.0
+  triangles_alternating  def    survives a=1.0         survives a=1.0
+  truncated_square_488   mc    0.3196                 0.3196
+  truncated_square_488   def    0.0961                 0.0961
+
+=== ROC AUC, population = all solved rows (both sigma rules) ===
+predictor      AUC(Theta_max>0)  AUC(certified)   [directed = max(AUC, 1-AUC)]
+  rho_geom      0.0816 [0.9184]     0.0818 [0.9182]
+  rho_hop       0.1078 [0.8922]     0.1077 [0.8923]
+  rho_max       0.0476 [0.9524]     0.0478 [0.9522]
+  psplit        0.1259 [0.8741]     0.1259 [0.8741]
+  badq_ini      0.0128 [0.9872]     0.0131 [0.9869]
+  aniso         0.2553 [0.7447]     0.2554 [0.7446]
+  D             0.5854 [0.5854]     0.5853 [0.5853]
+  amp           0.2574 [0.7426]     0.2574 [0.7426]
+  badq_X0       0.0000 [1.0000]     0.0011 [0.9989]
+  margin_X0     0.9999 [0.9999]     1.0000 [1.0000]
+  back_rel      0.0541 [0.9459]     0.0540 [0.9460]
+  proj_rel      0.5594 [0.5594]     0.5592 [0.5592]
+
+=== ROC AUC, population = split-bearing tilings only (n_split > 0) ===
+predictor      AUC(Theta_max>0)  AUC(certified)   [directed = max(AUC, 1-AUC)]
+  rho_geom      0.2225 [0.7775]     0.2233 [0.7767]
+  rho_hop       0.2938 [0.7062]     0.2939 [0.7061]
+  rho_max       0.1298 [0.8702]     0.1304 [0.8696]
+  psplit        0.3431 [0.6569]     0.3436 [0.6564]
+  badq_ini      0.0240 [0.9760]     0.0242 [0.9758]
+  aniso         0.1841 [0.8159]     0.1838 [0.8162]
+  D             0.5040 [0.5040]     0.5037 [0.5037]
+  amp           0.1694 [0.8306]     0.1691 [0.8309]
+  badq_X0       0.0000 [1.0000]     0.0011 [0.9989]
+  margin_X0     0.9999 [0.9999]     0.9999 [0.9999]
+  back_rel      0.1463 [0.8537]     0.1461 [0.8539]
+  proj_rel      0.4685 [0.5315]     0.4680 [0.5320]
+
+=== which certificate clause binds (all solved rows, n = 6416) ===
+  POS        6105
+  NOOVERLAP  5065
+  NOROOT     6197
+  exact Theta_max == 0 : 1349
+

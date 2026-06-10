@@ -1,0 +1,29 @@
+variant|sigma              n  medDimN  medNpin  medMinQ0  secFeas     feas  theta>0   cert>0
+free|sigma_mc            200      156        1    -51.55      176        0        0        0
+fixed|sigma_mc           200      126       18    -78.20       60        0        0        0
+split_free|sigma_mc      200      131       12    -66.98       83        0        0        0
+split_free|sigma_def     200      329        7   -130.64      182        1        0        0
+free|sigma_def           200      338        1   -130.64      200        3        2        2
+fixed|sigma_def          200      321       18   -130.64       67        2        0        0
+
+binding split_free|sigma_mc,split-inward = 200
+binding fixed|sigma_def,split-inward = 188
+binding split_free|sigma_def,vertex-edge = 12
+binding free|sigma_def,inverted = 1
+binding free|sigma_def,n/a = 2
+binding fixed|sigma_mc,split-inward = 200
+binding free|sigma_def,split-inward = 184
+binding fixed|sigma_def,vertex-edge = 11
+binding free|sigma_mc,split-inward = 200
+binding split_free|sigma_def,split-inward = 187
+binding fixed|sigma_def,inverted = 1
+binding free|sigma_def,vertex-edge = 13
+binding split_free|sigma_def,inverted = 1
+
+theta>0 [free|sigma_def]: 0.241884 0.2484
+
+--- cross-checks ---
+dim_null(free) - dim_null(fixed) == |V_bdry| - 1 on 400/400 rows; mean gain 32.8
+fixed control primary-feasible: id 12 voronoi sigma_def
+fixed control primary-feasible: id 93 voronoi sigma_def
+referee |theta_exact - bisection| <= 1e-5 on 5/6, worst 0.2484

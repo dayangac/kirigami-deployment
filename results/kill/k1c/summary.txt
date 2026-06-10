@@ -1,0 +1,19 @@
+K1c: 171 deployable, embedded designs with split cuts
+closed forms T5.2 verified: worst |p+q|/scale 0.000e+00, worst |closed - generic|/scale 8.898e-08
+worst |theta* - per-pair bisection| for qualifying re-closures : 1.035e-11
+split edges collapsed to zero length, ours / native Eq. (9) : 109 / 0
+--- Y_9 from our optimize_collision_sweep (gamma ladder) ---
+  certified designs (valid flat embedding)      : 115
+  with a re-closure below min beta (CORRECTED)  : 40 (34.78 %)
+  where the re-closure is the binding contact   : 9 (7.83 %)
+  rule AS WRITTEN (no interval/crossing clause) : 32 (27.83 %)
+  clauses applied, SAME range Theta_max         : 0 (0.00 %)   <- isolates the clauses' effect
+  VERDICT (corrected, >= 3% below min beta)    : PASS
+--- Y_9 from authors' native prevent (published defaults) ---
+  certified designs (valid flat embedding)      : 169
+  with a re-closure below min beta (CORRECTED)  : 16 (9.47 %)
+  where the re-closure is the binding contact   : 12 (7.10 %)
+  rule AS WRITTEN (no interval/crossing clause) : 110 (65.09 %)
+  clauses applied, SAME range Theta_max         : 0 (0.00 %)   <- isolates the clauses' effect
+  VERDICT (corrected, >= 3% below min beta)    : PASS
+wall 30.4 s

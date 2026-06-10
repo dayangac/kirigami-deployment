@@ -1,0 +1,6 @@
+[ 8] hexagons_3x3               tgt=0 hit=1.1e-16 cert=1 eps=1.06292 thmax=1.06292 minq=1.51e+00
+[ 8] hexagons_3x3               tgt=1 hit=2.2e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-3.02e-01
+[20] t3_4_3_12_3x3              tgt=0 hit=1.1e-16 cert=0 eps=0.00000 thmax=0.00000 minq=3.00e-01
+[20] t3_4_3_12_3x3              tgt=1 hit=2.9e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-4.10e+01
+[32] voronoi_torus_11_n200      tgt=0 hit=8.9e-16 cert=0 eps=0.00000 thmax=0.00000 minq=1.00e-01
+[32] voronoi_torus_11_n200      tgt=1 hit=3.3e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-1.16e+00

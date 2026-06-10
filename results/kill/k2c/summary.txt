@@ -1,0 +1,39 @@
+K2c: 462 graphs
+log-log slope of max_f rho_f/r_f vs log F, all      : 0.0000 (R^2 0.4152, n=462)
+  on the X0 subset                                  : 0.0000 (R^2 0.4152, n=462)
+  on the X_ini subset                               : nan (R^2 0.0000, n=0)
+largest max_f rho_f/r_f seen                        : 1.000000000001
+worst | |Y_pv - m_f(theta)| - r_f |                  : 5.262e-13   (exactness of the moving disc)
+theta_max tested (F <= 800)                      : 285
+pruned == unpruned to 1e-12 (sound prune)           : 285/285, worst diff 0.000e+00 ()
+pruned == unpruned to 1e-12 (spec's static prune)   : 285/285, worst diff 0.000e+00
+log-log slope of surviving-pairs-per-face vs log F  : 0.1695 (R^2 0.3214, n=285)
+surviving pairs per face: median 12.6862, max 18.3973
+--- the gate statistic, withdrawn ---
+max_f rho_f/r_f is identically 1 by algebra (chi_u = -sigma_f J x_u), so its
+log-log slope is 0 for any input and the 'slope <= 0.3' gate cannot fail.
+--- H-LOC: centroid drift vs patch diameter (the refutation) ---
+H-LOC would need max_f |gamma_f(theta) - xbar_f| <= kappa * r_f for a kappa
+independent of the patch. Measured on a GROWING square tiling (the random
+population is generated in a fixed 40x40 box, so its diameter barely varies and a
+regression on it is meaningless -- it is reported afterwards only for completeness):
+  patch      diameter   max_f |gamma_f - xbar_f| / r_f
+  squares    2.828     1.414   (F=4)
+  squares    5.657     2.316   (F=16)
+  squares    8.485     3.924   (F=36)
+  squares    11.314     5.560   (F=64)
+  squares    14.142     7.205   (F=100)
+  squares    16.971     8.854   (F=144)
+  squares    19.799     10.505   (F=196)
+  squares    22.627     12.157   (F=256)
+  squares    24.042     12.984   (F=289)
+  squares    26.870     14.637   (F=361)
+  linear fit drift/r = a + b*diameter, b = 0.5656  -- growth is LINEAR in the diameter, so no such kappa exists
+  On the fixed-box random population (diameter 53.4 to 61.8, too narrow to regress): drift/r ranges 25.8 to 105.0
+  A drift of tens of circumradii means the swept region is NOT contained in any
+  fixed multiple of the flat circumdisc, so the packing argument for an O(n)
+  active set does not close. H-LOC is refuted, not merely unproved.
+VERDICT (REPLACED rule: pruned == unpruned exact Theta_max, 1e-12): PASS
+VERDICT (old slope gate): WITHDRAWN -- vacuous, the statistic is identically 1
+No O(n) claim is made: H-LOC is refuted by the drift column above.
+wall 176.0 s

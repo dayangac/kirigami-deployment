@@ -1,0 +1,6 @@
+[ 1] squares_3x2                tgt=0 hit=0.0e+00 cert=0 eps=0.00000 thmax=0.00000 minq=-2.31e+00
+[ 1] squares_3x2                tgt=1 hit=1.0e+00 cert=0 eps=0.00000 thmax=0.00000 minq=-3.35e+01
+[13] snub_square_3x2            tgt=0 hit=2.8e-17 cert=1 eps=0.57307 thmax=0.57307 minq=4.59e-01
+[13] snub_square_3x2            tgt=1 hit=4.4e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-4.26e+01
+[25] voronoi_torus_4_n55        tgt=0 hit=5.6e-17 cert=1 eps=0.45301 thmax=0.45301 minq=5.83e-01
+[25] voronoi_torus_4_n55        tgt=1 hit=2.7e-16 cert=0 eps=0.00000 thmax=0.00000 minq=-8.87e-01

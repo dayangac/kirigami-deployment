@@ -1,0 +1,47 @@
+K6 -- 0+ repair in the null space. 17 graphs, eps = 0.300
+graphs skipped for a missing K5 sigma_def : 0
+t lives in the FULL null space, dim m = 2 * dim_null (Phi is N x k and acts on
+each coordinate separately). Feasible = all q_e > 0 AND all a_f > 0 strictly.
+
+=== sigma_mc (17 designs) ===
+  (1) inward split edges at t = 0 (q_e <= 0)
+      median / q1 / q3 / max      : 23.0 / 11.0 / 54.0 / 89.0
+      median fraction of split edges : 0.5851
+      designs with ZERO inward edges : 0 / 17
+      median |E_split|            : 34.0
+  (2) 0+-feasible after the L-BFGS repair : 2 / 17  (11.76 %)
+  (3) certificate POS /\ NOOVERLAP(eps/2) /\ NOROOT at eps = 0.30 : 0 / 17
+      certified Theta_max > 0 (largest certified eps) : 0 / 17  (0.00 %)
+      exact Theta_max (T4.2")  median / max : 2.5305 / 2.5305
+      referee: |Theta_exact - bisection| <= 1e-5 on 2 / 2, worst 1.801e-12
+      soundness: certified eps <= bisection Theta_max on 2 / 2
+      lambda ladder {1e-6,1e-3,1e-1,1} (extension): feasible 3 / 17, certified Theta_max > 0 on 0 / 17  (0.00 %)
+      stage 2 (repair, then range_opt): run on 2, still 0+-feasible 2, certified Theta_max > 0 on 0 / 17  (0.00 %), bisection Theta_max > 0 on 2
+      binding contact type at the failures:  inverted 15  n/a 2
+  (4) native comparison: no design qualified (feasible and |F| <= 550)
+      wall : 3.9 s
+
+=== sigma_def (17 designs) ===
+  (1) inward split edges at t = 0 (q_e <= 0)
+      median / q1 / q3 / max      : 45.0 / 25.0 / 91.0 / 151.0
+      median fraction of split edges : 0.4148
+      designs with ZERO inward edges : 0 / 17
+      median |E_split|            : 105.0
+  (2) 0+-feasible after the L-BFGS repair : 0 / 17  (0.00 %)
+  (3) certificate POS /\ NOOVERLAP(eps/2) /\ NOROOT at eps = 0.30 : 0 / 17
+      certified Theta_max > 0 (largest certified eps) : 0 / 17  (0.00 %)
+      referee: |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
+      soundness: certified eps <= bisection Theta_max on 0 / 0
+      lambda ladder {1e-6,1e-3,1e-1,1} (extension): feasible 0 / 17, certified Theta_max > 0 on 0 / 17  (0.00 %)
+      stage 2 (repair, then range_opt): run on 0, still 0+-feasible 0, certified Theta_max > 0 on 0 / 17  (0.00 %), bisection Theta_max > 0 on 0
+      binding contact type at the failures:  inverted 17
+  (4) native comparison: no design qualified (feasible and |F| <= 550)
+      wall : 18.2 s
+
+--- PASS rule: certified Theta_max > 0 on >= 20 % for at least one sigma ---
+best family : none at 0.00 %
+VERDICT (lambda = 1e-6, as specified): FAIL
+with the lambda ladder and stage 2 (extensions), best family none at 0.00 %
+VERDICT (extensions): FAIL
+baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200
+wall 27.6 s
