@@ -1,0 +1,26 @@
+{
+  "bbox_mm": [
+    89.49367658177134,
+    90.60787910102111
+  ],
+  "faces": 53,
+  "hinge": "living-hinge-neck",
+  "hinge_sites": 64,
+  "input": "results/core_validation/cases/snub_square_33434/M.json",
+  "profile": "felt_laser",
+  "scale_mm_per_unit": 10.0,
+  "solid": {
+    "boundary_edges": 0,
+    "closed": true,
+    "components": 53,
+    "consistently_oriented": true,
+    "nonmanifold_edges": 0,
+    "triangles": 2408,
+    "volume_mm3": 6353.513421053157,
+    "warnings": []
+  },
+  "split_edges": 13,
+  "svg": "export/samples/snub_square_33434_open.svg",
+  "theta": 0.41888173943537377,
+  "warnings": []
+}

@@ -1,0 +1,29 @@
+{
+  "3mf": "export/samples/tiling_3_4_3_12_closed.3mf",
+  "bbox_mm": [
+    111.96152422706633,
+    111.96152422706633
+  ],
+  "faces": 25,
+  "hinge": "living-hinge-neck",
+  "hinge_sites": 40,
+  "input": "results/core_validation/cases/tiling_3_4_3_12/M.json",
+  "profile": "felt_laser",
+  "scale_mm_per_unit": 10.0,
+  "solid": {
+    "boundary_edges": 0,
+    "closed": true,
+    "components": 1,
+    "consistently_oriented": true,
+    "nonmanifold_edges": 0,
+    "objects": 1,
+    "triangles": 1388,
+    "volume_mm3": 13011.370419030924,
+    "warnings": []
+  },
+  "split_edges": 4,
+  "stl": "export/samples/tiling_3_4_3_12_closed.stl",
+  "svg": "export/samples/tiling_3_4_3_12_closed.svg",
+  "theta": 0.0,
+  "warnings": []
+}
