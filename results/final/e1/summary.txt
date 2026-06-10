@@ -1,0 +1,46 @@
+E1 -- exact Theta_max (T4.2") vs. bisection referee, extended population
+==========================================================================
+
+N designs                                              : 3113
+Agreement |Theta_max(T4.2") - bisect| <= 1e-5           : 3113 / 3113  (100.00 %)
+Worst gap                                               : 3.8221e-09
+
+--- Certificate (POS /\ NOOVERLAP(eps/2) /\ NOROOT, eps = 0.006) ---
+Certificate holds (n_cert_valid)                        : 2150 / 3113
+Soundness: holds => bisection Theta_max >= eps          : 2150 / 2150 sound, 0 violations
+Exactness: certified vs. actually Theta_max >= eps       : 2150 / 2150  (exact on this population)
+
+--- Population breakdown (source_sigma-rule) ---
+authored_mc   : 830
+authored_def  : 830
+jitter_mc     : 688
+jitter_def    : 634
+random_mc     : 0     (0/900+ random ids gave a tightly-embedded sigma_mc projection --
+                        consistent with K1a's 0/200 injective under Eq. (1) orientation)
+random_def    : 131   (58 delaunay, 59 quad_random, 14 voronoi; sigma_mc never embeds
+                        random graphs here, sigma_def -- K5's defect search -- does on a
+                        minority; no random design reaches this stage under sigma_mc)
+
+--- Per-family table (family, N, agree@1e-5, worst_gap, certified, actually>=eps) ---
+delaunay                   58         58    3.135e-12        0          0
+hexagons                  420        420    3.822e-09      336        336
+hexagons_auto             342        342    3.803e-09      259        259
+kagome                     20         20    0.000e+00       20         20
+quad_random                59         59    4.534e-12        0          0
+snub_square               420        420    8.121e-10      290        290
+snub_square_33434         306        306    4.913e-10      193        193
+squares                    20         20    0.000e+00       20         20
+t3_4_3_12                 340        340    1.198e-10      324        324
+tiling_3_4_3_12           332        332    5.268e-10      164        164
+trunc_square              420        420    7.153e-10      272        272
+truncated_square_488      342        342    2.580e-09      252        252
+triangles                   20         20    0.000e+00       20         20
+voronoi                     14         14    6.665e-12        0          0
+
+Wall time: 12-way sharded (xargs -P 12), slowest shard 311.1 s; sum of per-design
+measurement time (exact scan + referee + certificate) across all 3113 rows: 352.1 s.
+
+Reproducing:
+  cd code/build && cmake --build . --target kill_e1
+  bash ../scripts/run_e1.sh 200
+  arch -arm64 /usr/local/bin/python3 ../scripts/plot_e1.py
