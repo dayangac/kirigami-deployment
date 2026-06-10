@@ -1,0 +1,19 @@
+[native] pop 2002 native_col -> completed theta=0.835903 (0.195 s)
+[native] pop 2002 sigma_mc -> completed theta=0.109444 (0.352 s)
+[native] pop 2002 sigma_def -> completed theta=0 (0.355 s)
+[native] pop 2006 native_col -> completed theta=0 (0.967 s)
+sh: line 1: 32638 Alarm clock: 14         /usr/bin/perl -e 'alarm shift; exec @ARGV' 600 baseline/native/build_fixed/tuttekiri_cli prevent /tmp/kiri_regime/n2/quad_random_2006_sigma_mc/g.json --collisions --dump /tmp/kiri_regime/n2/quad_random_2006_sigma_mc/pat.json --out /tmp/kiri_regime/n2/quad_random_2006_sigma_mc/full.json > /tmp/kiri_regime/n2/quad_random_2006_sigma_mc/log.txt 2>&1
+[native] pop 2006 sigma_mc -> timed_out theta=0 (600.115 s)
+sh: line 1: 48478 Alarm clock: 14         /usr/bin/perl -e 'alarm shift; exec @ARGV' 600 baseline/native/build_fixed/tuttekiri_cli prevent /tmp/kiri_regime/n2/quad_random_2006_sigma_def/g.json --collisions --dump /tmp/kiri_regime/n2/quad_random_2006_sigma_def/pat.json --out /tmp/kiri_regime/n2/quad_random_2006_sigma_def/full.json > /tmp/kiri_regime/n2/quad_random_2006_sigma_def/log.txt 2>&1
+[native] pop 2006 sigma_def -> timed_out theta=0 (600.051 s)
+[native] pop 2010 native_col -> completed theta=0 (0.729 s)
+[native] pop 2010 sigma_mc -> completed theta=0 (0.474 s)
+[native] pop 2010 sigma_def -> completed theta=0 (1.214 s)
+[native] pop 2014 native_col -> completed theta=0.249923 (0.288 s)
+[native] pop 2014 sigma_mc -> completed theta=0 (0.149 s)
+[native] pop 2014 sigma_def -> completed theta=0 (0.391 s)
+sh: line 1: 64255 Alarm clock: 14         /usr/bin/perl -e 'alarm shift; exec @ARGV' 600 baseline/native/build_fixed/tuttekiri_cli prevent /tmp/kiri_regime/n2/quad_random_2018_native/colored.json --collisions --dump /tmp/kiri_regime/n2/quad_random_2018_native/pat.json --out /tmp/kiri_regime/n2/quad_random_2018_native/full.json > /tmp/kiri_regime/n2/quad_random_2018_native/log.txt 2>&1
+[native] pop 2018 native_col -> timed_out theta=0 (600.103 s)
+[native] pop 2018 sigma_mc -> completed theta=0 (0.372 s)
+[native] pop 2018 sigma_def -> completed theta=0 (2.766 s)
+[native] pop 2022 native_col -> completed theta=0 (2.462 s)
