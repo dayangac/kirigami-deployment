@@ -1,0 +1,37 @@
+{
+  "F": 130,
+  "N": 71,
+  "binding": "n/a",
+  "certificate": {
+    "eps": 0.3,
+    "first_root": -1.0,
+    "min_signed_area": 1.390707882217665,
+    "n_candidates": 20696,
+    "n_identically_zero": 0,
+    "n_inverted": 0,
+    "n_pairs": 1188,
+    "n_roots_deflated": 0,
+    "n_roots_inadmissible": 913,
+    "nooverlap": true,
+    "noroot": true,
+    "pos": true,
+    "theta_1": 0.15,
+    "valid": true
+  },
+  "certified": true,
+  "eps_max": 3.1415926535887495,
+  "first_contact": {
+    "face_e": 3,
+    "face_v": 56,
+    "found": true,
+    "theta": 3.1415926535897496
+  },
+  "min_corner_angle_deg": 5.068533794889171,
+  "n_corners": 390,
+  "n_hinge": 172,
+  "n_inverted": 0,
+  "n_sliver_lt10deg": 3,
+  "n_split": 18,
+  "theta_bisect_referee": 3.141592653589793,
+  "theta_max": 3.141592653589793
+}
