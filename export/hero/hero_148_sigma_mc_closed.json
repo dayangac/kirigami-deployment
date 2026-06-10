@@ -1,0 +1,33 @@
+{
+  "3mf": "export/hero/hero_148_sigma_mc_closed.3mf",
+  "bbox_mm": [
+    376.3553057151381,
+    394.8045351570382
+  ],
+  "faces": 101,
+  "hinge": "living-hinge-neck",
+  "hinge_sites": 128,
+  "input": "export/hero/hero_graph.json",
+  "profile": "felt_laser",
+  "scale_mm_per_unit": 10.0,
+  "solid": {
+    "boundary_edges": 0,
+    "closed": true,
+    "components": 1,
+    "consistently_oriented": true,
+    "nonmanifold_edges": 0,
+    "objects": 1,
+    "triangles": 4392,
+    "volume_mm3": 247305.48528720308,
+    "warnings": [
+      "face 7: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 17: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 62: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)"
+    ]
+  },
+  "split_edges": 16,
+  "stl": "export/hero/hero_148_sigma_mc_closed.stl",
+  "svg": "export/hero/hero_148_sigma_mc_closed.svg",
+  "theta": 0.0,
+  "warnings": []
+}
