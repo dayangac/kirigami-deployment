@@ -1,0 +1,86 @@
+K9 -- convexity-constrained embedding in the Tutte auxetic null space
+population: 17 graphs (K6's), 34 designs (2 sigma), missing sigma_def 0
+delta = 0.001 * med^2, split delta' = 0.001 * med^2, starts 3 + t=0, L-BFGS iters 600, barrier stages 6, eps = 0.3
+non-convex corners at X0: 906 / 33810 (2.68 %)
+
+split-only repair (K6's secondary objective, the (b) fallback start) feasible on 3 / 34 designs
+designs whose X0 is ALREADY fully convex: 14 / 34, of which exact Theta_max > 0: 0
+
+X0 baseline (no solve): designs 34, convex-feasible 14 (41.2 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 14 feasible
+  min mu / med^2 over feasible: median -8.523e+00, q10 -1.822e+01, q90 -4.057e+00
+  |X - X_ini| per vertex, in median edges: median 0.0000, q90 0.0000  (|t|/med median 0.0000)
+  referee: agree 34 / 34, worst gap 0.000e+00; sound (eps_max <= bisection) 34 / 34
+  binding at Theta_max = 0: split-inward=34
+
+(a) convexity only: designs 34, convex-feasible 18 (52.9 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 18 feasible
+  min mu / med^2 over feasible: median -8.436e+00, q10 -1.726e+01, q90 -2.832e+00
+  |X - X_ini| per vertex, in median edges: median 0.2648, q90 0.3435  (|t|/med median 2.8694)
+  expansive-cone LP: run 18, feasible 0
+  referee: agree 34 / 34, worst gap 0.000e+00; sound (eps_max <= bisection) 34 / 34
+  binding at Theta_max = 0: split-inward=34
+
+(a) convexity only [sigma_mc]: designs 17, convex-feasible 1 (5.9 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 1 feasible
+  min mu / med^2 over feasible: median -5.598e-01, q10 -5.598e-01, q90 -5.598e-01
+  |X - X_ini| per vertex, in median edges: median 0.3639, q90 0.3639  (|t|/med median 0.7596)
+  expansive-cone LP: run 1, feasible 0
+  referee: agree 17 / 17, worst gap 0.000e+00; sound (eps_max <= bisection) 17 / 17
+  binding at Theta_max = 0: split-inward=17
+
+(a) convexity only [sigma_def]: designs 17, convex-feasible 17 (100.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 17 feasible
+  min mu / med^2 over feasible: median -8.861e+00, q10 -1.726e+01, q90 -3.576e+00
+  |X - X_ini| per vertex, in median edges: median 0.2605, q90 0.3435  (|t|/med median 2.8694)
+  expansive-cone LP: run 17, feasible 0
+  referee: agree 17 / 17, worst gap 0.000e+00; sound (eps_max <= bisection) 17 / 17
+  binding at Theta_max = 0: split-inward=17
+
+(b) convexity + split: designs 34, convex-feasible 7 (20.6 %)
+  exact Theta_max > 0: 6 (17.6 %), refereed 5
+  certified (eps_max > 0): 6
+  all 0+ corner margins > 0 at the returned X: 6 / 7 feasible
+  min mu / med^2 over feasible: median 4.693e-02, q10 2.519e-02, q90 1.247e-01
+  |X - X_ini| per vertex, in median edges: median 0.3723, q90 0.5699  (|t|/med median 3.3971)
+  eps_max distribution: median 3.040e-01, max 1.997e+00
+  expansive-cone LP: run 7, feasible 0
+  referee: agree 33 / 34, worst gap 1.779e-01; sound (eps_max <= bisection) 33 / 34
+  binding at Theta_max = 0: inverted=14 n/a=6 split-inward=13 vertex-edge=1
+
+(b) convexity + split [sigma_mc]: designs 17, convex-feasible 3 (17.6 %)
+  exact Theta_max > 0: 3 (17.6 %), refereed 2
+  certified (eps_max > 0): 3
+  all 0+ corner margins > 0 at the returned X: 3 / 3 feasible
+  min mu / med^2 over feasible: median 4.693e-02, q10 2.919e-02, q90 1.252e-01
+  |X - X_ini| per vertex, in median edges: median 0.5699, q90 0.7438  (|t|/med median 4.1052)
+  eps_max distribution: median 3.040e-01, max 1.997e+00
+  expansive-cone LP: run 3, feasible 0
+  referee: agree 16 / 17, worst gap 1.779e-01; sound (eps_max <= bisection) 16 / 17
+  binding at Theta_max = 0: inverted=3 n/a=3 split-inward=11
+
+(b) convexity + split [sigma_def]: designs 17, convex-feasible 4 (23.5 %)
+  exact Theta_max > 0: 3 (17.6 %), refereed 3
+  certified (eps_max > 0): 3
+  all 0+ corner margins > 0 at the returned X: 3 / 4 feasible
+  min mu / med^2 over feasible: median 7.963e-02, q10 -1.294e+00, q90 1.247e-01
+  |X - X_ini| per vertex, in median edges: median 0.2997, q90 0.4029  (|t|/med median 3.3971)
+  eps_max distribution: median 2.854e-01, max 3.681e-01
+  expansive-cone LP: run 4, feasible 0
+  referee: agree 17 / 17, worst gap 2.998e-12; sound (eps_max <= bisection) 17 / 17
+  binding at Theta_max = 0: inverted=11 n/a=3 split-inward=2 vertex-edge=1
+
+PASS bar: refereed Theta_max > 0 on >= 10 % of 34 designs (>= 4)
+best variant: 5 refereed positives, 18 convex-feasible
+VERDICT: PASS
+HARD FAIL (feasible >= 50 % and Theta_max > 0 < 2 %): no
+baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200; K6 0/400
+wall 141.4 s

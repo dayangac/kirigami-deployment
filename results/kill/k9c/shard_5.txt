@@ -1,0 +1,7 @@
+K9c -- the range-maximising constrained embedding
+population: 17 graphs (K9's = K6's), 34 designs (2 sigma), missing sigma_def 0
+arms: k9 (proximity, delta=1e-3), k9b (proximity, delta=1e-2, 8 starts), k9c (max 0+ margin from k9/k9b/x0, 6 stages x 120 iters, stage B ON)
+per-design budget 100 s
+gallery designs dumped: 20
+
+wall 1749.8 s

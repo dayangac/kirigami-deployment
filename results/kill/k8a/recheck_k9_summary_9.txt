@@ -1,0 +1,11 @@
+K8a recheck -- the corrected cone LP at K9's variant (b) embeddings
+designs with a feasible (b) embedding and F <= 800 : 0
+sigma in P(X) by direct zero_plus measurement       : 0
+  LP margin > 0 (was 0 with the old solver)         : 0/0
+  LP margin >= the solver-free sigma chart bound    : 0/0
+  LP margin > 0 where min(q, mu)/2 > 0              : 0/0
+  a NON-UNIFORM flex strictly beats the sigma ray   : 0/0
+sigma OUTSIDE P(X)                                  : 0
+  LP margin > 0 anyway (a genuine non-uniform rescue): 0/0
+  every pass Farkas-certified < 1e-9 (verified)     : 0/0
+wall 2240.5 s

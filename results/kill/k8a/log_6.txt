@@ -1,0 +1,23 @@
+  voronoi_6 F=353 rows=4273 dim_flex=7 margin=0.000e+00 dual=5.949e-08 eps=0 [0.1 s]
+  quad_random_14 F=404 rows=4914 dim_flex=16 margin=0.000e+00 dual=9.616e-08 eps=0 [0.1 s]
+  delaunay_22 F=206 rows=2905 dim_flex=78 margin=0.000e+00 dual=9.999e-08 eps=0 [1.9 s]
+  voronoi_30 F=202 rows=2421 dim_flex=5 margin=0.000e+00 dual=4.956e-08 eps=0 [0.0 s]
+  quad_random_38 F=187 rows=2228 dim_flex=10 margin=0.000e+00 dual=8.158e-08 eps=0 [0.0 s]
+  delaunay_46 F=183 rows=2566 dim_flex=73 margin=0.000e+00 dual=9.997e-08 eps=0 [1.4 s]
+  voronoi_54 F=139 rows=1626 dim_flex=4 margin=0.000e+00 dual=6.462e-08 eps=0 [0.0 s]
+  quad_random_62 F=689 rows=8742 dim_flex=26 margin=0.000e+00 dual=9.835e-08 eps=0 [0.3 s]
+  delaunay_70 F=378 rows=5559 dim_flex=148 margin=0.000e+00 dual=9.998e-08 eps=0 [7.7 s]
+  voronoi_78 F=580 rows=7243 dim_flex=5 margin=0.000e+00 dual=3.577e-08 eps=0 [0.2 s]
+  quad_random_86 F=658 rows=8130 dim_flex=21 margin=0.000e+00 dual=8.467e-08 eps=0 [0.4 s]
+  delaunay_94 F=347 rows=5078 dim_flex=141 margin=0.000e+00 dual=9.996e-08 eps=0 [8.9 s]
+K8a -- expansive-cone LP
+K1a graphs                               : 12
+LP margin > 0 at X_ini (PASS >= 20/100)  : 0/12
+LP margin > 0 at X0                      : 0/12
+dual bound < 1e-6 (approx. Farkas)       : 12/12
+sigma is a flex at X_ini                 : 0/12
+sigma in P(X_ini)                        : 0/12
+Euler step tested / collision-free       : 0/0
+margin: median 0.000e+00, max 0.000e+00
+dim flex: median 21, range [4, 148]
+wall 46.7 s

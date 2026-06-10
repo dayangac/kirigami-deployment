@@ -1,0 +1,37 @@
+K9b -- pushing the convexity-constrained embedding
+merged from 12 shards, 400 designs
+
+k9b: designs 400, convex+split feasible 28 (7.0 %)
+  exact Theta_max > 0: 28 (7.0 %), refereed 1e-12: 28, refereed 1e-9: 28
+  certified (eps_max > 0): 28, of which eps_max >= 0.1 rad: 16
+  all 0+ corner margins > 0 at the returned X: 13 / 28 feasible
+  positives whose accepted point came from stage 2 (range_opt): 2
+  eps_max: median 1.514e-01, q90 6.690e-01, max 1.828e+00
+  |X - X_ini| per vertex, median edges: median 0.2095, q90 0.5470
+  winning delta_rel among positives: 1.0e-04=1 1.0e-03=12 1.0e-02=15
+  referee: worst |exact - bisection(1e-9)| 2.800e-07; sound (eps_max <= bisection 1e-9) 400 / 400
+  binding at Theta_max = 0: inverted=73 n/a=28 split-inward=259 vertex-edge=40
+k9b:sigma_def: designs 200, convex+split feasible 17 (8.5 %)
+  exact Theta_max > 0: 6 (3.0 %), refereed 1e-12: 6, refereed 1e-9: 6
+  certified (eps_max > 0): 6, of which eps_max >= 0.1 rad: 3
+  all 0+ corner margins > 0 at the returned X: 4 / 17 feasible
+  positives whose accepted point came from stage 2 (range_opt): 1
+  eps_max: median 1.155e-01, q90 1.074e+00, max 1.074e+00
+  |X - X_ini| per vertex, median edges: median 0.1689, q90 0.2095
+  winning delta_rel among positives: 1.0e-03=2 1.0e-02=4
+  referee: worst |exact - bisection(1e-9)| 1.600e-07; sound (eps_max <= bisection 1e-9) 200 / 200
+  binding at Theta_max = 0: inverted=61 n/a=6 split-inward=98 vertex-edge=35
+k9b:sigma_mc: designs 200, convex+split feasible 11 (5.5 %)
+  exact Theta_max > 0: 22 (11.0 %), refereed 1e-12: 22, refereed 1e-9: 22
+  certified (eps_max > 0): 22, of which eps_max >= 0.1 rad: 13
+  all 0+ corner margins > 0 at the returned X: 9 / 11 feasible
+  positives whose accepted point came from stage 2 (range_opt): 1
+  eps_max: median 2.400e-01, q90 6.690e-01, max 1.828e+00
+  |X - X_ini| per vertex, median edges: median 0.4956, q90 0.7283
+  winning delta_rel among positives: 1.0e-04=1 1.0e-03=10 1.0e-02=11
+  referee: worst |exact - bisection(1e-9)| 2.800e-07; sound (eps_max <= bisection 1e-9) 200 / 200
+  binding at Theta_max = 0: inverted=12 n/a=22 split-inward=161 vertex-edge=5
+
+best-of-2 sigma, per GRAPH (200 graphs):
+  graphs with exact Theta_max > 0 under at least one sigma: 26
+  graphs with certified eps_max >= 0.1 rad: 16

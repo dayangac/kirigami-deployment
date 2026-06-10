@@ -1,0 +1,87 @@
+K9c -- the range-maximising constrained embedding
+merged from 12 shards, 182 designs
+NOTE: the per-arm rows are counted from the same CSV; only the best-of-3 row is
+refereed by bisection, so the per-arm 'refereed' columns repeat the exact scan.
+
+arm k9  (proximity, K9 settings): designs 182, convex+split feasible 30 (16.5 %), of which 0+ margin m > 0: 23
+  exact Theta_max > 0: 28 (15.4 %), refereed 1e-12: 28, refereed 1e-9: 28
+  certified (eps_max > 0): 28, of which eps_max >= 0.1 rad: 26
+  positives whose WINNING point came from stage B (range_opt): 0
+  eps_max: median 2.443e-01, q90 3.806e-01, max 1.997e+00
+  0+ margin m (med^2) over feasible: median 4.959e-02, q90 1.109e-01
+  referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
+  binding at Theta_max = 0:
+arm k9b (proximity, delta = 1e-2): designs 182, convex+split feasible 24 (13.2 %), of which 0+ margin m > 0: 12
+  exact Theta_max > 0: 19 (10.4 %), refereed 1e-12: 19, refereed 1e-9: 19
+  certified (eps_max > 0): 19, of which eps_max >= 0.1 rad: 7
+  positives whose WINNING point came from stage B (range_opt): 0
+  eps_max: median 1.283e-02, q90 3.805e-01, max 1.828e+00
+  0+ margin m (med^2) over feasible: median 3.937e-03, q90 1.052e-02
+  referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
+  binding at Theta_max = 0:
+arm k9c (range-maximising): designs 182, convex+split feasible 150 (82.4 %), of which 0+ margin m > 0: 145
+  exact Theta_max > 0: 141 (77.5 %), refereed 1e-12: 141, refereed 1e-9: 141
+  certified (eps_max > 0): 140, of which eps_max >= 0.1 rad: 120
+  positives whose WINNING point came from stage B (range_opt): 0
+  eps_max: median 3.744e-01, q90 1.882e+00, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 3.087e-01, q90 7.783e-01
+  referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
+  binding at Theta_max = 0:
+arm k9c (range-maximising):sigma_def: designs 88, convex+split feasible 87 (98.9 %), of which 0+ margin m > 0: 82
+  exact Theta_max > 0: 60 (68.2 %), refereed 1e-12: 60, refereed 1e-9: 60
+  certified (eps_max > 0): 60, of which eps_max >= 0.1 rad: 55
+  positives whose WINNING point came from stage B (range_opt): 0
+  eps_max: median 3.731e-01, q90 8.533e-01, max 1.960e+00
+  0+ margin m (med^2) over feasible: median 4.871e-01, q90 8.986e-01
+  referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
+  binding at Theta_max = 0:
+arm k9c (range-maximising):sigma_mc: designs 94, convex+split feasible 63 (67.0 %), of which 0+ margin m > 0: 63
+  exact Theta_max > 0: 81 (86.2 %), refereed 1e-12: 81, refereed 1e-9: 81
+  certified (eps_max > 0): 80, of which eps_max >= 0.1 rad: 65
+  positives whose WINNING point came from stage B (range_opt): 0
+  eps_max: median 4.331e-01, q90 2.556e+00, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 1.444e-01, q90 2.172e-01
+  referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
+  binding at Theta_max = 0:
+k9c:best-of-3: designs 182, convex+split feasible 123 (67.6 %), of which 0+ margin m > 0: 121
+  exact Theta_max > 0: 141 (77.5 %), refereed 1e-12: 141, refereed 1e-9: 141
+  certified (eps_max > 0): 140, of which eps_max >= 0.1 rad: 121
+  positives whose WINNING point came from stage B (range_opt): 101
+  eps_max: median 3.783e-01, q90 1.943e+00, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 2.172e-01, q90 7.473e-01
+  |X - X_ini| per vertex, median edges: median 0.7534, q90 1.4150
+  provenance of the winning point: k9=47 k9b=1 k9c/k9+B=7 k9c/k9b+B=7 k9c/x0=33 k9c/x0+B=87
+  referee: worst |exact - bisection(1e-9)| 6.708e-01; sound (eps_max <= bisection 1e-9) 182 / 182
+  binding at Theta_max = 0: inverted=16 n/a=141 split-inward=20 vertex-edge=5
+k9c:best-of-3:sigma_def: designs 88, convex+split feasible 61 (69.3 %), of which 0+ margin m > 0: 59
+  exact Theta_max > 0: 60 (68.2 %), refereed 1e-12: 60, refereed 1e-9: 60
+  certified (eps_max > 0): 60, of which eps_max >= 0.1 rad: 56
+  positives whose WINNING point came from stage B (range_opt): 46
+  eps_max: median 3.731e-01, q90 8.533e-01, max 1.960e+00
+  0+ margin m (med^2) over feasible: median 4.762e-01, q90 1.264e+00
+  |X - X_ini| per vertex, median edges: median 0.6706, q90 1.6806
+  provenance of the winning point: k9=28 k9b=1 k9c/k9+B=6 k9c/k9b+B=3 k9c/x0=13 k9c/x0+B=37
+  referee: worst |exact - bisection(1e-9)| 6.708e-01; sound (eps_max <= bisection 1e-9) 88 / 88
+  binding at Theta_max = 0: inverted=15 n/a=60 split-inward=8 vertex-edge=5
+k9c:best-of-3:sigma_mc: designs 94, convex+split feasible 62 (66.0 %), of which 0+ margin m > 0: 62
+  exact Theta_max > 0: 81 (86.2 %), refereed 1e-12: 81, refereed 1e-9: 81
+  certified (eps_max > 0): 80, of which eps_max >= 0.1 rad: 65
+  positives whose WINNING point came from stage B (range_opt): 55
+  eps_max: median 4.467e-01, q90 2.556e+00, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 1.310e-01, q90 2.167e-01
+  |X - X_ini| per vertex, median edges: median 0.8376, q90 1.1682
+  provenance of the winning point: k9=19 k9c/k9+B=1 k9c/k9b+B=4 k9c/x0=20 k9c/x0+B=50
+  referee: worst |exact - bisection(1e-9)| 1.127e-05; sound (eps_max <= bisection 1e-9) 94 / 94
+  binding at Theta_max = 0: inverted=1 n/a=81 split-inward=12
+
+best-of-2 sigma, per GRAPH (94 graphs):
+  graphs with exact Theta_max > 0 under at least one sigma: 89
+  graphs with certified eps_max >= 0.1 rad: 77
+
+K9 / K9b cross-check (from results/kill/k9/k9.csv and k9b/k9b.csv):
+  K9 positives 36, K9b positives 28
+  designs K9 had and K9b LOST: 9
+  ... recovered by the K9c arm alone: 9
+  ... recovered by the best-of-3 row: 9
+  lost designs: delaunay_103_sigma_mc delaunay_10_sigma_def delaunay_112_sigma_def delaunay_163_sigma_def delaunay_190_sigma_def delaunay_37_sigma_def delaunay_40_sigma_mc delaunay_43_sigma_def delaunay_64_sigma_def
+  recovered by K9c: delaunay_103_sigma_mc delaunay_10_sigma_def delaunay_112_sigma_def delaunay_163_sigma_def delaunay_190_sigma_def delaunay_37_sigma_def delaunay_40_sigma_mc delaunay_43_sigma_def delaunay_64_sigma_def
