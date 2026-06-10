@@ -1,0 +1,214 @@
+WP2 yield analysis
+features.csv rows: 400   fresh.csv rows: 200
+K9c population yield (theta_exact > 0): 307/400 = 0.7675  Wilson95 [0.7237, 0.8062]
+FRESH yield (theta_exact > 0): 157/200 = 0.7850  Wilson95 [0.7230, 0.8363]
+FRESH eps_max >= 0.1: 103/200
+
+==============================================================================
+1. UNIVARIATE (400 K9c designs): AUC for theta_exact > 0, Spearman with eps_max
+   AUC > 0.5 means LARGER feature value -> MORE likely to deploy.
+==============================================================================
+feature                         AUC rho(eps)   group
+min_mu_ini                   0.7627   0.4245   input
+F                            0.2569  -0.5329   input
+log_F                        0.2569  -0.5329   input
+min_q_ini                    0.7376   0.3858   input
+n_incid                      0.2660  -0.4597   input
+log_n_incid                  0.2660  -0.4597   input
+proj_min_q_x0                0.7325   0.2646   projection
+n_constraints_0plus          0.2796  -0.4505   input
+log_n_constraints_0plus      0.2796  -0.4505   input
+ang_min                      0.7090   0.2011   input
+n_hinge                      0.2916  -0.5656   input
+log_n_hinge                  0.2916  -0.5656   input
+E_int                        0.3434  -0.4788   input
+log_E_int                    0.3434  -0.4788   input
+n_corner                     0.3468  -0.4747   input
+E                            0.3503  -0.4710   input
+mean_split_comp              0.3529  -0.0694   input
+hole_size_mean               0.6378   0.2765   input
+frac_q_pos_ini               0.6145   0.0441   input
+hinge_frac_largest           0.3867   0.0279   input
+split_depth                  0.3903  -0.0660   input
+proj_frac_q_pos_x0           0.6048   0.1014   projection
+pure_frac                    0.3969   0.0185   input
+dim_null_per_N               0.3994  -0.1879   input
+max_split_comp               0.4015  -0.0852   input
+asp_min                      0.5950   0.0531   input
+hole_size_max                0.5941   0.1644   input
+N                            0.4140  -0.4012   input
+log_N                        0.4140  -0.4012   input
+dof_ratio                    0.5833  -0.0511   input
+n_split                      0.4197  -0.3186   input
+dim_null                     0.4197  -0.3186   input
+log_n_split                  0.4197  -0.3186   input
+asp_med                      0.5786  -0.1419   input
+dof_ratio_all                0.5767  -0.0612   input
+face_deg_med                 0.5648  -0.1535   input
+med_edge                     0.5635   0.3677   input
+split_per_face               0.5597  -0.0915   input
+ang_med                      0.5582  -0.1804   input
+frac_face_sharp              0.4665   0.1941   input
+proj_dist_x0                 0.4683  -0.1155   projection
+H                            0.4693  -0.2789   input
+split_density                0.5294  -0.0661   input
+asp_max                      0.5288  -0.1632   input
+n_split_comp                 0.5285  -0.2419   input
+frac_mu_pos_ini              0.4731   0.1987   input
+n_notch                      0.5238  -0.1918   input
+n_border                     0.5186  -0.2249   input
+proj_nonconvex0              0.4859  -0.2681   projection
+hinge_diam                   0.5133  -0.2680   input
+proj_frac_convex_x0          0.4892   0.1762   projection
+frac_convex_ini                 nan      nan   input
+
+solver-side (EXCLUDED from the pre-registered bar; restatements of the outcome):
+best_margin                  1.0000   0.7617   solver
+dist                         0.0788  -0.2667   solver
+secs                         0.4723  -0.1262   solver
+best_feas                    0.8296   0.8036   solver
+
+==============================================================================
+2. THE SIZE / FAMILY CONFOUND
+==============================================================================
+yield (theta_exact > 0) per family at matched |F| bins  [k/n, Wilson95]
+family        F<230                     230<=F<420                F>=420                  
+voronoi        33/34  0.97 [0.85,0.99]   43/46  0.93 [0.82,0.98]   46/54  0.85 [0.73,0.92]
+delaunay       60/64  0.94 [0.85,0.98]   26/36  0.72 [0.56,0.84]   22/34  0.65 [0.48,0.79]
+quad_random    14/16  0.88 [0.64,0.97]   33/46  0.72 [0.57,0.83]   30/70  0.43 [0.32,0.55]
+
+split_density terciles of the 400: edges ['0.0748', '0.3007', '0.3345', '0.6310']
+yield per family at matched split_density bins
+family        sd bin 0                  sd bin 1                  sd bin 2                
+voronoi         0/0   0.00 [0.00,0.00]   56/66  0.85 [0.74,0.92]   66/68  0.97 [0.90,0.99]
+delaunay       63/67  0.94 [0.86,0.98]   45/67  0.67 [0.55,0.77]    0/0   0.00 [0.00,0.00]
+quad_random    35/66  0.53 [0.41,0.65]    0/0   0.00 [0.00,0.00]   42/66  0.64 [0.52,0.74]
+
+family mean split_density (400 designs):
+  voronoi       split_density mean 0.4708  median |F| 354  n=134
+  delaunay      split_density mean 0.2145  median |F| 236  n=134
+  quad_random   split_density mean 0.3065  median |F| 549  n=132
+family medians of the leading features (400 designs):
+  family        min_mu_ini    ang_min    asp_med  dof_ratio    n_incid
+  voronoi           -7.301      20.41      7.849     0.3169       2426
+  delaunay          -8.430       0.46      2.008     0.0756       1817
+  quad_random      -16.787       0.28      2.593     0.1368       3644
+yield in |F| bins, all families pooled:
+  F<230        107/114 0.939 [0.879,0.970]
+  230<=F<420   102/128 0.797 [0.719,0.857]
+  F>=420        98/158 0.620 [0.543,0.692]
+
+==============================================================================
+3. LOGISTIC MODELS -- fit on one sigma half, evaluated on the other and on fresh
+   Model choice is made on the FIT set only; held-out AUC is reported, never used
+   to choose.
+==============================================================================
+[fit sigma_mc -> held-out sigma_def] best single feature by fit-set CV AUC: log_F (CV 0.7401)
+    in-sample fit AUC 0.7553    held-out AUC 0.7316
+    fit-set top 8 singles by CV AUC: log_F 0.740, F 0.737, min_mu_ini 0.726, log_n_incid 0.724, log_n_hinge 0.723, log_n_constraints_0plus 0.723, split_depth 0.722, n_incid 0.719
+[fit sigma_mc -> held-out sigma_def] best pair by fit-set CV AUC: (split_depth, proj_nonconvex0) (CV 0.7928)
+    in-sample fit AUC 0.8045    held-out AUC 0.6573
+    runner-up pairs (CV): (log_F,log_n_constraints_0plus) 0.777; (split_depth,n_hinge) 0.774; (F,n_constraints_0plus) 0.772
+
+[fit sigma_def -> held-out sigma_mc] best single feature by fit-set CV AUC: mean_split_comp (CV 0.8080)
+    in-sample fit AUC 0.8203    held-out AUC 0.7242
+    fit-set top 8 singles by CV AUC: mean_split_comp 0.808, dim_null_per_N 0.763, min_mu_ini 0.756, proj_min_q_x0 0.740, log_n_incid 0.735, n_incid 0.731, min_q_ini 0.725, log_F 0.720
+[fit sigma_def -> held-out sigma_mc] best pair by fit-set CV AUC: (log_n_incid, log_n_constraints_0plus) (CV 0.8300)
+    in-sample fit AUC 0.8414    held-out AUC 0.6807
+    runner-up pairs (CV): (mean_split_comp,pure_frac) 0.817; (n_incid,n_constraints_0plus) 0.817; (log_n_incid,log_n_hinge) 0.816
+
+--- additional fit: ALL 400 K9c designs, selected by 5-fold CV on those 400 only,
+    with the FRESH graphs as the held-out set (the strongest legitimate test: the
+    fresh graphs are disjoint from the K9 population, fresh_check.txt) ---
+    best single by CV on the 400: min_mu_ini (CV 0.7547, in-sample 0.7627)
+    top 8 singles by CV: min_mu_ini 0.755, log_F 0.736, F 0.734, proj_min_q_x0 0.730, log_n_incid 0.729, n_incid 0.728, min_q_ini 0.728, log_n_constraints_0plus 0.713
+    best pair by CV on the 400: (log_F, hole_size_mean) (CV 0.7866, in-sample 0.7939)
+    runner-up pairs (CV): (log_n_incid,hole_size_mean) 0.786; (F,hole_size_mean) 0.783; (n_incid,hole_size_mean) 0.782
+
+--- the models applied to the FRESH graphs (200 rows) ---
+[fit sigma_mc] single log_F                  fresh AUC 0.6893   predicted yield 0.7735 (obs 0.7850)
+[fit sigma_mc] pair   (split_depth, proj_nonconvex0)  fresh AUC 0.6075   predicted yield 0.3876
+[fit sigma_def] single mean_split_comp        fresh AUC 0.6381   predicted yield 0.8698 (obs 0.7850)
+[fit sigma_def] pair   (log_n_incid, log_n_constraints_0plus)  fresh AUC 0.7378   predicted yield 0.7403
+[fit all 400] single min_mu_ini             fresh AUC 0.6227   predicted yield 0.7771 (obs 0.7850)
+[fit all 400] pair   (log_F, hole_size_mean)  fresh AUC 0.7394   predicted yield 0.7699
+observed fresh yield 0.7850  Wilson95 [0.7230, 0.8363]
+
+PASS BAR: held-out AUC >= 0.85 on fresh AND predicted yield inside the Wilson interval.
+  fit sigma_mc   single log_F                             AUC 0.6893  pred 0.7735  in-interval True  -> FAIL
+  fit sigma_mc   pair ('split_depth', 'proj_nonconvex0')  AUC 0.6075  pred 0.3876  in-interval False  -> FAIL
+  fit sigma_def  single mean_split_comp                   AUC 0.6381  pred 0.8698  in-interval False  -> FAIL
+  fit sigma_def  pair ('log_n_incid', 'log_n_constraints_0plus') AUC 0.7378  pred 0.7403  in-interval True  -> FAIL
+  fit all 400    single min_mu_ini                        AUC 0.6227  pred 0.7771  in-interval True  -> FAIL
+  fit all 400    pair ('log_F', 'hole_size_mean')         AUC 0.7394  pred 0.7699  in-interval True  -> FAIL
+VERDICT: FAIL   (best fresh AUC obtained: 0.7394)
+
+==============================================================================
+4. BINDING MODE OF THE FAILURES vs min_mu_ini
+==============================================================================
+min_mu_ini quartiles over the 400: ['-15.5386', '-9.1393', '-6.4858']
+  inverted       n= 27   median min_mu_ini -20.7719   median split_density 0.3265   median |F| 579
+  n/a            n=307   median min_mu_ini -8.0819   median split_density 0.3257   median |F| 303
+  split-inward   n= 57   median min_mu_ini -16.7407   median split_density 0.1768   median |F| 622
+  vertex-edge    n=  9   median min_mu_ini -15.4745   median split_density 0.4491   median |F| 530
+fresh binding modes: inverted=11, n/a=157, split-inward=28, vertex-edge=4
+
+==============================================================================
+5. MECHANISM PROBES
+==============================================================================
+  log n_constraints_0plus  ~ 1.021 log|F|   (R2 0.923)
+  log n_incid              ~ 1.009 log|F|   (R2 0.928)
+  log n_split              ~ 1.230 log|F|   (R2 0.482)
+  log n_corner             ~ 1.070 log|F|   (R2 0.846)
+  log dim_null             ~ 1.230 log|F|   (R2 0.482)
+  log N                    ~ 1.128 log|F|   (R2 0.607)
+  2*dim_null vs n_constraints_0plus: dof_ratio median 0.1385, Spearman with |F| 0.1111
+  => dof_ratio is essentially flat in |F|; a 'constraints outgrow the null space' story needs a
+     clearly negative trend here.
+
+  Spearman(min_mu_ini, log|F|) = -0.6379 ; Spearman(min_q_ini, log|F|) = -0.5822
+  median min_mu_ini by |F| bin:
+    F<230        n=114  median min_mu_ini -5.44181  median min_q_ini -10.53450  median n_incid 1094
+    230<=F<420   n=128  median min_mu_ini -9.07184  median min_q_ini -14.93765  median n_incid 2197
+    F>=420       n=158  median min_mu_ini -14.06100  median min_q_ini -23.17865  median n_incid 4527
+
+  residual power: AUC of each candidate WITHIN matched |F| bins (pooled over bins)
+    min_mu_ini         within-bin AUC ['0.636', '0.600', '0.769']   n-weighted 0.6767
+    min_q_ini          within-bin AUC ['0.571', '0.558', '0.752']   n-weighted 0.6383
+    proj_min_q_x0      within-bin AUC ['0.555', '0.641', '0.730']   n-weighted 0.6518
+    ang_min            within-bin AUC ['0.716', '0.659', '0.678']   n-weighted 0.6828
+    split_density      within-bin AUC ['0.514', '0.635', '0.569']   n-weighted 0.5746
+    dof_ratio          within-bin AUC ['0.509', '0.646', '0.630']   n-weighted 0.6003
+    asp_med            within-bin AUC ['0.537', '0.668', '0.624']   n-weighted 0.6134
+  and AUC of |F| WITHIN terciles of min_mu_ini:
+    F within min_mu_ini terciles: ['0.275', '0.482', '0.298']   n-weighted 0.3518
+
+==============================================================================
+6. REPRODUCTION ON THE FRESH GRAPHS
+==============================================================================
+  fresh yield in |F| bins:
+    F<230         60/68  0.882 [0.785,0.939]
+    230<=F<420    41/48  0.854 [0.728,0.928]
+    F>=420        56/84  0.667 [0.561,0.758]
+  fresh yield per family:
+    voronoi        60/66  0.909 [0.816,0.958]
+    delaunay       53/68  0.779 [0.667,0.862]
+    quad_random    44/66  0.667 [0.547,0.768]
+  univariate AUC on the 400 vs on the 200 fresh, top features:
+    feature                   AUC 400 AUC fresh
+    min_mu_ini                 0.7627   0.6227
+    log_F                      0.2569   0.3107
+    min_q_ini                  0.7376   0.6143
+    n_incid                    0.2660   0.3054
+    proj_min_q_x0              0.7325   0.6669
+    n_constraints_0plus        0.2796   0.3231
+    ang_min                    0.7090   0.6838
+    hole_size_mean             0.6378   0.6275
+    mean_split_comp            0.3529   0.3619
+    dof_ratio                  0.5833   0.5493
+    split_density              0.5294   0.5130
+  Spearman(min_mu_ini, log|F|) on fresh = -0.6486
+
+wrote /Users/emredayangac/Documents/kirigami-experiments/results/yield/fig_yield_predictor.png
+wrote /Users/emredayangac/Documents/kirigami-experiments/results/yield/fig_yield_matched.png
+wrote /Users/emredayangac/Documents/kirigami-experiments/results/yield/fig_yield_auc.png

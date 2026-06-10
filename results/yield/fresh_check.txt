@@ -1,0 +1,4 @@
+fingerprint = N:F:sum_x:sum_y:sum_|x|^2 of the generated graph
+K9 population graphs fingerprinted: 200 (of 200 ids)
+fresh graphs generated: 100 / 100
+collisions with the K9 population: 0

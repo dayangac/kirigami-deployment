@@ -1,0 +1,47 @@
+WP2b -- solver basin vs geometry, derived from results/yield/basin.csv
+deploy threshold: exact Theta_max > 1e-9
+
+designs: 8 (8 originally failing, 0 sampled successes); designs without all 9 rows: 3
+
+== 1. FLIP RATE OF THE FAILURES (>= 1 of 8 new seeds deploying)
+overall: 0 / 8 = 0 %, Wilson 95 % [0, 32.44075649] %
+of the flipped, eps_max >= 0.1 rad at the best seed: 0; confirmed by the 1e-9 bisection referee: 0
+by family:
+  delaunay: 0 / 2 = 0 %  [0, 65.76197725]
+  quad_random: 0 / 5 = 0 %  [0, 43.44824648]
+  voronoi: 0 / 1 = 0 %  [0, 79.34506856]
+by original binding:
+  inverted: 0 / 4 = 0 %  [0, 48.98908365]
+  split-inward: 0 / 4 = 0 %  [0, 48.98908365]
+by orientation rule:
+  sigma_def: 0 / 4 = 0 %  [0, 48.98908365]
+  sigma_mc: 0 / 4 = 0 %  [0, 48.98908365]
+distribution of the number of deploying seeds (out of 8), failures only:
+  n=0: 8
+  n=1: 0
+  n=2: 0
+  n=3: 0
+  n=4: 0
+  n=5: 0
+  n=6: 0
+  n=7: 0
+  n=8: 0
+flipped designs:
+
+== 2. SEED-TO-SEED SPREAD ON THE 30 SAMPLED SUCCESSES (9 seeds each)
+id,sigma,n_seeds,min,q25,median,q75,max,iqr,rel_iqr,theta_k0,best_k,orig_is_best,n_zero
+successes: 0; original seed was the best of the 9 on 0 (0 %)
+successes with at least one NON-deploying seed: 0; all 9 deploy: 0
+sampled successes with eps_max >= 0.1: k = 0: 0, best of 9: 0
+
+== 3. BEST-OF-9 YIELD ON THE 400 K9c DESIGNS
+single-seed (archived K9c): 307 / 400 = 76.75 %
+best-of-9 (EXACT on the deploy count: every one of the 93 failures was rerun, and a success stays a success because k = 0 is one of the nine): 307 / 400 = 76.75 %, Wilson 95 % [72.36773297, 80.62335929] %
+eps_max >= 0.1 rad: EXTRAPOLATED from the 0 sampled successes only (the other 307 successes were not rerun).
+  sampled-success rate at k = 0: 0, best of 9: 0
+  implied count over the 307 successes: 0 -> 0, plus 0 from the flipped failures
+  implied 400-design rate: 0 % (best of 9) against the archived 103/400 = 25.75 % single-seed on the fresh set and K9c's own count; treat as an estimate, not a measurement.
+
+== 4. PRE-REGISTERED RULE
+flip rate 0 % < 20 % -> PREDOMINANTLY GEOMETRIC: the failure set is not a solver basin.
+
