@@ -1,0 +1,136 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{8}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{} and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showURL}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showURL #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Acu{\~n}a et~al\mbox{.}(2022)]%
+        {Acuna2022}
+\bibfield{author}{\bibinfo{person}{Daniel Acu{\~n}a},
+  \bibinfo{person}{Francisco Guti{\'e}rrez}, \bibinfo{person}{Rodrigo Silva},
+  \bibinfo{person}{Humberto Palza}, \bibinfo{person}{Alvaro~S. Nunez}, {and}
+  \bibinfo{person}{Gustavo D{\"u}ring}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Auxetic behavior on demand: a three steps recipe
+  for new designs}.
+\newblock \bibinfo{journal}{\emph{Communications Physics}}  \bibinfo{volume}{5}
+  (\bibinfo{year}{2022}).
+\newblock
+\newblock
+\shownote{arXiv:2101.12352}.
+
+
+\bibitem[Choi et~al\mbox{.}(2019)]%
+        {Choi2019}
+\bibfield{author}{\bibinfo{person}{Gary P.~T. Choi}, \bibinfo{person}{Levi~H.
+  Dudte}, {and} \bibinfo{person}{Lakshminarayanan Mahadevan}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Programming shape using kirigami tessellations}.
+\newblock \bibinfo{journal}{\emph{Nature Materials}} \bibinfo{volume}{18},
+  \bibinfo{number}{9} (\bibinfo{year}{2019}), \bibinfo{pages}{999--1004}.
+\newblock
+
+
+\bibitem[Grima et~al\mbox{.}(2012)]%
+        {Grima2012}
+\bibfield{author}{\bibinfo{person}{Joseph~N. Grima}, \bibinfo{person}{Elaine
+  Chetcuti}, \bibinfo{person}{Elaine Manicaro}, \bibinfo{person}{Daphne
+  Attard}, \bibinfo{person}{Marija Camilleri}, \bibinfo{person}{Ruben Gatt},
+  {and} \bibinfo{person}{Kenneth~E. Evans}.} \bibinfo{year}{2012}\natexlab{}.
+\newblock \showarticletitle{On the auxetic properties of generic rotating rigid
+  triangles}.
+\newblock \bibinfo{journal}{\emph{Proceedings of the Royal Society A}}
+  \bibinfo{volume}{468} (\bibinfo{year}{2012}), \bibinfo{pages}{810--830}.
+\newblock
+
+
+\bibitem[Jiang and Choi(2026)]%
+        {Jiang2026}
+\bibfield{author}{\bibinfo{person}{Jiang} {and} \bibinfo{person}{Choi}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{A unified geometric design framework for kirigami
+  structures}.
+\newblock
+\newblock
+\shownote{arXiv:2608.30032}.
+
+
+\bibitem[Katoh and Tanigawa(2009)]%
+        {Katoh2009}
+\bibfield{author}{\bibinfo{person}{Naoki Katoh} {and}
+  \bibinfo{person}{Shin-ichi Tanigawa}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \bibinfo{title}{A Proof of the Molecular Conjecture}.
+\newblock
+\newblock
+\shownote{arXiv:0902.0236}.
+
+
+\bibitem[Rote et~al\mbox{.}(2003)]%
+        {Rote2003}
+\bibfield{author}{\bibinfo{person}{G{\"u}nter Rote}, \bibinfo{person}{Francisco
+  Santos}, {and} \bibinfo{person}{Ileana Streinu}.}
+  \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{Expansive Motions and the Polytope of Pointed
+  Pseudo-Triangulations}.
+\newblock In \bibinfo{booktitle}{\emph{Discrete and Computational Geometry: The
+  Goodman--Pollack Festschrift}}. \bibinfo{publisher}{Springer}.
+\newblock
+
+
+\bibitem[Segall et~al\mbox{.}(2025)]%
+        {Segall2025}
+\bibfield{author}{\bibinfo{person}{Aviv Segall}, \bibinfo{person}{Jing Ren},
+  \bibinfo{person}{Marcel Padilla}, {and} \bibinfo{person}{Olga
+  Sorkine-Hornung}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Reconfigurable Hinged Kirigami Tessellations}. In
+  \bibinfo{booktitle}{\emph{SIGGRAPH Asia 2025 Conference Papers}}.
+\newblock
+\href{https://doi.org/10.1145/3757377.3763895}{doi:\nolinkurl{10.1145/3757377.3763895}}
+
+
+\bibitem[Segall et~al\mbox{.}(2026)]%
+        {Segall2026}
+\bibfield{author}{\bibinfo{person}{Aviv Segall}, \bibinfo{person}{Jing Ren},
+  {and} \bibinfo{person}{Olga Sorkine-Hornung}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{Uniformly Deployable Kirigami on Arbitrary Planar
+  Graphs}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Graphics}}
+  \bibinfo{volume}{45}, \bibinfo{number}{4}, Article \bibinfo{articleno}{60}
+  (\bibinfo{year}{2026}).
+\newblock
+\href{https://doi.org/10.1145/3811326}{doi:\nolinkurl{10.1145/3811326}}
+
+
+\end{thebibliography}
