@@ -1,0 +1,65 @@
+K9 -- convexity-constrained embedding in the Tutte auxetic null space
+population: 33 graphs (K6's), 66 designs (2 sigma), missing sigma_def 0
+delta = 0.001 * med^2, split delta' = 0.001 * med^2, starts 3 + t=0, L-BFGS iters 600, barrier stages 6, eps = 0.3
+non-convex corners at X0: 10563 / 159942 (6.60 %)
+
+split-only repair (K6's secondary objective, the (b) fallback start) feasible on 56 / 66 designs
+designs whose X0 is ALREADY fully convex: 0 / 66, of which exact Theta_max > 0: 0
+
+X0 baseline (no solve): designs 66, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  referee: agree 66 / 66, worst gap 0.000e+00; sound (eps_max <= bisection) 66 / 66
+  binding at Theta_max = 0: split-inward=66
+
+(a) convexity only: designs 66, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  referee: agree 66 / 66, worst gap 0.000e+00; sound (eps_max <= bisection) 66 / 66
+  binding at Theta_max = 0: split-inward=66
+
+(a) convexity only [sigma_mc]: designs 33, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  referee: agree 33 / 33, worst gap 0.000e+00; sound (eps_max <= bisection) 33 / 33
+  binding at Theta_max = 0: split-inward=33
+
+(a) convexity only [sigma_def]: designs 33, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  referee: agree 33 / 33, worst gap 0.000e+00; sound (eps_max <= bisection) 33 / 33
+  binding at Theta_max = 0: split-inward=33
+
+(b) convexity + split: designs 66, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 3 (4.5 %), refereed 3
+  certified (eps_max > 0): 3
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  eps_max distribution: median 2.717e-01, max 6.690e-01
+  referee: agree 66 / 66, worst gap 1.078e-11; sound (eps_max <= bisection) 66 / 66
+  binding at Theta_max = 0: n/a=3 split-inward=63
+
+(b) convexity + split [sigma_mc]: designs 33, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 3 (9.1 %), refereed 3
+  certified (eps_max > 0): 3
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  eps_max distribution: median 2.717e-01, max 6.690e-01
+  referee: agree 33 / 33, worst gap 1.078e-11; sound (eps_max <= bisection) 33 / 33
+  binding at Theta_max = 0: n/a=3 split-inward=30
+
+(b) convexity + split [sigma_def]: designs 33, convex-feasible 0 (0.0 %)
+  exact Theta_max > 0: 0 (0.0 %), refereed 0
+  certified (eps_max > 0): 0
+  all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
+  referee: agree 33 / 33, worst gap 0.000e+00; sound (eps_max <= bisection) 33 / 33
+  binding at Theta_max = 0: split-inward=33
+
+PASS bar: refereed Theta_max > 0 on >= 10 % of 66 designs (>= 7)
+best variant: 3 refereed positives, 0 convex-feasible
+VERDICT: FAIL
+HARD FAIL (feasible >= 50 % and Theta_max > 0 < 2 %): no
+baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200; K6 0/400
+wall 4197.6 s

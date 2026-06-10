@@ -1,0 +1,31 @@
+K2a: 187 graphs with an embedded flat state
+--- T4.2" interval scan (the corrected closed form) ---
+|Theta_max(T4.2") - bisect(1e-9)|  <= 1e-5 : 187/187, worst 1.956e-07
+|Theta_max(T4.2") - bisect(1e-12)| <= 1e-5 : 187/187, worst 1.956e-10 (trunc_square_R25_s3)
+agreement rate (T4.2", 1e-12 reference)     : 100.00 %
+configurations with Theta_max = 0 (i* = 0)   : 14
+configurations where min-over-roots < Theta_max (GRAZE) : 5
+mean |C(X)| / mean intervals probed          : 40.1 / 1.9
+split-free patterns: Theta_max == min(min beta, pi) to 1e-12 : 16/16, worst 8.882e-16
+  of those, patterns with min beta > pi (the cap bites)      : 5
+--- validity certificate POS /\ NOOVERLAP(eps/2) /\ NOROOT, eps = 0.006 ---
+certificate holds / POS / NOOVERLAP / NOROOT : 173 / 187 / 173 / 187  (of 187)
+candidate harmonics by class 1/2/3 + identically zero : 728783 / 98376 / 631 + 0
+spurious roots in (0,eps) the tau=0 deflation removes : 13630
+T5.2b': certificate holds => bisection Theta_max >= eps : 173/173   (violations by the closed form: 0)
+configurations that actually have Theta_max >= eps      : 173/187   (so the certificate is a strict INNER approximation)
+--- min-over-roots (the rule as written in ranking.md) ---
+|exact - bisect| <= 1e-5, shrink 1e-6 (shipped) : 149/187, worst 1.047e+00
+|exact - bisect| <= 1e-5, shrink 1e-9           : 182/187, worst 1.047e+00
+|exact - bisect| <= 1e-5, shrink 1e-12          : 182/187, worst 1.047e+00 (hexagons_R40)
+configurations that penetrate immediately (range 0) : 14
+pure root enumeration agrees (no theta=0 test)  : 168/187
+flat state embedded at shrink 1e-12            : 187/187
+  of those, |exact - bisect(1e-12)| <= 1e-5     : 182/187
+  disagreements that are tangential contact     : 5  (no overlap just past the closed-form angle)
+binding edge is a split duplicate / hinge / no contact : 130 / 42 / 10
+binding faces not adjacent in M                       : 1
+VERDICT (corrected rule, T4.2" vs bisect 1e-12, all configs): PASS
+VERDICT (rule as written, min-over-roots): FAIL
+VERDICT (tightly embedded configurations, tangential contacts allowed): PASS
+wall 13.6 s
