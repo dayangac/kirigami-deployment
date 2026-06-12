@@ -45,3 +45,8 @@ in `data/corpus/`.
 ## Reporting back
 End your report with: files written, test counts (`Pass/Fail/Error`), every C++ behaviour you
 could NOT reproduce and why, and any C++ bug you found (do not silently fix; replicate and flag).
+
+## Bit-exactness note (from the mt19937 port)
+The C++ was built with clang -O2 on arm64, default `-ffp-contract=on`: `a*b + c` patterns are
+FMA-fused. Where a value must be reproduced bit-exactly (RNG streams, corpus generation), use
+`fma(a, b, c)` with the same operand placement. For tolerance-based comparisons this is irrelevant.
