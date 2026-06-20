@@ -136,3 +136,28 @@ Copies of the stored pattern files the C++ tests and reference apps read; see
   the `kiri_*` apps use authored tilings via `generate(kind, {R}, rng)` or the reference
   cases, all reproducible from `reference_cases_8.json` / the tiling generators; they were
   not enumerated separately.
+
+## Unit-test fixtures for `test_mesh_cut.jl` / `test_holes.jl` (`reference_patterns/test_fixtures_*.json`)
+
+`code/tests/test_mesh_cut.cpp` and `code/tests/test_holes.cpp` load no files: every case
+builds its meshes procedurally (`generate`, `delaunay_of_random_points`,
+`voronoi_of_random_points`, `quad_dominant_random`, `tiling_squares`) with a case-local
+`std::mt19937` seed, and draws sigma with `test::random_sigma` (`bernoulli(0.5)`),
+`test::checkerboard_sigma` or `assign_orientation_relaxation`. The geometric hole checks
+additionally run `assemble_system` / `solve_system` / `deploy` / `has_collision`. Until those
+units are ported, the Julia tests read frozen replays:
+
+| File | Producer | Contents |
+|---|---|---|
+| `reference_patterns/test_fixtures_mesh_cut.json` | `reference_patterns/freeze_fixtures.cpp` (built against `code/build/libkiri_core.a`, same toolchain as above, run 2026-09-19) | `remark_A1` (7 families: base mesh + 30 sigmas each; 40 Delaunay graphs with sigma as `orientation`), `A2A3_kagome` (kagome + 20 sigmas). |
+| `reference_patterns/test_fixtures_holes.json` | same | `case1` (65 graphs: mesh with sigma, `forest`, `connected`, and where the C++ reached the geometric stage the deployed M'-vertex positions `Yd` and the C++ `holes_geometric` result `geo`), `rotating_squares`, `case3` (4 families x 8 sigmas), `case4` (107 `try_check` instances: mesh, embedding `X`, `Yd`/`geo` where deployed), plus the C++ run's own tallies under `counts`. |
+
+Every block carries a `provenance` object (test case name, seed, generator call + args in
+call order, sigma method, how `X`/`Yd` were produced). Meshes are in the standard mesh JSON
+format (0-based); `geo` edge ids are 0-based C++ edge indices (edge numbering is the
+`build_topology` traversal order, identical in the port). The freezer replays the C++ test
+bodies verbatim, so `counts` equals the numbers the C++ tests print (65 graphs / 7 geometric
+agreements / 37 split cycles / 53 disconnected / 0 mismatches; 60 checked / 1 of 30 / 47
+skipped). The Julia tests recompute `holes_geometric(c, Yd)` and compare it against `geo`
+and against the combinatorial preimages; they do not just echo the stored value.
+`TODO(generators)` comments mark the load sites to swap for direct generator calls.
