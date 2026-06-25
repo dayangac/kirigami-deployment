@@ -8,3 +8,4 @@ results/**/cache/
 **/*.log
 **/*.out
 **/*.blg
+Kirigami/gui/exports/
