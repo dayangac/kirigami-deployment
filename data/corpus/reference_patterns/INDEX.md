@@ -25,3 +25,8 @@ the tiling generators directly (`tiling_squares(rect(...))`, `generate(kind, {R}
 Verification performed when freezing (2026-09-19): `reference_cases.json` rows agree with
 `../reference_cases_8.json` on `name`, `N`, `F` for all 8 cases; `cases/*/M.json` vertices
 and faces are compared against `../reference_cases_8.json` in `../README.md`.
+
+Julia-port unit-test fixtures (`test_fixtures_*.json`, not C++ archives): produced here by
+`freeze_fixtures.cpp` (mesh_cut, holes) and `freeze_fixtures_2a.cpp` (system, kinematics,
+collision, rank_checks), which replay the C++ test bodies against `code/build/libkiri_core.a`.
+See `../README.md` for the per-file contents.

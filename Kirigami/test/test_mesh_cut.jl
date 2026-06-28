@@ -8,6 +8,9 @@ include("helpers.jl")
 import JSON
 
 const K = Kirigami
+# TODO(generators): regenerate via generators.jl once MT19937 + generators are ported; each
+# fixture block carries a "provenance" record (test case, generator call + args, seed, sigma
+# method) describing the exact C++ sequence to replay. See data/corpus/README.md.
 const MESH_CUT_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_mesh_cut.json"))
 
 # a mesh JSON object (0-based file format) -> Mesh, and a frozen sigma array
@@ -74,6 +77,8 @@ end
 end
 
 @testset "Remark A.1: in-degree == out-degree at every interior vertex" begin
+    # TODO(generators): rng = MT19937(12345); generate(kind, [4.0], rng) + 30 x random_sigma;
+    # then 40 x delaunay_of_random_points(30 + trial, 10.0, rng) + random_sigma.
     fx = MESH_CUT_FIXTURES["remark_A1"]
     checked = 0
     for fam in fx["families"]
@@ -100,6 +105,7 @@ end
 @testset "M' vertex count matches the Remark A.2 / A.3 bookkeeping" begin
     # At an interior vertex with k hinge edges in (and k out) and s split edges,
     # the number of duplicated copies is k + s.
+    # TODO(generators): rng = MT19937(7); generate("kagome", [4.0], rng) + 20 x random_sigma.
     fx = MESH_CUT_FIXTURES["A2A3_kagome"]
     g = fixture_mesh(fx["mesh"])
     for s in fx["sigmas"]

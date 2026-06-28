@@ -161,3 +161,59 @@ agreements / 37 split cycles / 53 disconnected / 0 mismatches; 60 checked / 1 of
 skipped). The Julia tests recompute `holes_geometric(c, Yd)` and compare it against `geo`
 and against the combinatorial preimages; they do not just echo the stored value.
 `TODO(generators)` comments mark the load sites to swap for direct generator calls.
+
+## Unit-test fixtures for `test_system.jl` / `test_kinematics.jl` / `test_collision.jl` / `test_rank_checks.jl`
+
+Same situation as above: `code/tests/test_system.cpp`, `test_kinematics.cpp`, `test_collision.cpp`
+and `test_rank_checks.cpp` build every input procedurally (tiling_* / periodic_* / torus_* /
+generate / delaunay_of_random_points, sigma from `checkerboard_sigma`, `random_sigma` or
+`assign_orientation_relaxation` on a case-local `std::mt19937`) and compute their expected
+numbers inline. `reference_patterns/freeze_fixtures_2a.cpp` (built against
+`code/build/libkiri_core.a`, Xcode clang++ `-O2 -std=c++20 -arch arm64`, run 2026-09-19)
+replays the four test bodies verbatim and writes:
+
+| File | Contents |
+|---|---|
+| `reference_patterns/test_fixtures_system.json` | one block per TEST_CASE: mesh (with sigma), the C++ `solve_system` report (`rank_full`, `rank_L`, `dim_null`, row counts, `projection_ok`, `sv_tol`, `X0`), the exhaustive-hexagon tallies (39/39/0), the (3,4,3,12) residual data (12 of 16, `per_hole`, `max_norm`), the 100 affine maps `[a00,a01,a10,a11,bx,by]` drawn from mt19937(19), the null-space offsets `[i][t] = [ux,uy]` drawn from mt19937(23) and the C++ `Phi`, the brute-force / relaxation orientation reports of the small hexagon patch, and the periodic_kagome(3,3) mesh. |
+| `reference_patterns/test_fixtures_kinematics.json` | per family: mesh, sigma, the Eq. (6) embedding `X`, `max_mismatch` per theta; the 8 shuffled face orders (0-based) per kind of the BFS-order case; the FD case's per-trial sigma + 6 theta draws and its tally (20532 samples, worst 1.0875e-9); the Remark A.4 case (76 pairs). |
+| `reference_patterns/test_fixtures_collision.json` | per kind: mesh, sigma, `X0`, `theta_max_geometric`, `min_beta`, `beta`, `collided`; the rotating-squares report; the deployment velocity `z`; the collision-sweep results (`theta_max_before/after`, `gamma_used`, full gamma ladder). |
+| `reference_patterns/test_fixtures_rank_checks.json` | the 12 bounded and 3 torus cases (name, mode, mesh with sigma) and every field of the C++ `RowSumReport` (incl. `r`), `FactorizationReport` and `HingeGraphReport`, plus `solve_system(...).rank_L`. |
+
+Every mesh object carries `faces_roundtrip_stable`: whether `mesh_from_json(mesh_to_json(m))`
+returns the same face lists. It is `false` for the three torus meshes (their wrap-around faces
+are geometrically degenerate, so the CCW normalisation flips them); the Julia loader
+(`test/helpers.jl::fixture_mesh_raw`) therefore takes faces AS STORED and only builds topology.
+The collision-sweep numbers are OPTIMIZER output (L-BFGS over a null-space basis whose columns
+differ between Eigen and LAPACK) and are recorded for comparison, not asserted.
+`TODO(generators)` comments mark the load sites to swap for direct generator calls.
+
+## Export-writer fixtures for `test_export.jl` (`export_fixtures/`)
+
+`code/tests/test_export.cpp` builds its meshes in place (a 3x3 `squares_patch`) except
+one case that needs `tiling_3_4_3_12(disk(...))` + `assign_orientation_relaxation`. The
+Julia port compares every writer against the C++ **bytes**, so the reference outputs were
+frozen by `export_fixtures/freeze_export.cpp` (linked against `code/build/src/export/
+libkiri_export.a` + `libkiri_core.a`, same toolchain as above, run 2026-09-19):
+
+| File | What |
+|---|---|
+| `squares_3x3.json`, `squares_3x3_split.json` | the test's `squares_patch(3,3)` and its `make_split` variant (mesh JSON with `orientation`) |
+| `t34312_disk2.5.json` | `tiling_3_4_3_12(disk(Vec2(0,0),2.5))` with `assign_orientation_relaxation(m, std::mt19937(12345))` sigma |
+| `squares_felt_theta0.svg`, `squares_split_felt_theta0.svg`, `squares_felt_deployed.svg`, `squares_pla_theta0.svg`, `t34312_frac0.svg`, `t34312_frac1.svg` | `svg_string(build_layout(...), SvgOptions{})` at theta 0 / 0.8 theta_max, scale 10, felt_laser or pla_print |
+| `squares_felt.stl`, `squares_pla.stl` | `write_stl_binary(build_solid(L))`, default header |
+| `squares_felt.3mf`, `squares_pla.3mf` | `write_3mf(build_solid(L))`, default title |
+| `index.json` | per-case layout summaries (bbox, hinge necks/setbacks/points, per-face outline sizes and areas, warnings), solid summaries (`check_manifold` report, `split_components` count), the C++ `theta_max` values, and a `provenance` block |
+
+Comparison used by the Julia tests: SVG text and binary STL byte-for-byte; 3MF both as
+decompressed entries (name + content) and as the raw archive (the zip writer is STORE-only
+with a fixed 1980-01-01 stamp, so the raw bytes are deterministic).
+
+The reference build contracts `x*y - z*w` into `fma(x, y, -(z*w))` (Apple clang, arm64).
+The ear-clipping tie-breaks and the float32 STL normals depend on those sub-ulp residuals,
+so `solid.jl` reproduces the contraction explicitly (`fms`, `cross_cpp`); without it four
+triangles of the hero solid differ.
+
+The migrated exports under `export/{hero,hero2,samples}` (and the `sequence/` frames) are
+also regenerated by `test_export.jl` from their input graphs (`hero*_graph.json`,
+`reference_patterns/cases/<name>/M.json`) at the theta recorded in each report JSON and
+compared byte for byte with the C++ files.

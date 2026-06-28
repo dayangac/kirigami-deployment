@@ -12,6 +12,9 @@ include("helpers.jl")
 import JSON
 
 const K = Kirigami
+# TODO(generators): regenerate via generators.jl + tutte_auxetic/kinematics/collision once
+# those are ported; each fixture block carries a "provenance" record (test case, generator
+# call + args, seed, sigma method, how X/Yd were produced). See data/corpus/README.md.
 const HOLES_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_holes.json"))
 
 holes_fixture_mesh(j) = K.mesh_from_json_string(JSON.json(j))
@@ -24,6 +27,7 @@ holes_fixture_geo(g) = sort!([Int[e + 1 for e in cyc] for cyc in g])
 # E_hinge union E_split, and (on a deployable embedding) must reproduce the
 # bounded complement components of M' traced geometrically.
 @testset "hole preimages: seed-growing == partition formulation == geometry" begin
+    # TODO(generators): rng = MT19937(2024); see fx["provenance"] for the exact sequence.
     fx = HOLES_FIXTURES["case1"]
     graphs = 0
     geometric_checks = 0
@@ -82,6 +86,7 @@ holes_fixture_geo(g) = sort!([Int[e + 1 for e in cyc] for cyc in g])
 end
 
 @testset "hole preimages of the rotating-squares pattern are the interior vertices" begin
+    # TODO(generators): tiling_squares(rect(Vec2(2, 2), 2.01, 2.01)) + checkerboard_sigma.
     m = holes_fixture_mesh(HOLES_FIXTURES["rotating_squares"])  # checkerboard sigma frozen
     c = K.make_cut(m)
     @test K.n_split(c) == 0
@@ -95,6 +100,8 @@ end
 end
 
 @testset "split cuts merge holes: H = #interior - #interior split edges (forest case)" begin
+    # TODO(generators): rng = MT19937(99); generate(kind, [3.2], rng) + 8 x random_sigma per kind
+    # (see HOLES_FIXTURES["case3_provenance"]).
     for fam in HOLES_FIXTURES["case3"]
         g = holes_fixture_mesh(fam["mesh"])
         for s in fam["sigmas"]
@@ -129,6 +136,7 @@ end
 #      affine map (Remark 4.1) plus a random null-space offset (Eq. 5).
 # The embeddings X and the overlap-free deployments Yd come frozen from the C++ run.
 @testset "hole preimages: geometric agreement on >= 50 random instances" begin
+    # TODO(generators): rng = MT19937(31337); see fx["provenance"] for populations (A) and (B).
     fx = HOLES_FIXTURES["case4"]
     checked = 0
     for rec in fx["instances"]

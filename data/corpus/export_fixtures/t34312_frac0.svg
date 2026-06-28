@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="57.3205mm" height="57.3205mm" viewBox="0 0 57.3205 57.3205">
+<desc>kiri export: profile=felt_laser hinge=living-hinge-neck theta=0 rad, scale=10 mm/unit, units=mm, faces=9</desc>
+<g id="cut" fill="none" stroke="#000000" stroke-width="0.1">
+  <path id="cut_face_0" d="M 14.7113 15 L 5 15 L 9.8557 23.4103 L 13.9085 16.3905 L 14.125 16.5155 L 14.875 15.2165 L 14.6585 15.0915 Z"/>
+  <path id="cut_face_1" d="M 14.7113 42.3205 L 10.6585 35.3008 L 10.875 35.1758 L 10.125 33.8768 L 9.9085 34.0018 L 9.8557 33.9103 L 5 42.3205 Z"/>
+  <path id="cut_face_2" d="M 42.3205 42.6092 L 35.3008 46.662 L 35.1758 46.4455 L 33.8768 47.1955 L 34.0018 47.412 L 33.9103 47.4648 L 42.3205 52.3205 Z"/>
+  <path id="cut_face_3" d="M 15 42.6092 L 15 52.3205 L 23.4103 47.4648 L 16.3905 43.412 L 16.5155 43.1955 L 15.2165 42.4455 L 15.0915 42.662 Z"/>
+  <path id="cut_face_4" d="M 47.3205 33.1603 L 47.3205 24.1603 L 46.979 23.5687 L 47.1955 23.4437 L 46.4455 22.1447 L 46.229 22.2697 L 42.1375 15.183 L 41.979 15.0915 L 42.104 14.875 L 40.805 14.125 L 40.68 14.3415 L 33.1603 10 L 24.1603 10 L 23.5687 10.3415 L 23.4437 10.125 L 22.1447 10.875 L 22.2697 11.0915 L 15.183 15.183 L 15.0915 15.3415 L 14.875 15.2165 L 14.125 16.5155 L 14.3415 16.6405 L 10 24.1603 L 10 33.1603 L 10.3415 33.7518 L 10.125 33.8768 L 10.875 35.1758 L 11.0915 35.0508 L 15.183 42.1375 L 15.3415 42.229 L 15.2165 42.4455 L 16.5155 43.1955 L 16.6405 42.979 L 24.1603 47.3205 L 33.1603 47.3205 L 33.7518 46.979 L 33.8768 47.1955 L 35.1758 46.4455 L 35.0508 46.229 L 42.1375 42.1375 L 42.229 41.979 L 42.4455 42.104 L 43.1955 40.805 L 42.979 40.68 Z"/>
+  <path id="cut_face_5" d="M 52.3205 15 L 42.6092 15 L 46.662 22.0197 L 46.4455 22.1447 L 47.1955 23.4437 L 47.412 23.3187 L 47.4648 23.4103 Z"/>
+  <path id="cut_face_6" d="M 42.3205 5 L 33.9103 9.8557 L 40.93 13.9085 L 40.805 14.125 L 42.104 14.875 L 42.229 14.6585 L 42.3205 14.7113 Z"/>
+  <path id="cut_face_7" d="M 15 5 L 15 14.7113 L 22.0197 10.6585 L 22.1447 10.875 L 23.4437 10.125 L 23.3187 9.9085 L 23.4103 9.8557 Z"/>
+  <path id="cut_face_8" d="M 52.3205 42.3205 L 47.4648 33.9103 L 43.412 40.93 L 43.1955 40.805 L 42.4455 42.104 L 42.662 42.229 L 42.6092 42.3205 Z"/>
+</g>
+<g id="score" fill="none" stroke="#0000ff" stroke-width="0.1">
+  <path id="score_hinge_2" d="M 15 15 L 14.25 16.299"/>
+  <path id="score_hinge_3" d="M 10 33.6603 L 10.75 34.9593"/>
+  <path id="score_hinge_6" d="M 33.6603 47.3205 L 34.9593 46.5705"/>
+  <path id="score_hinge_11" d="M 15 42.3205 L 16.299 43.0705"/>
+  <path id="score_hinge_13" d="M 47.3205 23.6603 L 46.5705 22.3612"/>
+  <path id="score_hinge_14" d="M 42.3205 15 L 41.0215 14.25"/>
+  <path id="score_hinge_16" d="M 23.6603 10 L 22.3612 10.75"/>
+  <path id="score_hinge_19" d="M 42.3205 42.3205 L 43.0705 41.0215"/>
+</g>
+<g id="engrave" fill="none" stroke="#ff0000" stroke-width="0.1">
+  <path id="sigma_0" d="M 11.8612 17.0998 A 2.0207 2.0207 0 1 0 9.2131 16.0255"/>
+  <path id="sigma_head_0_m" d="M 9.2131 16.0255 L 8.2078 15.9247"/>
+  <path id="sigma_head_0_p" d="M 9.2131 16.0255 L 8.585 16.817"/>
+  <text id="faceid_0" x="10" y="18.8971" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">0+</text>
+  <path id="sigma_1" d="M 11.8612 38.6468 A 2.0207 2.0207 0 1 0 9.2131 37.5725"/>
+  <path id="sigma_head_1_m" d="M 9.2131 37.5725 L 8.2078 37.4717"/>
+  <path id="sigma_head_1_p" d="M 9.2131 37.5725 L 8.585 38.364"/>
+  <text id="faceid_1" x="10" y="40.4441" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">1+</text>
+  <path id="sigma_2" d="M 41.295 46.5336 A 2.0207 2.0207 0 1 0 38.6468 45.4593"/>
+  <path id="sigma_head_2_m" d="M 38.6468 45.4593 L 37.6415 45.3584"/>
+  <path id="sigma_head_2_p" d="M 38.6468 45.4593 L 38.0188 46.2507"/>
+  <text id="faceid_2" x="39.4338" y="48.3309" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">2+</text>
+  <path id="sigma_3" d="M 19.748 46.5336 A 2.0207 2.0207 0 1 0 17.0998 45.4593"/>
+  <path id="sigma_head_3_m" d="M 17.0998 45.4593 L 16.0945 45.3584"/>
+  <path id="sigma_head_3_p" d="M 17.0998 45.4593 L 16.4718 46.2507"/>
+  <text id="faceid_3" x="17.8868" y="48.3309" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">3+</text>
+  <path id="sigma_4" d="M 32.3445 27.1026 A 4 4 0 1 1 30.2179 32.3445"/>
+  <path id="sigma_head_4_m" d="M 30.2179 32.3445 L 28.7254 32.1947"/>
+  <path id="sigma_head_4_p" d="M 30.2179 32.3445 L 29.2855 33.5195"/>
+  <text id="faceid_4" x="28.6603" y="29.7103" font-size="3" text-anchor="middle" fill="#ff0000" stroke="none">4-</text>
+  <path id="sigma_5" d="M 49.1817 17.0998 A 2.0207 2.0207 0 1 0 46.5336 16.0255"/>
+  <path id="sigma_head_5_m" d="M 46.5336 16.0255 L 45.5283 15.9247"/>
+  <path id="sigma_head_5_p" d="M 46.5336 16.0255 L 45.9055 16.817"/>
+  <text id="faceid_5" x="47.3205" y="18.8971" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">5+</text>
+  <path id="sigma_6" d="M 41.295 9.2131 A 2.0207 2.0207 0 1 0 38.6468 8.1388"/>
+  <path id="sigma_head_6_m" d="M 38.6468 8.1388 L 37.6415 8.0379"/>
+  <path id="sigma_head_6_p" d="M 38.6468 8.1388 L 38.0188 8.9302"/>
+  <text id="faceid_6" x="39.4338" y="11.0104" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">6+</text>
+  <path id="sigma_7" d="M 19.748 9.2131 A 2.0207 2.0207 0 1 0 17.0998 8.1388"/>
+  <path id="sigma_head_7_m" d="M 17.0998 8.1388 L 16.0945 8.0379"/>
+  <path id="sigma_head_7_p" d="M 17.0998 8.1388 L 16.4718 8.9302"/>
+  <text id="faceid_7" x="17.8868" y="11.0104" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">7+</text>
+  <path id="sigma_8" d="M 49.1817 38.6468 A 2.0207 2.0207 0 1 0 46.5336 37.5725"/>
+  <path id="sigma_head_8_m" d="M 46.5336 37.5725 L 45.5283 37.4717"/>
+  <path id="sigma_head_8_p" d="M 46.5336 37.5725 L 45.9055 38.364"/>
+  <text id="faceid_8" x="47.3205" y="40.4441" font-size="2.8868" text-anchor="middle" fill="#ff0000" stroke="none">8+</text>
+</g>
+</svg>
