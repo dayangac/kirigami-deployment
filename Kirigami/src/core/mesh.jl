@@ -6,6 +6,27 @@
 # Naming deviation from the C++: functions that mutate their argument carry the Julia
 # `!` suffix (`build_topology!`, `normalize_face_ccw!`); everything else keeps the C++ name.
 
+# 2-D cross product (signed parallelogram area); shared by several method modules.
+_det2(u::Vec2, v::Vec2) = u[1] * v[2] - u[2] * v[1]
+
+# Platform libm shims. The C++ reference linked Apple's libm; Julia's Base trig differs
+# from it by 1 ulp on some arguments, which is visible in bit-exact reproductions (tiling
+# generators, float32 STL normals). On macOS call the system libm; elsewhere use Base.
+if Sys.isapple()
+    const _LIBM = "libSystem.B.dylib"
+    libm_cos(x::Float64) = ccall((:cos, _LIBM), Float64, (Float64,), x)
+    libm_sin(x::Float64) = ccall((:sin, _LIBM), Float64, (Float64,), x)
+    libm_tan(x::Float64) = ccall((:tan, _LIBM), Float64, (Float64,), x)
+    libm_pow(x::Float64, y::Float64) = ccall((:pow, _LIBM), Float64, (Float64, Float64), x, y)
+    libm_atan2(y::Float64, x::Float64) = ccall((:atan2, _LIBM), Float64, (Float64, Float64), y, x)
+else
+    libm_cos(x::Float64) = cos(x)
+    libm_sin(x::Float64) = sin(x)
+    libm_tan(x::Float64) = tan(x)
+    libm_pow(x::Float64, y::Float64) = x^y
+    libm_atan2(y::Float64, x::Float64) = atan(y, x)
+end
+
 # A pair of vertex indices in canonical (sorted) order -- the undirected edge key.
 struct EdgeKey
     a::Int

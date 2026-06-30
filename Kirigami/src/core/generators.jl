@@ -17,21 +17,7 @@
 #     Apple build (then tilings and the relaxation are bit-exact with the C++) and fall
 #     back to Base elsewhere (then tiling vertices can differ from the C++ by 1 ulp).
 
-const _LIBM = "/usr/lib/libSystem.B.dylib"
-const _USE_SYSTEM_LIBM = Sys.isapple() && Sys.ARCH === :aarch64
-if _USE_SYSTEM_LIBM
-    libm_cos(x::Float64) = ccall((:cos, _LIBM), Float64, (Float64,), x)
-    libm_sin(x::Float64) = ccall((:sin, _LIBM), Float64, (Float64,), x)
-    libm_tan(x::Float64) = ccall((:tan, _LIBM), Float64, (Float64,), x)
-    libm_pow(x::Float64, y::Float64) = ccall((:pow, _LIBM), Float64, (Float64, Float64), x, y)
-    libm_atan2(y::Float64, x::Float64) = ccall((:atan2, _LIBM), Float64, (Float64, Float64), y, x)
-else
-    libm_cos(x::Float64) = cos(x)
-    libm_sin(x::Float64) = sin(x)
-    libm_tan(x::Float64) = tan(x)
-    libm_pow(x::Float64, y::Float64) = x^y
-    libm_atan2(y::Float64, x::Float64) = atan(y, x)
-end
+# libm_* shims live in core/mesh.jl (shared with the export layer).
 
 # Eigen `v.dot(w)`, `v.squaredNorm()`, `v.norm()` for Vector2d: x*x' + y*y', not contracted.
 _dot2(a::Vec2, b::Vec2) = a[1] * b[1] + a[2] * b[2]

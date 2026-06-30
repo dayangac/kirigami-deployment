@@ -50,3 +50,8 @@ could NOT reproduce and why, and any C++ bug you found (do not silently fix; rep
 The C++ was built with clang -O2 on arm64, default `-ffp-contract=on`: `a*b + c` patterns are
 FMA-fused. Where a value must be reproduced bit-exactly (RNG streams, corpus generation), use
 `fma(a, b, c)` with the same operand placement. For tolerance-based comparisons this is irrelevant.
+
+## Shared helpers (avoid duplicate definitions — precompile refuses method overwriting)
+`core/mesh.jl` owns: `_det2(u,v)` (2-D cross product) and the `libm_cos/sin/tan/pow/atan2`
+shims (system libm on macOS, Base elsewhere). `export/layout.jl` owns `polygon_area`.
+`cut.jl` owns `DSU`/`find!`/`unite!`. Before defining a small helper, `grep -rn` for it.
