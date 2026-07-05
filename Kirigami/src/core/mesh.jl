@@ -12,6 +12,10 @@ _det2(u::Vec2, v::Vec2) = u[1] * v[2] - u[2] * v[1]
 # Platform libm shims. The C++ reference linked Apple's libm; Julia's Base trig differs
 # from it by 1 ulp on some arguments, which is visible in bit-exact reproductions (tiling
 # generators, float32 STL normals). On macOS call the system libm; elsewhere use Base.
+# True only when the system libm is the arm64 Apple libm the C++ reference linked against
+# (an x86_64 Julia under Rosetta gets Apple's x86_64 libm, which differs by 1 ulp on some
+# arguments); bit-exact trig-dependent tests key on this.
+const _USE_SYSTEM_LIBM = Sys.isapple() && Sys.ARCH === :aarch64
 if Sys.isapple()
     const _LIBM = "libSystem.B.dylib"
     libm_cos(x::Float64) = ccall((:cos, _LIBM), Float64, (Float64,), x)
