@@ -55,3 +55,8 @@ FMA-fused. Where a value must be reproduced bit-exactly (RNG streams, corpus gen
 `core/mesh.jl` owns: `_det2(u,v)` (2-D cross product) and the `libm_cos/sin/tan/pow/atan2`
 shims (system libm on macOS, Base elsewhere). `export/layout.jl` owns `polygon_area`.
 `cut.jl` owns `DSU`/`find!`/`unite!`. Before defining a small helper, `grep -rn` for it.
+
+## Julia binary
+Use the native arm64 Julia: `export PATH=$HOME/.juliaup/bin:$PATH` (juliaup, 1.12.7 aarch64).
+`/usr/local/bin/julia` is the x86_64 Homebrew build under Rosetta: slower, and its libm
+differs from the arm64 libm the C++ reference used (1-ulp trig/hypot differences).
