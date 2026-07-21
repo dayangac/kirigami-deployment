@@ -21,8 +21,15 @@ mutable struct Deployment
     bfs_order::Vector{Int}    # faces in BFS order
 end
 
-_rot(a::Float64) = Mat2(cos(a), sin(a), -sin(a), cos(a))           # column-major
-_drot(a::Float64) = Mat2(-sin(a), cos(a), -cos(a), -sin(a))        # d/da rot(a)
+# Trig via the project's libm shim (mesh.jl) so the rotation entries carry the same bits
+# as the C++ (which linked Apple's libm) wherever the platform allows.
+_rot(a::Float64) = Mat2(libm_cos(a), libm_sin(a), -libm_sin(a), libm_cos(a))     # column-major
+_drot(a::Float64) = Mat2(-libm_sin(a), libm_cos(a), -libm_cos(a), -libm_sin(a))  # d/da rot(a)
+
+# Eigen's fixed-size 2x2 * vector product as clang -O2 (-ffp-contract=on) compiled it:
+# y_i = fma(R(i,1), x_1, R(i,0) * x_0). Verified bit-exact against the C++ deployed
+# positions of four frozen patches (382/382 vertices); a plain `R * x` differs by an ulp.
+_mv(R::Mat2, x::Vec2) = Vec2(fma(R[1, 2], x[2], R[1, 1] * x[1]), fma(R[2, 2], x[2], R[2, 1] * x[1]))
 
 # face -> list of (hinge edge, neighbour face)
 function _hinge_adjacency(c::CutStructure)
@@ -80,15 +87,15 @@ function _run_kinematics(c::CutStructure, X::Vector{Vec2}, theta::Float64,
             for (e, g) in adj[f]
                 v = c.hinge_dir[e].src  # the hinge stays at the source vertex
                 xv = X[v]
-                p = R[f] * xv + t[f]
-                dp = dR[f] * xv + dt[f]
+                p = _mv(R[f], xv) + t[f]
+                dp = _mv(dR[f], xv) + dt[f]
                 if !queued[g]
                     queued[g] = true
-                    t[g] = p - R[g] * xv
-                    dt[g] = dp - dR[g] * xv
+                    t[g] = p - _mv(R[g], xv)
+                    dt[g] = dp - _mv(dR[g], xv)
                     push!(q, g)
                 else
-                    p2 = R[g] * xv + t[g]
+                    p2 = _mv(R[g], xv) + t[g]
                     d.max_mismatch = max(d.max_mismatch, norm(p - p2))
                 end
             end
@@ -99,8 +106,8 @@ function _run_kinematics(c::CutStructure, X::Vector{Vec2}, theta::Float64,
         vs = m.faces[f]
         for k in eachindex(vs)
             pv = c.prime_faces[f][k]
-            d.Y[pv] = R[f] * X[vs[k]] + t[f]
-            d.dY_dtheta[pv] = dR[f] * X[vs[k]] + dt[f]
+            d.Y[pv] = _mv(R[f], X[vs[k]]) + t[f]
+            d.dY_dtheta[pv] = _mv(dR[f], X[vs[k]]) + dt[f]
         end
     end
     return d

@@ -60,6 +60,8 @@ end
         @test K.hole_residuals(c, X, hs).max_norm < 1e-9
         ref = K.deploy(c, X, 0.7, 1)
         @test maximum(norm.(ref.Y .- fixture_points(fam["Y_ref"]))) < 1e-9
+        # from the C++ X the port's deploy() is BIT-exact (FMA-contracted 2x2 mat-vec, libm trig)
+        @test K.deploy(c, fixture_points(fam["X"]), 0.7, 1).Y == fixture_points(fam["Y_ref"])
         for (trial, order0) in enumerate(fam["orders"])
             order = [Int(f) + 1 for f in order0]  # 0-based C++ face order -> 1-based
             alt = K.deploy_with_order(c, X, 0.7, order)

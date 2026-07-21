@@ -28,7 +28,9 @@ n_prime(b::DeployBasis) = size(b.C, 1)
 basis_c(b::DeployBasis, i::Int) = Vec2(b.C[i, 1], b.C[i, 2])   # C++ b.c(i)
 basis_s(b::DeployBasis, i::Int) = Vec2(b.S[i, 1], b.S[i, 2])   # C++ b.s(i)
 
-det2(u::Vec2, v::Vec2) = u[1] * v[2] - u[2] * v[1]
+# clang -O2 (arm64, -ffp-contract=on) fuses the C++ `u.x()*v.y() - u.y()*v.x()` into an fma
+# (see generators.jl); replicated so the tie-sensitive counts of contact.jl match the C++.
+det2(u::Vec2, v::Vec2) = fma(u[1], v[2], -(u[2] * v[1]))
 
 """C = Y(0), S = 2 dY/dtheta|_0, from a single call to deploy()."""
 function deploy_basis(c::CutStructure, X::Vector{Vec2})
@@ -59,8 +61,19 @@ struct Harmonic
     r::Float64
 end
 Harmonic() = Harmonic(0.0, 0.0, 0.0)
-harmonic_eval(h::Harmonic, th::Real) = h.p + h.q * cos(th) + h.r * sin(th)
-amp(h::Harmonic) = hypot(h.q, h.r)
+# C++ `p + q*cos + r*sin` is contracted left to right: fma(r, sin, fma(q, cos, p)).
+harmonic_eval(h::Harmonic, th::Real) = fma(h.r, libm_sin(Float64(th)), fma(h.q, libm_cos(Float64(th)), h.p))
+# std::hypot / std::atan2 / std::acos of the C++ are Apple libm (as in generators.jl); the
+# sub-ulp differences to Julia's own decide whether the tau = 0 artefact root of a class-2
+# harmonic lands at +1e-17 or -1e-17, i.e. inside or outside (0, eps].
+if Sys.isapple()
+    libm_hypot(x::Float64, y::Float64) = ccall((:hypot, _LIBM), Float64, (Float64, Float64), x, y)
+    libm_acos(x::Float64) = ccall((:acos, _LIBM), Float64, (Float64,), x)
+else
+    libm_hypot(x::Float64, y::Float64) = hypot(x, y)
+    libm_acos(x::Float64) = acos(x)
+end
+amp(h::Harmonic) = libm_hypot(h.q, h.r)
 scale(h::Harmonic) = abs(h.p) + amp(h)
 
 # Same three, from explicit (C,S) pairs -- used by the range optimizer, which
@@ -108,13 +121,13 @@ function harmonic_roots(h::Harmonic, lo::Real, hi::Real, tol::Real = 0.0)
     A <= 0.0 && return out
     ratio = -h.p / A
     (ratio > 1.0 || ratio < -1.0) && return out
-    phi = atan(h.r, h.q)
-    psi = acos(max(-1.0, min(1.0, ratio)))
+    phi = libm_atan2(h.r, h.q)
+    psi = libm_acos(max(-1.0, min(1.0, ratio)))
     twopi = 2.0 * pi
     for base in (phi - psi, phi + psi)
         # shift into (lo, lo + 2pi]
         t = base
-        t -= twopi * floor((t - lo) / twopi)
+        t = fma(-twopi, floor((t - lo) / twopi), t)   # C++ `t -= twopi * floor(...)`, contracted
         t <= lo && (t += twopi)
         while t <= hi + 1e-15
             push!(out, t)

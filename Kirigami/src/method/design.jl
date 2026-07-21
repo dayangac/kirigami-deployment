@@ -643,7 +643,7 @@ function design_range_max(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec2}
         out.design = finish(m, c, med, ss, X_ini, ss.X0, Float64[], rep, "range_max")
         out.design.status = "dim_null = 0: the shape space is the single point X0"
         out.provenance = "x0"
-        out.margin = zero_plus_margin(c, ss.X0, med)
+        out.margin = zero_plus_margin(c, ss.X0, med)[1]
         return out
     end
 
@@ -657,7 +657,7 @@ function design_range_max(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec2}
         cd.t = t
         e = exact_margins(m, c, X, delta_rel * s, delta_rel * s)
         cd.feasible = e.feasible
-        cd.margin = zero_plus_margin(c, X, med)
+        cd.margin = zero_plus_margin(c, X, med)[1]
         cd.ch = characterize(m, m.sigma, X, opt.characterize)
         cd.theta_max = cd.ch.theta_max
         cd.eps_max = cd.ch.eps_max

@@ -357,6 +357,14 @@ ConeLPResult() = ConeLPResult(Float64[], Float64[], 0.0, 0.0, 0.0, 0, 0, 0, fals
 
 Scales every row of `A` to unit Euclidean norm in place; rows of norm <= 0 (or not
 finite) are left alone and counted in the return value.
+
+Replicated C++ behaviour, flagged: a row whose exact value on the flex space is zero
+(a corner incidence whose two copies never separate) arrives as ~1e-16 rounding noise,
+passes the `n > 0` test and is scaled to a unit row of noise. On tilings with such rows
+(squares checkerboard: 80 of 160; truncated square: 16 of 55) the LP value depends on
+the rounding of the flex basis and is not reproducible across linear-algebra backends
+(see test_method_3.jl, frozen reference). Not fixed here because the C++ numbers are
+the acceptance criterion; a threshold relative to max |A N| would be the fix.
 """
 function normalise_rows!(A::Matrix{Float64})
     bad = 0
