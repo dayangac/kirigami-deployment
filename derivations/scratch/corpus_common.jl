@@ -12,7 +12,7 @@ const _CORPUS_DIR = normpath(joinpath(@__DIR__, "..", "..", "data", "corpus"))
 
 # (min_faces, max_faces, n_cap) -> corpus file, from data/corpus/README.md
 const _POPULATION_FILES = Dict(
-    (18, 46, 220)       => "derivation_l1_small.json",
+    (18, 46, 220)       => "derivation_l1_140.json",   # ids 0..139 (0..79 == derivation_l1_small.json)
     (100, 800, 1400)    => "k1a_200.json",
     (100, 5000, 1 << 30) => "k3a_500.json",
 )

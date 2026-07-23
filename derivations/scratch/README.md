@@ -21,8 +21,9 @@ julia --project=Kirigami ideas/rigidity_rig_check.jl
 ```
 
 `corpus_common.jl` is the slice of `code/apps/kill_common.hpp` that `check_l1` / `check_b4_93` need
-(`make_graph`, `reference_cases`), reading the frozen populations in `data/corpus/` instead of
-regenerating them. `TODO(julia-port)`: replace by `Kirigami/apps/kill_common.jl`.
+(`make_graph`, `reference_cases`), reading the frozen populations in `data/corpus/`
+(`derivation_l1_140.json` for `make_graph(id, 18, 46, 220)`, `k1a_200.json` for `(100, 800, 1400)`)
+instead of regenerating them. `TODO(julia-port)`: replace by `Kirigami/apps/kill_common.jl`.
 
 ## What can and cannot be reproduced line for line
 
@@ -86,14 +87,16 @@ Quoted from the derivation files (`core.md` "Programs run" table l.1984-1991 and
 | | A: max \|s/‖e‖² − L′/L\| | 1.55e−15 | 1.67e−15 | ~ |
 | | A: admissibility failures | **0** | **0** | = |
 | | B: counterexample | hexagons, θ₁ = π/3, Θ_max = 2π/3, ε = 1.570796 | same | = |
-| `check_l1 140 20` | graphs used | 84 (7 ref + 77 random of 140 ids) | **50** (7 ref + 43 random) | ✗ corpus: `data/corpus/derivation_l1_small.json` freezes ids 0..79 only; ids 80..139 are not frozen |
+| `check_l1 140 20` | graphs used | 84 (7 ref + 77 random of 140 ids) | 84 | = (corpus `derivation_l1_140.json`, ids 0..139) |
+| | candidate harmonics / coincident-copy pairs | 30 119 368 / 801 816 | 31 343 774 / 824 396 | ~ (kind 3: more samples survive the orientation screen) |
 | | shared but C ≠ 0 (must be 0) | 0 | 0 | = |
-| | class disagreements | 0 | 0 | = |
+| | class disagreements | 0 / 801 816 | 0 / 824 396 | = |
 | | class-3 by shared-edge type | hinge 160 / split 24 / none 100 | 160 / 24 / 100 | = |
 | | class-3 hinge ⟂ | 160 of 160 | 160 of 160 | = |
-| | class-3 transient / undecidable | 152 / 1 259 | 152 / 1 259 | = |
+| | class-3 persistent / transient / undecidable | 58 / 152 / 1 259 | 59 / 152 / 1 259 | ~ / = / = |
 | | closed-form errors p, q, r | 1.99e−12, 1.99e−12, 3.41e−13 | 2.93e−12, 2.93e−12, 3.41e−13 | ~ |
-| | everything else (pair totals, persistent counts) | 30 119 368 pairs … | 17 164 758 pairs … | ✗ fewer graphs (above) |
+| | hinge dS pairs, err; split dS pairs, err | 479 784, 1.00e−13; 159 816, 8.64e−14 | 494 840, 2.32e−13; 166 152, 1.22e−13 | ~ |
+| | persistent non-shared C = 0 by #frozen vertices 0:1:2:3 | 18 762 : 20 182 : 0 : 135 410 | 0 : 0 : 9 986 : 170 738 | **?** — "frozen" (zero row of Phi, threshold 1e−12) is invariant under a rotation of the null-space basis in exact arithmetic, so this split should not depend on LAPACK vs Eigen; the C++ text never interpreted this line, but the discrepancy is open |
 | `check_l1 52 20` (default) | | (not quoted) | 34 graphs, 10 482 152 pairs, 0 / 0 failures | |
 | `check_l2` | patterns evaluated | 133 | 133 | = |
 | | rank(A) = 2 rank(D) | 133 / 133 | 133 / 133 | = |
