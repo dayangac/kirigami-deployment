@@ -131,3 +131,11 @@ afterwards (`results/core_validation/referee_fix.md`), so a faithful replay woul
 `0.2484`, not `0`.
 
 Reproduce: `KIRI_B4_CACHE=~/Documents/kirigami-experiments/results/kill/b4/cache/free_sigma_def julia --project=Kirigami derivations/scratch/check_b4_93.jl 93 96`.
+
+**Resolved 2026-09-20 (port-method-2): not a port bug.** With the C++ `(X0, Phi)` loaded the start
+state is bit-identical and the first ~20 L-BFGS iterates agree to 1e-14; the 1199-iteration
+secondary repair never converges and the rounding path diverges after that (1e-9 at 40 iterations,
+4e-4 at 80), so the warm-started primary lands in a different local minimum and id 93's feasibility
+flips on one corner margin out of 5206. Probes, the full iterate table and the verdict:
+`derivations/scratch/b4_path/README.md`. The b4.csv rows for ids 93 and 96 (the 0.2484 / 0.241884 rad
+values) are knife-edge outcomes of a non-converged optimiser, not reproducible numbers.
