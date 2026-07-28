@@ -62,3 +62,31 @@ Total migrated: **333 MB, 3,151 files** (excluding `.git`).
 ## C++ mentions
 
 `docs/CPP_MENTIONS.md` lists **942 lines in 61 files** of the migrated `.md/.tex/.bib` that mention the C++ toolchain, C++ file paths, test binaries/counts, or the wasm web explorer. None have been edited. The heaviest are `notes/repo_2025.md` (116, third-party — keep), `results/kill/KILL_REPORT.md` (114), `docs/techreport/techreport.tex` (74), `derivations/core.md` (51), `derivations/check.md` (46), `derivations/lemmas.md` (42), `ideas/round2_adversary.md` (40), `REPORT.md` (36), `ideas/round2_theorist_b.md` (36), `STATE.md` (31).
+
+## Julia port status (2026-09-20)
+
+What of `kirigami-experiments/code/` now exists in Julia, file by file. "Ported" means the
+Julia file mirrors the C++ translation unit under the conventions of `PORTING.md` and its
+tests pass on the frozen corpora; the numerical caveats are in `Kirigami/README.md`
+("Reproducibility of the numbers") and `data/corpus/method_fixtures/README_design.md`.
+
+| C++ | Julia | status |
+|---|---|---|
+| `src/core/*.{hpp,cpp}` (13 units) | `Kirigami/src/core/*.jl`, same basenames, plus `core/kill_common.jl` (the population definitions of `apps/kill_common.hpp`) | ported |
+| `src/method/*.{hpp,cpp}` (11 units) | `Kirigami/src/method/*.jl`, same basenames | ported |
+| `src/export/*.{hpp,cpp}` (8 units) | `Kirigami/src/export/*.jl`, same basenames | ported |
+| `tests/test_*.cpp`, `derivation_tests.cpp`, `test_main.cpp`, `helpers.hpp` | `Kirigami/test/test_*.jl`, `derivation_tests.jl`, `runtests.jl`, `helpers.jl`; `test_method.cpp` is split into `test_method_{1,2,3}.jl` | ported (`⟨JULIA:tests⟩`, `⟨JULIA:derivation_tests⟩`) |
+| `apps/common_app.hpp`, `kill_common.hpp`, `native_common.hpp` | `Kirigami/apps/common_app.jl`, `kill_common.jl`, `native_common.jl` (included files; populations read from `data/corpus/`, `--regenerate` rebuilds them) | ported |
+| `apps/kiri_{gen,analyze,deploy,design,export,reference,sweep}.cpp` | `Kirigami/apps/kiri_*.jl`, same CLI arguments and output formats (checked against the C++ binaries on the same inputs) | ported |
+| `apps/kill_{e1,f23,jitter,k1a,k1b,k1c,k2a,k2b,k2c,k3a,k3a_recheck,k5,k6,k7,k8a,k8a_recheck,k9,k9b,k9c,t1}.cpp` | `Kirigami/apps/kill_*.jl`, same names | ported |
+| `apps/kill_{b3,b4,basin,basin_agg,native200,regime,scaling,yield}.cpp`, `native200_cell.cpp`, `native200_merge.cpp` | not yet in `Kirigami/apps/` at the time of writing | pending |
+| `apps/freeze_corpus.cpp` | -- | not needed: it produced `data/corpus/` once; the Julia side only reads it |
+| `derivations/scratch/check_*.cpp`, `ideas/rigidity_rig_check.cpp` | `check_*.jl`, `rigidity_rig_check.jl` next to them | ported (C++ kept as documentary evidence) |
+| `scripts/*.py`, `*.sh` | `Kirigami/scripts/plot_*.jl`, `summarise_k8a.jl` (CairoMakie, own `Project.toml`); the Python originals kept beside them; `run_e1.sh` / `run_scaling.sh` still name the C++ binaries (`TODO(julia-port)` header) | ported (figures regenerated with a `_julia` suffix) |
+| `web/` (wasm bindings, HTML/JS explorer) | `Kirigami/gui/` (GLMakie desktop app, `app.jl` + window-free `model.jl`, own `Project.toml` and tests); `web/patterns.json` -> `data/web_patterns.json` | replaced, deliberately not ported |
+| `apps/dbg_*.cpp` (`dbg_cert`, `dbg_k1b`, `dbg_k2a`, `dbg_k2a_out`, `dbg_k2c`, `dbg_k5`, `dbg_k6`, `dbg_k9`, `dbg_t422`) | -- | deliberately not ported: one-off debugging probes of the C++ era whose findings are recorded in `STATE.md` / `results/kill/KILL_REPORT.md` |
+| `CMakeLists.txt`, `README.md` (C++ build and graph contract) | `Kirigami/Project.toml`, `Kirigami/README.md`, this repo's `README.md` | replaced |
+
+Deliberately not ported, in one line: the `dbg_*` apps and the web explorer (the latter
+replaced by `Kirigami/gui/`). Everything else in `code/` has a Julia counterpart, except
+the ten apps marked pending above (eight `kill_*` drivers and the two `native200_*` helpers).
