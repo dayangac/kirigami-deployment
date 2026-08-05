@@ -1,15 +1,16 @@
 #!/bin/bash
-# TODO(julia-port): invoked C++ binary kill_e1; replace with Kirigami/apps/kill_e1.jl
-# Runs E1 (results/final/e1) 12-way sharded, then merges the shard CSVs.
+# Runs E1 (results/final/e1_julia) 12-way sharded, then merges the shard CSVs.
+# Julia port of code/scripts/run_e1.sh: drives Kirigami/apps/kill_e1.jl.
 set -euo pipefail
-cd "$(dirname "$0")/../build"
-OUT=../../results/final/e1
+cd "$(dirname "$0")/../.."
+export PATH=$HOME/.juliaup/bin:$PATH
+OUT=results/final/e1_julia
 mkdir -p "$OUT/shards"
 NSHARDS=12
 NRANDOM=${1:-900}
 
 seq 0 $((NSHARDS-1)) | xargs -P "$NSHARDS" -I{} \
-  ./kill_e1 --shard {} --nshards $NSHARDS --n-random "$NRANDOM" --out "$OUT/shards"
+  julia --project=Kirigami Kirigami/apps/kill_e1.jl --shard {} --nshards $NSHARDS --n-random "$NRANDOM" --out "$OUT/shards"
 
 # merge: one header, then all data rows
 head -n1 "$OUT/shards/e1_0.csv" > "$OUT/e1.csv"

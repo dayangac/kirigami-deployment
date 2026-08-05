@@ -1,0 +1,245 @@
+# diff_tolerances.toml -- per-file, per-column tolerances for scripts/diff_results.jl.
+#
+# Every column not mentioned here is compared exactly (strings, integers) or, for
+# floating-point columns, within [global] rtol/atol. Entries under a file section
+# (keyed by CSV basename; `*` glob patterns are allowed in section names and column
+# names) can set
+#   rtol / atol      -- the tolerance for that column
+#   info = true      -- "informational": reported, but NOT counted in the verdict, because
+#                       the C++ and Julia values are known to differ for a documented,
+#                       non-bug reason (optimizer path, null-space basis sign, tie-break,
+#                       different sparse-QR library, timing)
+#   note = "..."     -- the reason, printed in the Markdown
+# A [[file.rows]] entry marks WHOLE ROWS informational when `column == value`.
+#
+# Sources of the entries: the per-app reports of the driver porters (2026-09-19/20) and
+# the header comments of Kirigami/apps/*.jl.
+
+[global]
+rtol = 1e-9
+atol = 1e-12
+# key columns, in this priority order: those present in a file's header identify a row
+keys = ["id", "name", "case", "tiling", "kind", "sigma", "variant", "where", "target",
+        "source", "sigma_rule", "rule", "amp_idx", "seed", "v", "design", "theta",
+        "dir_deg", "stage", "routine", "sites", "family", "X_source", "deg"]
+# timing columns are never compared
+skip = ["secs", "secs_*", "*_secs", "native_secs", "wall"]
+
+# ---------------------------------------------------------------- group B (port-core-2b)
+
+["k3a.csv"]
+sigma_res     = { atol = 1e-12, note = "sum of tiny residuals; 1e-15 noise" }
+theta_max     = { rtol = 1e-5, note = "grid + 25-step bisection; last-bit ties" }
+theta_probe   = { rtol = 1e-5, note = "0.3 * theta_max" }
+
+["k3a_recheck.csv"]
+sparse_kerA      = { info = true, note = "SuiteSparse SPQR rank vs Eigen SparseQR at the same threshold (the artefact the recheck was built to expose)" }
+sparse_kerA_core = { info = true, note = "as sparse_kerA" }
+sparse_defect    = { info = true, note = "as sparse_kerA" }
+sv_gap_full      = { rtol = 1e-6 }
+sv_gap_core      = { rtol = 1e-6 }
+
+["k5.csv"]
+"*_first_overlap" = { info = true, note = "log ladder of has_collision probes at theta = 1e-12..1; the smallest rung is a tolerance-level decision on solver output" }
+"*_theta"        = { rtol = 1e-6, note = "2000-point grid + 50-step bisection" }
+"range_*"        = { info = true, note = "range optimiser (L-BFGS) path" }
+"*_proj_rel"     = { rtol = 1e-6 }
+"*_D"            = { rtol = 1e-8 }
+D_ratio          = { rtol = 1e-8 }
+
+["k6.csv"]
+best_start   = { info = true, note = "which L-BFGS start won: optimizer path" }
+iters        = { info = true, note = "L-BFGS iteration count: optimizer path" }
+min_q        = { info = true, note = "L-BFGS endpoint of the repair" }
+min_area     = { info = true, note = "L-BFGS endpoint of the repair" }
+min_mu       = { info = true, note = "L-BFGS endpoint of the repair" }
+n_bad_q      = { info = true, note = "L-BFGS endpoint of the repair" }
+n_bad_area   = { info = true, note = "L-BFGS endpoint of the repair" }
+n_bad_mu     = { info = true, note = "L-BFGS endpoint of the repair" }
+t_norm_rel   = { info = true, note = "L-BFGS endpoint of the repair" }
+"sec_*"      = { info = true, note = "secondary (split-only) repair: optimizer path" }
+"lad_*"      = { info = true, note = "lambda ladder: optimizer path" }
+"s2_*"       = { info = true, note = "stage 2 range optimiser: optimizer path" }
+"native_*"   = { info = true, note = "authors' native CLI (external binary, timeouts)" }
+eps_max      = { rtol = 1e-6, note = "first deflated root minus 1e-12" }
+theta_exact  = { rtol = 1e-6 }
+theta_bisect = { rtol = 1e-6 }
+"min_*0"     = { rtol = 1e-6, note = "evaluated at the dense-SVD X0" }
+
+["k7_main*.csv"]
+c1_fit_relerr   = { atol = 1e-12, note = "forward-kinematics fit residual (roundoff)" }
+c1_K_vs_basis   = { atol = 1e-12 }
+c1_affine_sec   = { atol = 1e-12, note = "second differences at random t (roundoff)" }
+cons            = { atol = 1e-12 }
+p0err           = { atol = 1e-12 }
+c2_conf_res     = { atol = 1e-12 }
+c2_maxdist      = { atol = 1e-9 }
+c2_tnorm        = { rtol = 1e-6, note = "min-norm least squares (COD vs pinv)" }
+"c3_*"          = { info = true, note = "random shape-space target + pattern search; the SVD null-space basis Phi differs in sign/rotation between LAPACK and Eigen, so random draws land elsewhere (verified: negating t reproduces the C++)" }
+c4_area_fit_err = { atol = 1e-9 }
+c4_geom_err     = { atol = 1e-9 }
+c4_abs_err      = { atol = 1e-9 }
+max_mismatch    = { atol = 1e-12 }
+
+["k7_c3*.csv"]
+hit_err  = { atol = 1e-12 }
+"*"      = { rtol = 1e-6 }
+[["k7_c3*.csv".rows]]
+column = "target"
+value  = "random_in_K"
+note   = "random achievable target: depends on the null-space basis sign (LAPACK vs Eigen)"
+
+["k7_nu_*.csv"]
+"*" = { rtol = 1e-6 }
+[["k7_nu_*.csv".rows]]
+column = "design"
+value  = "random_in_K"
+note   = "random shape-space design: depends on the null-space basis sign"
+
+["k7_periodicity*.csv"]
+"*" = { atol = 1e-12 }
+
+["k7_c4_sweep.csv"]
+"*" = { rtol = 1e-6, atol = 1e-12 }
+
+["k7_c4_bounded.csv"]
+"*" = { rtol = 1e-6, atol = 1e-12 }
+
+# ---------------------------------------------------------------- other driver groups
+
+["k1b.csv"]
+max_rel_res        = { info = true, note = "K1b residuals: roundoff-level, basis-dependent" }
+max_rel_res_geo    = { info = true, note = "K1b residuals" }
+max_closedform_err = { info = true, note = "K1b residuals" }
+max_coeff_rel_err  = { info = true, note = "K1b residuals" }
+max_basis_err      = { info = true, note = "K1b residuals" }
+max_area_drift     = { info = true, note = "K1b residuals" }
+min_degeneracy     = { rtol = 1e-6 }
+
+["k2a.csv"]
+cert_undeflated         = { info = true, note = "undeflated root count: tie-sensitive" }
+binding_edge_type       = { info = true, note = "binding witness: tie-sensitive" }
+binding_faces_adjacency = { info = true, note = "binding witness: tie-sensitive" }
+bis_1e6                 = { info = true, note = "bisection at shrink 1e-6: tolerance-level" }
+"bis_*"                 = { rtol = 1e-6 }
+"d_*"                   = { atol = 1e-9 }
+"dT_*"                  = { atol = 1e-9 }
+d12_pure                = { atol = 1e-9 }
+theta_hybrid            = { rtol = 1e-6 }
+theta_roots             = { rtol = 1e-9 }
+theta_t422              = { rtol = 1e-9 }
+
+["k9c.csv"]
+"k9_*"   = { info = true, note = "stage A/B optimizer path" }
+"k9b_*"  = { info = true, note = "stage A/B optimizer path" }
+"k9c_*"  = { info = true, note = "stage A/B optimizer path" }
+"best_*" = { info = true, note = "best of the optimizer stages" }
+eps_max      = { info = true, note = "certificate of the optimizer's endpoint" }
+theta_exact  = { info = true, note = "at the optimizer's endpoint" }
+"theta_ref*" = { info = true, note = "at the optimizer's endpoint" }
+binding      = { info = true, note = "at the optimizer's endpoint" }
+dist         = { info = true, note = "at the optimizer's endpoint" }
+
+["k9b.csv"]
+"*" = { info = true, note = "delta sweep + L-BFGS: optimizer path (only N, F, n_split, dim_null, n_corner, nonconvex0 are exact)" }
+N = { rtol = 0.0 }
+F = { rtol = 0.0 }
+n_split = { rtol = 0.0 }
+dim_null = { rtol = 0.0 }
+n_corner = { rtol = 0.0 }
+nonconvex0 = { rtol = 0.0 }
+med_edge = { rtol = 1e-9 }
+
+["k9.csv"]
+"a_*"   = { info = true, note = "stage A optimizer path" }
+"b_*"   = { info = true, note = "stage B optimizer path" }
+"split_only_*" = { info = true, note = "optimizer path" }
+"x0_*"  = { rtol = 1e-6, note = "certificate at the dense-SVD X0" }
+min_cross0 = { rtol = 1e-6 }
+min_mu0    = { rtol = 1e-6 }
+
+["b4.csv"]
+best_start = { info = true, note = "optimizer path" }
+iters      = { info = true, note = "optimizer path" }
+"min_*"    = { info = true, note = "L-BFGS endpoint" }
+"n_bad_*"  = { info = true, note = "L-BFGS endpoint" }
+t_norm_rel = { info = true, note = "L-BFGS endpoint" }
+"sec_*"    = { info = true, note = "L-BFGS endpoint" }
+"*0"       = { rtol = 1e-6, note = "at X0" }
+"cert_*"   = { rtol = 1e-6 }
+eps_max    = { rtol = 1e-6 }
+theta_exact = { rtol = 1e-6 }
+theta_bisect = { rtol = 1e-6 }
+
+["k8a*.csv"]
+passes         = { info = true, note = "LP iteration count" }
+pass_feasible  = { info = true, note = "LP solver path" }
+"margin_*"     = { rtol = 1e-6, note = "LP optimum" }
+"dual_*"       = { rtol = 1e-6 }
+n_active       = { info = true, note = "LP active set" }
+n_dual_support = { info = true, note = "LP dual support" }
+"*_resid"      = { atol = 1e-9 }
+euler_eps      = { rtol = 1e-6 }
+
+["recheck_k9.csv"]
+"*" = { rtol = 1e-6 }
+passes = { info = true, note = "LP iteration count" }
+"farkas_*" = { atol = 1e-9 }
+
+["k2c.csv"]
+"theta_*" = { rtol = 1e-9 }
+"diff_*"  = { atol = 1e-12 }
+"*rho*"   = { rtol = 1e-9 }
+min_r     = { rtol = 1e-9 }
+
+["k1a.csv"]
+sigma_cal   = { rtol = 1e-9 }
+"p_valid*"  = { rtol = 1e-9, note = "Gaussian samples from the bit-exact MT19937 on the same Phi" }
+"theta_max*" = { rtol = 1e-6 }
+max_move    = { rtol = 1e-9 }
+
+["e1.csv"]
+theta_bisect = { rtol = 1e-6 }
+gap          = { atol = 1e-9 }
+
+["jitter.csv"]
+D        = { rtol = 1e-8 }
+proj_rel = { rtol = 1e-6 }
+theta_max = { rtol = 1e-6 }
+"rho_*"  = { rtol = 1e-6 }
+back_rel = { rtol = 1e-6 }
+margin_X0 = { rtol = 1e-6 }
+aniso     = { rtol = 1e-6 }
+
+["k1c.csv"]
+"worst_*" = { atol = 1e-9 }
+theta_Y9  = { rtol = 1e-6 }
+first_theta = { rtol = 1e-6 }
+
+["k2b.csv"]
+"theta_native*" = { info = true, note = "authors' native CLI" }
+native_best_idx = { info = true, note = "authors' native CLI" }
+"theta_ours*"   = { info = true, note = "range optimiser (L-BFGS) path" }
+valid_ours      = { info = true, note = "range optimiser path" }
+theta_closed_ours = { info = true, note = "range optimiser path" }
+rel_gain        = { info = true, note = "range optimiser path" }
+gap_closed      = { info = true, note = "range optimiser path" }
+n_active        = { info = true, note = "range optimiser path" }
+"theta_*X0"     = { rtol = 1e-6 }
+"ladder_*"      = { rtol = 1e-6 }
+
+["f23.csv"]
+"worst_*" = { atol = 1e-9 }
+theta     = { rtol = 1e-9 }
+
+["t1.csv"]
+delta_rel = { rtol = 1e-6 }
+mu_rel    = { rtol = 1e-6 }
+
+["b3_*.csv"]
+"*" = { rtol = 1e-6 }
+
+["native200*.csv"]
+"native_*" = { info = true, note = "authors' native CLI (external binary, timeouts)" }
+status     = { info = true, note = "native CLI outcome" }
+"our_theta*" = { rtol = 1e-6 }

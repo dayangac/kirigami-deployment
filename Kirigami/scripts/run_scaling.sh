@@ -1,17 +1,18 @@
 #!/bin/zsh
-# TODO(julia-port): invoked C++ binary kill_scaling; replace with Kirigami/apps/kill_scaling.jl
-# WP7b -- drives apps/kill_scaling one (cell, routine) per process, strictly sequentially,
-# so that getrusage(RUSAGE_SELF).ru_maxrss at exit is that routine's own peak resident set.
+# WP7b -- drives Kirigami/apps/kill_scaling.jl one (cell, routine) per process, strictly
+# sequentially, so that the peak resident set at exit (Sys.maxrss) is that routine's own.
+# Julia port of code/scripts/run_scaling.sh.
 #
 # Each invocation is wrapped in the repo's `perl -e alarm` cap (no GNU coreutils `timeout`
 # on this machine). A routine that is killed writes no row; the script records the miss in
 # capped.csv, and STOPS running that routine at larger sizes for that family -- the cost
 # grows monotonically, so continuing only burns the cap again.
 #
-#   code/scripts/run_scaling.sh [outdir]
+#   Kirigami/scripts/run_scaling.sh [outdir]      (run from the repo root)
 set -u
-OUT=${1:-results/scaling}
-BIN=./code/build/kill_scaling
+export PATH=$HOME/.juliaup/bin:$PATH
+OUT=${1:-results/scaling_julia}
+BIN=(julia --project=Kirigami Kirigami/apps/kill_scaling.jl)
 CSV=$OUT/scaling.csv
 CAP_CSV=$OUT/capped.csv
 mkdir -p $OUT
@@ -30,7 +31,7 @@ run_stage() {
   local kind=$1 sites=$2 seed=$3 stage=$4 cap=$5
   local t0=$SECONDS
   /usr/bin/perl -e 'alarm shift; exec @ARGV' $cap \
-      $BIN --kind $kind --sites $sites --seed $seed --stage $stage --out $OUT --csv $CSV \
+      $BIN[@] --kind $kind --sites $sites --seed $seed --stage $stage --out $OUT --csv $CSV \
       >> $OUT/run.log 2>&1
   local rc=$?
   local dt=$((SECONDS - t0))
