@@ -242,8 +242,13 @@ end
 function deployable_population(; regenerate::Bool = false, samples_per_base::Int = 8,
                                radius_frac::Float64 = 0.2)
     regenerate && return build_deployable_population(samples_per_base, radius_frac)
-    path = joinpath(CORPUS_DIR, "deployable_population.json")
-    isfile(path) || error("deployable_population: no corpus file $path")
+    # the (8, 0.2) default is deployable_population.json; the other variants the C++ apps
+    # used are frozen as deployable_population_<samples>_<radius>.json (k8a: (2, 0.2);
+    # e1: (20, 0.2) and (20, 0.35)), with the C++ Eigen-basis samples
+    path = (samples_per_base == 8 && radius_frac == 0.2) ?
+           joinpath(CORPUS_DIR, "deployable_population.json") :
+           joinpath(CORPUS_DIR, "deployable_population_$(samples_per_base)_$(radius_frac).json")
+    isfile(path) || error("deployable_population: no corpus file $path (use regenerate = true)")
     out = DeployableConfig[]
     for r in JSON.parsefile(path)
         m = K.mesh_from_json(r["mesh"])

@@ -41,8 +41,8 @@
 #         [--dual-iters 600] [--limit K] [--regenerate]
 #
 # Population: the K1a graphs (frozen k1a_200, ids < n; `--regenerate` rebuilds them with
-# make_graph). The deployable population here is the (2, 0.2) variant, which the frozen
-# file (8 samples per base) does not contain, so it is always rebuilt. Outputs go to
+# make_graph). The deployable population here is the frozen (2, 0.2) variant
+# (data/corpus/deployable_population_2_0.2.json; `--regenerate` rebuilds it). Outputs go to
 # results/kill/k8a_julia/ (the C++ wrote results/kill/k8a/).
 include(joinpath(@__DIR__, "kill_common.jl"))
 
@@ -227,8 +227,8 @@ function main(args::Vector{String})
     # be feasible, so they are where a first-order flex can actually be integrated.
     dep_done = 0; dep_sound = 0; dep_pos = 0; dep_euler = 0; dep_euler_ok = 0
     if shard == 0 && do_deployable
-        # (2, 0.2) is not the frozen (8, 0.2) population: rebuilt, as the C++ did
-        for d in deployable_population(regenerate = true, samples_per_base = 2, radius_frac = 0.2)
+        # the frozen (2, 0.2) variant (deployable_population_2_0.2.json); --regenerate rebuilds
+        for d in deployable_population(regenerate = regenerate, samples_per_base = 2, radius_frac = 0.2)
             m = d.mesh
             K.build_topology!(m)
             c = K.make_cut(m)

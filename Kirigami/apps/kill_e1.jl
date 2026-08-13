@@ -46,8 +46,8 @@
 #   julia --project=Kirigami Kirigami/apps/kill_e1.jl [--shard S] [--nshards M] [--out DIR]
 #         [--n-random 900] [--limit K] [--regenerate]
 #
-# Population: (A) is always rebuilt (the frozen deployable_population.json is the (8, 0.2)
-# variant); (B) reads the frozen e1_900 rows (ids 0..899, `--regenerate` rebuilds them
+# Population: (A) reads the frozen (20, 0.2) / (20, 0.35) variants
+# (data/corpus/deployable_population_20_*.json; `--regenerate` rebuilds them); (B) reads the frozen e1_900 rows (ids 0..899, `--regenerate` rebuilds them
 # with make_graph); (C) reads the frozen reference cases. E1's own sigma_def (cap 20*F,
 # seed 5000000 + id) is recomputed here -- it is NOT the archived K5 sigma_def of
 # e1_900.json (4 starts, K5's seed). `--limit K` stops after K tasks owned by this shard.
@@ -291,7 +291,7 @@ function main(args::Vector{String})
     # (A) authored population, twice, with more samples/seeds than K2a's default (8, 0.2).
     for (rf, tag) in ((0.2, "a1"), (0.35, "a2"))
         done() && break
-        for d in deployable_population(regenerate = true, samples_per_base = 20, radius_frac = rf)
+        for d in deployable_population(regenerate = regenerate, samples_per_base = 20, radius_frac = rf)
             done() && break
             name = tag * "_" * d.name
             if owns()

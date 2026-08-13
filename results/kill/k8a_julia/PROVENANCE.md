@@ -16,30 +16,28 @@ Rows were matched on (`id`, `where`); every Julia row has a partner in both C++ 
 | column | archived != fresh C++ | archived != Julia | fresh C++ != Julia |
 |---|---|---|---|
 | N, F, n_split, n_corner, n_rows, dim_ker_A, dim_flex, components, sigma_is_flex | 0 / 82 | 0 / 82 | 0 / 82 |
-| n_convex | 0 / 82 | 9 / 82 | 9 / 82 |
-| sigma_in_cone | 0 / 82 | 5 / 82 | 5 / 82 |
-| sign of sigma_min_q | 0 / 82 | 5 / 82 | 5 / 82 |
-| sigma_bad_q, sigma_bad_mu | 0 / 82 | 6 / 82 | 6 / 82 |
-| pass_feasible, sign of margin_l2 | 0 / 82 | 4 / 82 | 4 / 82 |
-| euler_eps | 1 / 82 | 11 / 82 | 10 / 82 |
+| n_convex, sigma_in_cone, sign of sigma_min_q, sigma_bad_q, sigma_bad_mu, pass_feasible, sign of margin_l2 | 0 / 82 | 0 / 82 | 0 / 82 |
+| euler_eps | 1 / 82 | 1 / 82 | 0 / 82 |
 
-**The archived combinatorial columns are reproduced exactly by the current C++.** The
-Julia differences are the same set in both comparisons and all 11 rows are shape-space
-SAMPLES of the deployable population (`snub_square_R20_s1`, `snub_square_R40_s0`,
-`t3_4_3_12_R{25,30,35,40}_s0`, `t3_4_3_12_R40_s1`, `trunc_square_R30_s{0,1}`,
-`trunc_square_R40_s{0,1}`). Every base configuration (`*_R*` without `_sN`), every
-reference tiling and every K1a graph agrees on all of these columns.
+**Every combinatorial / geometric column agrees three ways** (the one `euler_eps` row,
+`snub_square_R40_s1`, is archived 0.2 vs 0.5 in both the fresh C++ and Julia: an LP-witness
+dependent quantity). On the 73 deployable rows Julia also matches the fresh C++ at rtol
+1e-9 on everything except the LP solver outputs (`margin_l2`, `margin_inf`, `dual_bound`,
+`dual_max`, `n_active`, `n_dual_support`, `farkas_*`, `lp_gap`); `sigma_chart` matches
+there too.
 
-Cause of the sample rows: a sample is `X = X0 + Phi * T` with `T` drawn from the shared
-`mt19937(20260903)` stream (reproduced bit-exactly), but `Phi` is the null-space basis
-returned by `solve_system`, which is only defined up to an orthogonal change of basis;
-Julia's LAPACK SVD returns a different basis than Eigen's `JacobiSVD`, so the same `T`
-is a different point of the same shape space. The base rows do not involve `Phi` and
-match. (On the x86_64/Rosetta Julia used earlier, two truncated-square BASES also
-differed because the orientation relaxation's trig landed on a different sigma; on arm64
-all bases match the C++ and the frozen `deployable_population.json`.) The `(2, 0.2)`
-population is not frozen in `data/corpus` -- only the `(8, 0.2)` one is -- so these
-sample rows can only be made bit-comparable by freezing that population from the C++.
+History of this table: a first Julia run rebuilt `deployable_population(2, 0.2)` in Julia
+and differed from both C++ files on 11 shape-space SAMPLE rows (`n_convex` 9, `sigma_in_cone`
+5, ...). A sample is `X = X0 + Phi * T` with `T` from the bit-exact `mt19937(20260903)`
+stream but `Phi` the null-space basis of `solve_system`, which Julia's LAPACK SVD returns in
+a different orthogonal frame than Eigen's `JacobiSVD`; the base rows never involve `Phi`
+and always matched. Since 2026-09-20 the C++ Eigen-basis samples are frozen as
+`data/corpus/deployable_population_{2_0.2,20_0.2,20_0.35}.json` and `kill_k8a.jl` /
+`kill_e1.jl` read them (`--regenerate` rebuilds in Julia and brings the sample-row
+differences back). With the frozen files the E1 authored rows also match the fresh C++
+`kill_e1` at rtol 1e-9 (shards 0 and 1 of 200: 15 + 22 rows, all columns).
+(On the x86_64/Rosetta Julia used even earlier, two truncated-square BASES differed as
+well, through the orientation relaxation's trig; on arm64 all bases match.)
 
 ## Solver columns: what the archived CSV does NOT reproduce
 
@@ -68,10 +66,11 @@ COUNT of combinatorial facts (sigma in P(X), n_convex, dim_flex, components, spl
 counts) is reproduced by both the current C++ and Julia on the bases, reference tilings
 and K1a graphs. Any quoted LP value (margins, dual bounds, "dual-certified" tallies,
 n_active / n_dual_support) comes from the superseded solver and must be re-derived
-from a fresh `kill_k8a` run (C++) -- the Julia LP (`expansive_cone.jl`) currently agrees
-with the fresh C++ on feasibility flags but not to better than a few percent on the
-margin/dual values, and `sigma_chart` (documented as solver-free) differs, which is an
-open item for the method port.
+from a fresh `kill_k8a` run (C++) -- the Julia LP (`expansive_cone.jl`) agrees with the
+fresh C++ on feasibility flags and on `sigma_chart` for the deployable rows, but not to
+better than a few percent on the margin/dual values, and on the K1a graphs at X_ini
+`sigma_chart` (documented as solver-free) still differs (e.g. voronoi_3 -0.83 vs -0.57),
+which is an open item for the method port.
 
 Files: fresh C++ run at the session scratchpad `cpp_k8a/k8a.csv` (re-runnable with
 `cd code/build && ./kill_k8a --n 5 --out <dir>`); comparison script `threeway.py` there.
