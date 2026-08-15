@@ -41,6 +41,7 @@ struct Design
     faces::Vector{Vector{Int}}
     C::Matrix{Float64}          # n × 2, closed frame v0
     S::Matrix{Float64}          # n × 2
+    source::Any                 # nothing for a frame file; GuiBackend.DesignSource when computed
 end
 
 """Deployment basis from two frames: Y(0)=v0=C and Y(θh)=v1 give
@@ -83,7 +84,7 @@ function design_from_json(j::AbstractDict)
     C, S = deploy_basis(_tomatrix(j["v0"]), _tomatrix(j["v1"]), Float64(j["theta_half"]))
     Design(string(j["id"]), string(get(j, "kind", "")), string(j["sigma"]), face_sense(C, S, faces), Int(j["F"]),
            Int(j["nsplit"]), Float64(j["theta_max"]), Float64(j["eps_max"]),
-           Float64(j["theta_half"]), faces, C, S)
+           Float64(j["theta_half"]), faces, C, S, nothing)
 end
 
 has_frame_schema(j) = j isa AbstractDict && all(haskey(j, k) for k in ("id", "faces", "v0", "v1", "theta_half", "theta_max", "eps_max", "sigma"))
@@ -157,9 +158,10 @@ end
 # ---- exports
 face_color(sigma::Int) = sigma > 0 ? FACE_A : FACE_B
 
-# TODO(export): use Kirigami.export_svg once port-core-1 lands the export layer; this is a
-# plain preview SVG (faces filled by σ, no kerf/hinge geometry).
-"""SVG of the frame at θ, 1 unit = `scale` px, y up.  Returns the SVG text."""
+# Preview SVG (faces filled by sense, no kerf/hinge geometry) for designs loaded from a
+# frame file, which carry no mesh. Computed designs use the real cut layout through
+# GuiBackend.export_svg_string (Kirigami build_layout + svg_string).
+"""Preview SVG of the frame at θ, 1 unit = `scale` px, y up.  Returns the SVG text."""
 function svg_string(d::Design, theta::Real; scale::Real = 40.0, margin::Real = 10.0)
     P = frame(d, theta)
     x0, y0, x1, y1 = bbox(P)

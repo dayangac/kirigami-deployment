@@ -124,3 +124,91 @@ end
         end
     end
 end
+
+# ---- phase 2: the live backend (window-free) -------------------------------------------
+include(joinpath(@__DIR__, "..", "backend.jl"))
+using .GuiBackend
+import Kirigami
+const KB = Kirigami
+const PATTERNS = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "web_patterns.json"))
+const CORPUS = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "corpus", "k1a_200.json"))
+
+@testset "parse_pattern_text" begin
+    p = GuiBackend.parse_pattern_text("v 0 0\nv 1 0 5\nv 1 1\nv 0 1\r\nf 1/1 2/2 3 4\nf -4 -3 -2\npx 1 0\npy 0 1\nfc 0\nfc 1\nrep2x2\n")
+    @test length(p.V) == 4 && p.V[2] == GuiBackend.Vec2(1, 0)        # z ignored
+    @test p.F == [[1, 2, 3, 4], [1, 2, 3]]                          # slashes, negative indices
+    @test p.fc == [0, 1] && p.periodic && p.rep2x2
+    @test !GuiBackend.parse_pattern_text("v 0 0\nv 1 0\nv 0 1\nf 1 2 3\n").periodic
+    @test_throws ArgumentError GuiBackend.parse_pattern_text("v 0 0\nf 1 2 3\n")   # index out of range
+    @test_throws ArgumentError GuiBackend.parse_pattern_text("v 0 0\n")            # no faces
+    @test GuiBackend.sigma_of_fc(0) == 1 && GuiBackend.sigma_of_fc(1) == -1
+end
+
+@testset "pattern_mesh tiling" begin
+    # one unit square per cell, periodic: rep x rep copies weld into a grid
+    p = GuiBackend.parse_pattern_text("v 0 0\nv 1 0\nv 1 1\nv 0 1\nf 1 2 3 4\npx 1 0\npy 0 1\nfc 0\n")
+    m, sig = GuiBackend.pattern_mesh(p, 3, 2)
+    @test KB.n_faces(m) == 6 && KB.n_vertices(m) == 12
+    @test sig == fill(1, 6)
+    m1, _ = GuiBackend.pattern_mesh(p, 1, 1)
+    @test KB.n_faces(m1) == 1
+    pn = GuiBackend.parse_pattern_text("v 0 0\nv 1 0\nv 1 1\nv 0 1\nf 1 2 3 4\n")   # no fc, not periodic
+    mn, sn = GuiBackend.pattern_mesh(pn, 2, 2)
+    @test KB.n_faces(mn) == 1 && sn === nothing
+    @test_throws ArgumentError GuiBackend.choose_sigma(mn, "file", nothing)
+    @test_throws ArgumentError GuiBackend.choose_sigma(mn, "bogus", nothing)
+end
+
+@testset "design_from_embedding consistency" begin
+    b = GuiBackend.ComputeBackend(PATTERNS, CORPUS)
+    @test length(b.patterns) == 25
+    p = b.patterns[findfirst(x -> x.name == "cairo", b.patterns)]
+    parsed = GuiBackend.parse_pattern_text(p.text)
+    m, sig = GuiBackend.pattern_mesh(parsed, 2, 2)
+    d = GuiBackend.design_from_embedding("cairo_ini", "ukp", "file", m, sig, m.X, "none")
+    m.sigma = sig
+    c = KB.make_cut(m)
+    Y0 = KB.deploy(c, m.X, 0.0).Y
+    P0 = frame(d, 0.0)
+    @test all(isapprox(P0[i, 1], Y0[i][1]; atol = 1e-12) && isapprox(P0[i, 2], Y0[i][2]; atol = 1e-12) for i in eachindex(Y0))
+    Yh = KB.deploy(c, m.X, 1.3).Y
+    Ph = frame(d, 1.3)
+    @test all(isapprox(Ph[i, 1], Yh[i][1]; atol = 1e-9) && isapprox(Ph[i, 2], Yh[i][2]; atol = 1e-9) for i in eachindex(Yh))
+    @test d.faces == c.prime_faces && d.F == KB.n_faces(m) && d.nsplit == KB.n_split(c)
+    @test d.source isa GuiBackend.DesignSource
+    @test GuiBackend.recharacterize(d).theta_max == d.theta_max
+    @test_throws ArgumentError GuiBackend.recharacterize(design_from_json(synthetic()[1]))
+end
+
+@testset "backend reproduces kiri_design.jl" begin
+    # Reference values printed by `kiri_design.jl <mesh> --sigma json` (default seed 9000,
+    # design_range_max) on the same meshes, 2026-09-20: cairo 2x2 with the file's fc
+    # orientation, and corpus k1a id 0 with sigma_mc.
+    b = GuiBackend.ComputeBackend(PATTERNS, CORPUS)
+    p = b.patterns[findfirst(x -> x.name == "cairo", b.patterns)]
+    msgs = String[]
+    d = GuiBackend.design_pattern(b, p; rep_x = 2, rep_y = 2, sigma_rule = "file", progress = m -> push!(msgs, m))
+    @test d.theta_max == 2.094395318741477
+    @test d.eps_max == 2.094395318740477
+    @test d.F == 16 && d.nsplit == 4
+    @test any(startswith("designing"), msgs) && msgs[end] == "characterizing"
+    d0 = GuiBackend.design_corpus(b, 0; sigma_rule = "file")
+    @test d0.theta_max == 0.0014617607456269249
+    @test d0.eps_max == 0.0014617607446269249
+    @test d0.F == 422
+    @test_throws ErrorException GuiBackend.load_corpus_graph(CORPUS, 100000)
+end
+
+@testset "DesignJob" begin
+    job = GuiBackend.start_job(prog -> (prog("a"); sleep(0.2); prog("b"); 42))
+    wait(job.task)
+    @test GuiBackend.snapshot(job) == ("b", true, 42)
+    job = GuiBackend.start_job(prog -> (sleep(0.2); 1))
+    GuiBackend.cancel!(job)
+    wait(job.task)
+    p, done, r = GuiBackend.snapshot(job)
+    @test done && r isa ErrorException && r.msg == "cancelled"
+    job = GuiBackend.start_job(prog -> error("boom"))
+    wait(job.task)
+    @test GuiBackend.snapshot(job)[3] isa ErrorException
+end
