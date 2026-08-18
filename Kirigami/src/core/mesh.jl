@@ -31,6 +31,23 @@ else
     libm_atan2(y::Float64, x::Float64) = atan(y, x)
 end
 
+# Where the C++ evaluates BOTH std::sin(x) and std::cos(x) in one function (the rotation
+# of kinematics.cpp, the harmonic p + q cos + r sin, ...), clang -O2 on Apple combines the
+# pair into a single `__sincos_stret` call, whose sine differs from the standalone `sin`
+# by 1 ulp on ~4% of arguments.  `libm_sincos(x) -> (sin, cos)` calls that same routine.
+struct _SinCosRet
+    s::Float64
+    c::Float64
+end
+if Sys.isapple()
+    function libm_sincos(x::Float64)
+        r = ccall((:__sincos_stret, _LIBM), _SinCosRet, (Float64,), x)
+        return r.s, r.c
+    end
+else
+    libm_sincos(x::Float64) = sincos(x)
+end
+
 # A pair of vertex indices in canonical (sorted) order -- the undirected edge key.
 struct EdgeKey
     a::Int

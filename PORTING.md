@@ -60,3 +60,11 @@ shims (system libm on macOS, Base elsewhere). `export/layout.jl` owns `polygon_a
 Use the native arm64 Julia: `export PATH=$HOME/.juliaup/bin:$PATH` (juliaup, 1.12.7 aarch64).
 `/usr/local/bin/julia` is the x86_64 Homebrew build under Rosetta: slower, and its libm
 differs from the arm64 libm the C++ reference used (1-ulp trig/hypot differences).
+
+## Bit-faithful trig and reductions (from the derivation-test port)
+- Where the C++ evaluates `std::cos(x)` and `std::sin(x)` of the same argument in one function,
+  clang on Apple fuses them into `__sincos_stret`, whose sine differs from standalone `sin` by
+  1 ulp on ~4% of arguments. Use `Kirigami.libm_sincos(x)` there, not `libm_sin`/`libm_cos`.
+- Eigen `dot()`/`squaredNorm()` are UNFUSED reductions; StaticArrays `dot` is a muladd that
+  becomes an fma on aarch64. In tie-sensitive predicates write the C++ contraction explicitly:
+  `a0*b0 + a1*b1` unfused for Eigen dots; `fma(ux, vy, -(uy*vx))` for inline `ux*vy - uy*vx`.

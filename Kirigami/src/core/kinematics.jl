@@ -21,10 +21,17 @@ mutable struct Deployment
     bfs_order::Vector{Int}    # faces in BFS order
 end
 
-# Trig via the project's libm shim (mesh.jl) so the rotation entries carry the same bits
-# as the C++ (which linked Apple's libm) wherever the platform allows.
-_rot(a::Float64) = Mat2(libm_cos(a), libm_sin(a), -libm_sin(a), libm_cos(a))     # column-major
-_drot(a::Float64) = Mat2(-libm_sin(a), libm_cos(a), -libm_cos(a), -libm_sin(a))  # d/da rot(a)
+# Trig via the project's libm shim (mesh.jl): the C++ rot()/drot() call std::cos and
+# std::sin of the same angle, which clang fuses into Apple's `__sincos_stret`, so the
+# combined `libm_sincos` is what reproduces the rotation entries bit for bit.
+function _rot(a::Float64)                       # column-major
+    s, c = libm_sincos(a)
+    return Mat2(c, s, -s, c)
+end
+function _drot(a::Float64)                      # d/da rot(a)
+    s, c = libm_sincos(a)
+    return Mat2(-s, c, -c, -s)
+end
 
 # Eigen's fixed-size 2x2 * vector product as clang -O2 (-ffp-contract=on) compiled it:
 # y_i = fma(R(i,1), x_1, R(i,0) * x_0). Verified bit-exact against the C++ deployed

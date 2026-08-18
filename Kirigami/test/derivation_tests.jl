@@ -25,9 +25,11 @@
 # classification), which are checked to within a few units per million.
 #
 # Runtime.  C++ wall times (clang -O2, arm64) are quoted per case; the whole C++ run is
-# 42 s, of which R3 (the chart-free crossing truth) is 37.6 s.  The largest cases are
-# gated behind ENV["KIRIGAMI_FULL_DERIVATIONS"] == "1"; the default runs a documented
-# subset (fewer corpus cases / draws) that keeps every property check meaningful.
+# 42 s, of which R3 (the chart-free crossing truth) is 37.6 s.  The two largest cases are
+# gated behind ENV["KIRIGAMI_FULL_DERIVATIONS"] == "1" (R3-c on all 16 corpus cases, the
+# 2000-draw L2 search); the default runs a documented subset (R3-c on 8 cases, 400 draws)
+# that keeps every property check meaningful.  Julia 1.12 arm64: default 1m12, full 1m40
+# (R3-c 27 s / 52 s, L1 11 s, R3 certificate 7 s; everything else under 5 s).
 include("helpers.jl")
 using Printf
 
@@ -1890,6 +1892,61 @@ function face_is_convex(P::Vector{K.Vec2})
     return sign != 0
 end
 
+# R3-c as a function: the corpus scan over every ordered (edge, vertex) pair of distinct
+# faces, decided by the chart-free dense crossing truth (top-level loops are far slower).
+function r3c_scan(cases::Vector{Case}, eps::Float64)
+    T = tan(eps / 2)
+    tested = 0; ambiguous = 0; ident_zero = 0; ident_zero_in_class3 = 0
+    nclass = zeros(Int, 3)
+    mm3 = 0; mm2 = 0; mm3_by = zeros(Int, 3); mm2_by = zeros(Int, 3)
+    mm3_conservative = 0
+    r2 = K.MT19937(70707)
+    for cs in cases, rep in 0:3
+        X = sample(cs, r2, rep == 0 ? 0.0 : 0.25)
+        B = K.deploy_basis(cs.c, X)
+        gs = maximum(norm, X)
+        tol = 1e-11 * gs * gs
+        F = K.n_faces(cs.m)
+        for f in 1:F
+            pf = cs.c.prime_faces[f]
+            nf = length(pf)
+            for kk in 1:nf
+                a = pf[kk]; b = pf[mod1(kk + 1, nf)]
+                for g in 1:F
+                    g == f && continue
+                    for w in cs.c.prime_faces[g]
+                        h = K.orient_harmonic(B, a, b, w)
+                        kl = r3_classify(h, tol)
+                        if hscale(h) <= tol          # h == 0 identically (T3.H.1)
+                            ident_zero += 1
+                            kl == R3_DOUBLE0 && (ident_zero_in_class3 += 1)
+                            continue
+                        end
+                        nclass[Int(kl)+1] += 1
+                        tr = truth_crosses_dense(h, eps)
+                        if tr < 0
+                            ambiguous += 1; continue
+                        end
+                        tested += 1
+                        truth_noroot = (tr == 0)
+                        a3 = r3_atoms_no_root(h, T, kl, true)
+                        a2 = r3_atoms_no_root(h, T, kl, false)
+                        if a3 != truth_noroot
+                            mm3 += 1; mm3_by[Int(kl)+1] += 1
+                            (truth_noroot && !a3) && (mm3_conservative += 1)
+                        end
+                        if a2 != truth_noroot
+                            mm2 += 1; mm2_by[Int(kl)+1] += 1
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return (tested, ambiguous, ident_zero, ident_zero_in_class3, nclass, mm3, mm2, mm3_by, mm2_by,
+            mm3_conservative)
+end
+
 # C++: 37.6 s -- the largest case.  R3-a/R3-b are synthetic and always run; R3-c (the
 # corpus scan, ~1.8M harmonics per eps) runs on the first 8 corpus cases by default and
 # on all 16 (with the C++ tallies asserted) under KIRIGAMI_FULL_DERIVATIONS=1.
@@ -1953,54 +2010,8 @@ end
     r3_cases = FULL ? corpus() : corpus()[1:8]
     FULL || println("  R3-c: default subset = first 8 corpus cases (KIRIGAMI_FULL_DERIVATIONS=1 runs all 16; C++ 37.6 s)")
     for eps in (0.2, 0.02)
-        T = tan(eps / 2)
-        tested = 0; ambiguous = 0; ident_zero = 0; ident_zero_in_class3 = 0
-        nclass = zeros(Int, 3)
-        mm3 = 0; mm2 = 0; mm3_by = zeros(Int, 3); mm2_by = zeros(Int, 3)
-        mm3_conservative = 0
-        r2 = K.MT19937(70707)
-        for cs in r3_cases, rep in 0:3
-            X = sample(cs, r2, rep == 0 ? 0.0 : 0.25)
-            B = K.deploy_basis(cs.c, X)
-            gs = maximum(norm, X)
-            tol = 1e-11 * gs * gs
-            F = K.n_faces(cs.m)
-            for f in 1:F
-                pf = cs.c.prime_faces[f]
-                nf = length(pf)
-                for kk in 1:nf
-                    a = pf[kk]; b = pf[mod1(kk + 1, nf)]
-                    for g in 1:F
-                        g == f && continue
-                        for w in cs.c.prime_faces[g]
-                            h = K.orient_harmonic(B, a, b, w)
-                            kl = r3_classify(h, tol)
-                            if hscale(h) <= tol          # h == 0 identically (T3.H.1)
-                                ident_zero += 1
-                                kl == R3_DOUBLE0 && (ident_zero_in_class3 += 1)
-                                continue
-                            end
-                            nclass[Int(kl)+1] += 1
-                            tr = truth_crosses_dense(h, eps)
-                            if tr < 0
-                                ambiguous += 1; continue
-                            end
-                            tested += 1
-                            truth_noroot = (tr == 0)
-                            a3 = r3_atoms_no_root(h, T, kl, true)
-                            a2 = r3_atoms_no_root(h, T, kl, false)
-                            if a3 != truth_noroot
-                                mm3 += 1; mm3_by[Int(kl)+1] += 1
-                                (truth_noroot && !a3) && (mm3_conservative += 1)
-                            end
-                            if a2 != truth_noroot
-                                mm2 += 1; mm2_by[Int(kl)+1] += 1
-                            end
-                        end
-                    end
-                end
-            end
-        end
+        (tested, ambiguous, ident_zero, ident_zero_in_class3, nclass, mm3, mm2, mm3_by, mm2_by,
+         mm3_conservative) = r3c_scan(r3_cases, eps)
         @printf("  R3-c eps=%-6.3f decided=%d ambiguous=%d  classes %d/%d/%d\n       identically-zero harmonics excluded=%d (of which class 3 by the numeric rule: %d)\n       three-class list: %d mismatches [%d/%d/%d] (of which conservative: %d)\n       two-class  list: %d mismatches [%d/%d/%d]\n",
                 eps, tested, ambiguous, nclass[1], nclass[2], nclass[3], ident_zero, ident_zero_in_class3,
                 mm3, mm3_by[1], mm3_by[2], mm3_by[3], mm3_conservative, mm2, mm2_by[1], mm2_by[2], mm2_by[3])

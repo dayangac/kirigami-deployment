@@ -7,6 +7,14 @@
 
 rot90(v::Vec2) = Vec2(-v[2], v[1])
 
+# Eigen's Vector2d dot()/squaredNorm() are UNFUSED sums of products (a redux over separate
+# statements, untouched by clang's -ffp-contract=on), whereas StaticArrays' `dot` is a
+# muladd that becomes an fma on aarch64.  Inline C++ expressions such as `ux*vy - uy*vx`
+# and `ux*ux + uy*uy` WERE contracted (fma on the first product).  Both forms are written
+# out explicitly so the predicate's tie decisions are the C++ ones on every platform.
+_dot(a::Vec2, b::Vec2) = a[1] * b[1] + a[2] * b[2]
+_sq(a::Vec2) = a[1] * a[1] + a[2] * a[2]
+
 # ---------------------------------------------------------------------------
 # Robust primitives for the overlap predicate (F34 fix).
 #
@@ -25,7 +33,7 @@ function orient_raw(a::Vec2, b::Vec2, c::Vec2)
     uy = b[2] - a[2]
     vx = c[1] - a[1]
     vy = c[2] - a[2]
-    return ux * vy - uy * vx
+    return fma(ux, vy, -(uy * vx))
 end
 
 # Sign of the orientation, with a RELATIVE tolerance: the point c counts as ON the
@@ -44,12 +52,12 @@ function orient_sign(a::Vec2, b::Vec2, c::Vec2, eps::Float64)
     d == 0 && return 0
     ux = b[1] - a[1]; uy = b[2] - a[2]
     vx = c[1] - a[1]; vy = c[2] - a[2]
-    s2 = vx * vx + vy * vy
-    s2 = max(s2, dot(a, a))
-    s2 = max(s2, dot(b, b))
-    s2 = max(s2, dot(c, c))
+    s2 = fma(vx, vx, vy * vy)
+    s2 = max(s2, _sq(a))
+    s2 = max(s2, _sq(b))
+    s2 = max(s2, _sq(c))
     # |d| <= eps * |u| * S, compared squared so no sqrt is needed.
-    thr2 = eps * eps * (ux * ux + uy * uy) * s2
+    thr2 = eps * eps * fma(ux, ux, uy * uy) * s2
     d * d <= thr2 && return 0
     return d > 0 ? 1 : -1
 end
@@ -58,9 +66,9 @@ end
 function on_segment(p::Vec2, a::Vec2, b::Vec2, eps::Float64)
     orient_sign(a, b, p, eps) != 0 && return false
     e = b - a
-    l2 = dot(e, e)
-    l2 == 0.0 && return dot(p - a, p - a) == 0.0
-    s = dot(p - a, e)
+    l2 = _sq(e)
+    l2 == 0.0 && return _sq(p - a) == 0.0
+    s = _dot(p - a, e)
     return s >= -eps * l2 && s <= l2 * (1.0 + eps)
 end
 
@@ -91,12 +99,12 @@ function segment_hits!(ts::Vector{Float64}, a::Vec2, b::Vec2, c::Vec2, d::Vec2, 
     s1 = orient_sign(a, b, c, eps); s2 = orient_sign(a, b, d, eps)
     s3 = orient_sign(c, d, a, eps); s4 = orient_sign(c, d, b, eps)
     e = b - a
-    l2 = dot(e, e)
+    l2 = _sq(e)
     l2 == 0.0 && return
     push_t(t) = (t >= 0.0 && t <= 1.0) && push!(ts, t)
     if s1 == 0 && s2 == 0  # collinear
-        push_t(dot(c - a, e) / l2)
-        push_t(dot(d - a, e) / l2)
+        push_t(_dot(c - a, e) / l2)
+        push_t(_dot(d - a, e) / l2)
         return
     end
     (s1 * s2 > 0 || s3 * s4 > 0) && return  # one segment entirely on one side
@@ -119,7 +127,7 @@ function interior_point(P::Vector{Vec2}, eps::Float64)
     for i in 1:n
         u = P[i]
         v = P[mod1(i + 1, n)]
-        area2 += u[1] * v[2] - u[2] * v[1]
+        area2 += fma(u[1], v[2], -(u[2] * v[1]))
     end
     orient = area2 >= 0 ? 1 : -1
     for i in 1:n
