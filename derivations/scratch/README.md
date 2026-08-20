@@ -96,7 +96,7 @@ Quoted from the derivation files (`core.md` "Programs run" table l.1984-1991 and
 | | class-3 persistent / transient / undecidable | 58 / 152 / 1 259 | 59 / 152 / 1 259 | ~ / = / = |
 | | closed-form errors p, q, r | 1.99e−12, 1.99e−12, 3.41e−13 | 2.93e−12, 2.93e−12, 3.41e−13 | ~ |
 | | hinge dS pairs, err; split dS pairs, err | 479 784, 1.00e−13; 159 816, 8.64e−14 | 494 840, 2.32e−13; 166 152, 1.22e−13 | ~ |
-| | persistent non-shared C = 0 by #frozen vertices 0:1:2:3 | 18 762 : 20 182 : 0 : 135 410 | 0 : 0 : 9 986 : 170 738 | **?** — "frozen" (zero row of Phi, threshold 1e−12) is invariant under a rotation of the null-space basis in exact arithmetic, so this split should not depend on LAPACK vs Eigen; the C++ text never interpreted this line, but the discrepancy is open |
+| | persistent non-shared C = 0 by #frozen vertices 0:1:2:3 | 18 762 : 20 182 : 0 : 135 410 | 19 524 : 20 822 : 0 : 135 026 | ~ (kind 3). The earlier Julia line 0 : 0 : 9 986 : 170 738 was a port bug, fixed 2026-09-20: the frozen-vertex scan was written as one `for v, j` loop, whose `break` on the first nonzero Phi entry left BOTH loops, so every later vertex stayed marked frozen; the C++ breaks only the inner loop. The remaining spread is the shape-space sample-point effect (this row counts per-sample pairs, like the coincident-copy row) |
 | `check_l1 52 20` (default) | | (not quoted) | 34 graphs, 10 482 152 pairs, 0 / 0 failures | |
 | `check_l2` | patterns evaluated | 133 | 133 | = |
 | | rank(A) = 2 rank(D) | 133 / 133 | 133 / 133 | = |

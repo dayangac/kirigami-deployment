@@ -162,12 +162,15 @@ function run_graph(name::String, m::K.Mesh, n_samp::Int, rng::K.MT19937, T::Tall
         scale = max(scale, norm(p))
     end
 
-    # frozen vertices: zero row of Phi
+    # frozen vertices: zero row of Phi.  (Two nested loops: a single `for v, j` loop
+    # would make the `break` leave BOTH loops and freeze every later vertex.)
     frozen = trues(K.n_vertices(m))
-    for v in 1:K.n_vertices(m), j in 1:sr.dim_null
-        if abs(sr.Phi[v, j]) > 1e-12
-            frozen[v] = false
-            break
+    for v in 1:K.n_vertices(m)
+        for j in 1:sr.dim_null
+            if abs(sr.Phi[v, j]) > 1e-12
+                frozen[v] = false
+                break
+            end
         end
     end
 
