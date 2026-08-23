@@ -68,3 +68,8 @@ differs from the arm64 libm the C++ reference used (1-ulp trig/hypot differences
 - Eigen `dot()`/`squaredNorm()` are UNFUSED reductions; StaticArrays `dot` is a muladd that
   becomes an fma on aarch64. In tie-sensitive predicates write the C++ contraction explicitly:
   `a0*b0 + a1*b1` unfused for Eigen dots; `fma(ux, vy, -(uy*vx))` for inline `ux*vy - uy*vx`.
+
+## Loop semantics
+`for a in A, b in B ... break` is ONE loop in Julia: `break` leaves both. A C++ nested loop that
+breaks only the inner one must be written as explicitly nested `for` blocks. (`continue` is safe.)
+Swept 2026-09-20: the only instance was in check_l1.jl, fixed.
