@@ -1,0 +1,12 @@
+hexagons_auto_"hexagons_auto": rows=79 noise=0 in-chart=0 sigma_chart=0.175935 clean=0.175935 rep: margin=0.621222 dual=0.621222 pass=1
+    chart LP 600: 0.621222 / 0.621222 | 20k: 0.621222 / 0.621222
+    clean LP 600: 0.621222 / 0.621222 | 20k: 0.621222 / 0.621222
+truncated_square_488_"truncated_square_488": rows=188 noise=56 in-chart=2 sigma_chart=0.582806 clean=0.582806 rep: margin=0.85226 dual=0.85226 pass=1
+    chart LP 600: 0.85226 / 0.85226 | 20k: 0.85226 / 0.85226
+    clean LP 600: 1 / 1 | 20k: 1 / 1
+snub_square_33434_"snub_square_33434": rows=599 noise=0 in-chart=0 sigma_chart=0.0211716 clean=0.0211716 rep: margin=0.0595443 dual=0.0671802 pass=1
+    chart LP 600: 0.0595443 / 0.0671802 | 20k: 0.0657838 / 0.0657838
+    clean LP 600: 0.0595443 / 0.0671802 | 20k: 0.0657838 / 0.0657838
+tiling_3_4_3_12_"tiling_3_4_3_12": rows=188 noise=0 in-chart=0 sigma_chart=0.179979 clean=0.179979 rep: margin=0.311915 dual=0.311915 pass=1
+    chart LP 600: 0.311915 / 0.311915 | 20k: 0.311915 / 0.311915
+    clean LP 600: 0.311915 / 0.311915 | 20k: 0.311915 / 0.311915

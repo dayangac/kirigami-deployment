@@ -358,13 +358,29 @@ ConeLPResult() = ConeLPResult(Float64[], Float64[], 0.0, 0.0, 0.0, 0, 0, 0, fals
 Scales every row of `A` to unit Euclidean norm in place; rows of norm <= 0 (or not
 finite) are left alone and counted in the return value.
 
-Replicated C++ behaviour, flagged: a row whose exact value on the flex space is zero
-(a corner incidence whose two copies never separate) arrives as ~1e-16 rounding noise,
-passes the `n > 0` test and is scaled to a unit row of noise. On tilings with such rows
-(squares checkerboard: 80 of 160; truncated square: 16 of 55) the LP value depends on
-the rounding of the flex basis and is not reproducible across linear-algebra backends
-(see test_method_3.jl, frozen reference). Not fixed here because the C++ numbers are
-the acceptance criterion; a threshold relative to max |A N| would be the fix.
+Replicated C++ behaviour, flagged (verdict of the K8a three-way comparison,
+results/kill/k8a_julia/PROVENANCE.md "LP layer"): a row whose exact value on the flex
+space is zero (a corner incidence whose two copies never separate at first order)
+arrives as ~1e-16 rounding noise, passes the `n > 0` test and is scaled to a unit row of
+noise. Such rows exist on every truncated-square configuration (16-56 of 55-244 rows),
+on snub_square_R20 (36 of 196), t3_4_3_12_R25 (2 of 154), the checkerboard squares
+(80 of 160) and on the K1a graphs at X_ini (80 to 6165 of 1641 to 8905 rows, because the
+flex space at a non-deployable X_ini is essentially the rigid motions). Their direction
+is the rounding of the flex basis (Eigen Householder vs LAPACK), so on those inputs
+`margin_l2`, `margin_inf`, `dual_bound`, `n_active`, `n_dual_support` and, at K1a X_ini,
+`sigma_chart_margin` differ between the C++ and this port (3-6 % on the margins, up to a
+factor 2 on sigma_chart_margin) although A and the flex projector N N^T agree to 1e-15.
+Dropping those rows before normalising makes every one of those numbers agree to 6+
+digits between the two implementations (measured on 5 K1a graphs, 15 deployable rows
+and the 4 reference tilings). Where no such row exists the two implementations agree to
+~1e-6 at the driver's 600 Frank-Wolfe iterations and to ~1e-7 at 20000.
+
+The C++ header documents "rows of norm <= 0 are left alone" -- an exactly-zero row left
+in place would force the LP margin to 0, so the degenerate case was never handled
+either way; the intent of the LP (a row that is identically zero on the flex space is
+no constraint) says such rows should be DROPPED, e.g. rows with norm < 1e-9 max_i |a_i N|.
+Not applied here: the C++ numbers are the acceptance criterion and the driver columns
+quoted from them must stay comparable.
 """
 function normalise_rows!(A::Matrix{Float64})
     bad = 0
