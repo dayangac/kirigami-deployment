@@ -193,3 +193,285 @@ function normal(d::NormalDist, rng::MT19937)::Float64
     end
     return fma(up, d.stddev, d.mean)
 end
+
+# ---------------------------------------------------------------------------- std::sort
+# Bit-faithful port of libc++ 18 `std::sort` (__algorithm/sort.h) for a NON-arithmetic
+# value type with an arbitrary comparator: `__introsort<..., _UseBitSetPartition = false>`
+# = pdqsort-style introsort with __sort3/4/5 networks, guarded insertion sort on the
+# leftmost range and unguarded elsewhere (limit 24), median-of-3 (Tukey ninther above 128),
+# `__partition_with_equals_on_right`, the "already partitioned -> try
+# __insertion_sort_incomplete" shortcut, and `__partition_with_equals_on_left` when the
+# range's predecessor equals the pivot. The result is unstable, so where the C++ result
+# depends on the ORDER of equivalent elements (e.g. `detect_lattice`'s tie among lattice
+# vectors of equal length) only this exact algorithm reproduces it. The heap-sort fallback at
+# depth exhaustion is not ported; it is unreachable on the inputs this code base sorts and
+# raises an error rather than silently sorting differently.
+
+@inline function _lc_swap!(v, a, b)
+    v[a], v[b] = v[b], v[a]
+    return
+end
+
+function _lc_sort3!(v, x, y, z, lt)
+    if !lt(v[y], v[x])
+        lt(v[z], v[y]) || return
+        _lc_swap!(v, y, z)
+        lt(v[y], v[x]) && _lc_swap!(v, x, y)
+        return
+    end
+    if lt(v[z], v[y])
+        _lc_swap!(v, x, z)
+        return
+    end
+    _lc_swap!(v, x, y)
+    lt(v[z], v[y]) && _lc_swap!(v, y, z)
+    return
+end
+
+function _lc_sort4!(v, x1, x2, x3, x4, lt)
+    _lc_sort3!(v, x1, x2, x3, lt)
+    if lt(v[x4], v[x3])
+        _lc_swap!(v, x3, x4)
+        if lt(v[x3], v[x2])
+            _lc_swap!(v, x2, x3)
+            lt(v[x2], v[x1]) && _lc_swap!(v, x1, x2)
+        end
+    end
+end
+
+function _lc_sort5!(v, x1, x2, x3, x4, x5, lt)
+    _lc_sort4!(v, x1, x2, x3, x4, lt)
+    if lt(v[x5], v[x4])
+        _lc_swap!(v, x4, x5)
+        if lt(v[x4], v[x3])
+            _lc_swap!(v, x3, x4)
+            if lt(v[x3], v[x2])
+                _lc_swap!(v, x2, x3)
+                lt(v[x2], v[x1]) && _lc_swap!(v, x1, x2)
+            end
+        end
+    end
+end
+
+# [first, last) half-open, 1-based
+function _lc_insertion_sort!(v, first, last, lt)
+    first == last && return
+    for i in (first + 1):(last - 1)
+        j = i - 1
+        if lt(v[i], v[j])
+            t = v[i]
+            k = j
+            j = i
+            while true
+                v[j] = v[k]
+                j = k
+                (j != first && (k -= 1; lt(t, v[k]))) || break
+            end
+            v[j] = t
+        end
+    end
+end
+
+# assumes an element before `first` that is <= every element of the range
+function _lc_insertion_sort_unguarded!(v, first, last, lt)
+    first == last && return
+    for i in (first + 1):(last - 1)
+        j = i - 1
+        if lt(v[i], v[j])
+            t = v[i]
+            k = j
+            j = i
+            while true
+                v[j] = v[k]
+                j = k
+                k -= 1
+                lt(t, v[k]) || break
+            end
+            v[j] = t
+        end
+    end
+end
+
+# returns true iff the range is sorted on exit (gives up after 8 insertions)
+function _lc_insertion_sort_incomplete!(v, first, last, lt)
+    n = last - first
+    if n <= 1
+        return true
+    elseif n == 2
+        lt(v[last - 1], v[first]) && _lc_swap!(v, first, last - 1)
+        return true
+    elseif n == 3
+        _lc_sort3!(v, first, first + 1, last - 1, lt)
+        return true
+    elseif n == 4
+        _lc_sort4!(v, first, first + 1, first + 2, last - 1, lt)
+        return true
+    elseif n == 5
+        _lc_sort5!(v, first, first + 1, first + 2, first + 3, last - 1, lt)
+        return true
+    end
+    j = first + 2
+    _lc_sort3!(v, first, first + 1, j, lt)
+    limit = 8
+    count = 0
+    i = j + 1
+    while i != last
+        if lt(v[i], v[j])
+            t = v[i]
+            k = j
+            j = i
+            while true
+                v[j] = v[k]
+                j = k
+                (j != first && (k -= 1; lt(t, v[k]))) || break
+            end
+            v[j] = t
+            count += 1
+            if count == limit
+                return i + 1 == last
+            end
+        end
+        j = i
+        i += 1
+    end
+    return true
+end
+
+# returns (pivot position, already_partitioned)
+function _lc_partition_equals_right!(v, first, last, lt)
+    begin_ = first
+    pivot = v[first]
+    while true
+        first += 1
+        lt(v[first], pivot) || break
+    end
+    if begin_ == first - 1
+        while first < last
+            last -= 1
+            lt(v[last], pivot) && break
+        end
+    else
+        while true
+            last -= 1
+            lt(v[last], pivot) && break
+        end
+    end
+    already = first >= last
+    while first < last
+        _lc_swap!(v, first, last)
+        while true
+            first += 1
+            lt(v[first], pivot) || break
+        end
+        while true
+            last -= 1
+            lt(v[last], pivot) && break
+        end
+    end
+    pivot_pos = first - 1
+    begin_ != pivot_pos && (v[begin_] = v[pivot_pos])
+    v[pivot_pos] = pivot
+    return pivot_pos, already
+end
+
+# returns the new `first` (one past the pivot)
+function _lc_partition_equals_left!(v, first, last, lt)
+    begin_ = first
+    pivot = v[first]
+    if lt(pivot, v[last - 1])
+        while true
+            first += 1
+            lt(pivot, v[first]) && break
+        end
+    else
+        while true
+            first += 1
+            (first < last && !lt(pivot, v[first])) || break
+        end
+    end
+    if first < last
+        while true
+            last -= 1
+            lt(pivot, v[last]) || break
+        end
+    end
+    while first < last
+        _lc_swap!(v, first, last)
+        while true
+            first += 1
+            lt(pivot, v[first]) && break
+        end
+        while true
+            last -= 1
+            lt(pivot, v[last]) || break
+        end
+    end
+    pivot_pos = first - 1
+    begin_ != pivot_pos && (v[begin_] = v[pivot_pos])
+    v[pivot_pos] = pivot
+    return first
+end
+
+function _lc_introsort!(v, first, last, lt, depth, leftmost)
+    limit = 24
+    ninther = 128
+    while true
+        len = last - first
+        if len <= 1
+            return
+        elseif len == 2
+            lt(v[last - 1], v[first]) && _lc_swap!(v, first, last - 1)
+            return
+        elseif len == 3
+            _lc_sort3!(v, first, first + 1, last - 1, lt); return
+        elseif len == 4
+            _lc_sort4!(v, first, first + 1, first + 2, last - 1, lt); return
+        elseif len == 5
+            _lc_sort5!(v, first, first + 1, first + 2, first + 3, last - 1, lt); return
+        end
+        if len < limit
+            leftmost ? _lc_insertion_sort!(v, first, last, lt) : _lc_insertion_sort_unguarded!(v, first, last, lt)
+            return
+        end
+        depth == 0 && error("libcxx_sort!: introsort depth exhausted; the heap-sort fallback is not ported")
+        depth -= 1
+        half = len ÷ 2
+        if len > ninther
+            _lc_sort3!(v, first, first + half, last - 1, lt)
+            _lc_sort3!(v, first + 1, first + half - 1, last - 2, lt)
+            _lc_sort3!(v, first + 2, first + half + 1, last - 3, lt)
+            _lc_sort3!(v, first + half - 1, first + half, first + half + 1, lt)
+            _lc_swap!(v, first, first + half)
+        else
+            _lc_sort3!(v, first + half, first, last - 1, lt)
+        end
+        if !leftmost && !lt(v[first - 1], v[first])
+            first = _lc_partition_equals_left!(v, first, last, lt)
+            continue
+        end
+        i, already = _lc_partition_equals_right!(v, first, last, lt)
+        if already
+            fs = _lc_insertion_sort_incomplete!(v, first, i, lt)
+            if _lc_insertion_sort_incomplete!(v, i + 1, last, lt)
+                fs && return
+                last = i
+                continue
+            elseif fs
+                first = i + 1
+                continue
+            end
+        end
+        _lc_introsort!(v, first, i, lt, depth, leftmost)
+        leftmost = false
+        first = i + 1
+    end
+end
+
+"""libc++ `std::sort(v.begin(), v.end(), lt)` for a non-arithmetic element type: the exact
+(unstable) permutation libc++ 18 produces, see the block comment above."""
+function libcxx_sort!(v::AbstractVector, lt)
+    n = length(v)
+    depth = n == 0 ? 0 : 2 * (8 * sizeof(Int) - 1 - leading_zeros(n))   # 2 * floor(log2 n)
+    _lc_introsort!(v, firstindex(v), firstindex(v) + n, lt, depth, true)
+    return v
+end
