@@ -184,11 +184,11 @@ function detect_lattice(big::Mesh, tol::Float64 = 1e-6)
         out.err = "no lattice found ($(length(good)) candidates)"
         return out
     end
-    # The C++ std::sort is unstable (libc++ introsort), so among candidates of equal
-    # length the order it produced is not reproducible here; Julia's default sort is
-    # stable and keeps vertex order among ties. data/corpus/method_fixtures freezes the
-    # C++ lattice of every tiling family so the test can compare.
-    sort!(good; by = v -> dot(v, v))
+    # The C++ std::sort is unstable (libc++ introsort) and the tie order among candidates
+    # of equal length decides t1/t2 (e.g. +-t for the square and kagome lattices), so the
+    # libc++ algorithm itself is used (core/mt19937.jl `libcxx_sort!`), with Eigen's
+    # unfused squaredNorm as the comparator.
+    libcxx_sort!(good, (a, b) -> a[1] * a[1] + a[2] * a[2] < b[1] * b[1] + b[2] * b[2])
     t1 = good[1]
     t2 = Vec2(0, 0)
     found = false
