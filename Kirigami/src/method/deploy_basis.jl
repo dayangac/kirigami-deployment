@@ -28,9 +28,19 @@ n_prime(b::DeployBasis) = size(b.C, 1)
 basis_c(b::DeployBasis, i::Int) = Vec2(b.C[i, 1], b.C[i, 2])   # C++ b.c(i)
 basis_s(b::DeployBasis, i::Int) = Vec2(b.S[i, 1], b.S[i, 2])   # C++ b.s(i)
 
-# clang -O2 (arm64, -ffp-contract=on) fuses the C++ `u.x()*v.y() - u.y()*v.x()` into an fma
-# (see generators.jl); replicated so the tie-sensitive counts of contact.jl match the C++.
+# Bit-faithful scalar kernels (PORTING.md "Bit-faithful trig and reductions"): clang -O2 on
+# arm64 (-ffp-contract=on) fuses the inline C++ `u.x()*v.y() - u.y()*v.x()` into an fma,
+# while Eigen's dot()/squaredNorm()/norm() are UNFUSED reductions. The tie-sensitive
+# predicates of contact.jl are decided by the last ulp of these, so they are written out.
 det2(u::Vec2, v::Vec2) = fma(u[1], v[2], -(u[2] * v[1]))
+_dotu(a::Vec2, b::Vec2) = a[1] * b[1] + a[2] * b[2]      # Eigen a.dot(b)
+_sqnormu(a::Vec2) = a[1] * a[1] + a[2] * a[2]            # Eigen a.squaredNorm()
+_normu(a::Vec2) = sqrt(_sqnormu(a))                      # Eigen a.norm()
+if Sys.isapple()
+    libm_atan(x::Float64) = ccall((:atan, _LIBM), Float64, (Float64,), x)
+else
+    libm_atan(x::Float64) = atan(x)
+end
 
 """C = Y(0), S = 2 dY/dtheta|_0, from a single call to deploy()."""
 function deploy_basis(c::CutStructure, X::Vector{Vec2})
@@ -49,9 +59,9 @@ end
 
 """Y(theta) from the basis."""
 function basis_eval(b::DeployBasis, theta::Real)
-    cc = cos(0.5 * theta)
-    ss = sin(0.5 * theta)
-    return [cc * basis_c(b, i) + ss * basis_s(b, i) for i in 1:n_prime(b)]
+    ss, cc = libm_sincos(0.5 * Float64(theta))   # C++ std::cos/std::sin pair -> __sincos_stret
+    # Eigen `cc * C + ss * S`: unfused per component
+    return [Vec2(cc * b.C[i, 1] + ss * b.S[i, 1], cc * b.C[i, 2] + ss * b.S[i, 2]) for i in 1:n_prime(b)]
 end
 
 """h(theta) = p + q cos(theta) + r sin(theta)."""
@@ -61,8 +71,12 @@ struct Harmonic
     r::Float64
 end
 Harmonic() = Harmonic(0.0, 0.0, 0.0)
-# C++ `p + q*cos + r*sin` is contracted left to right: fma(r, sin, fma(q, cos, p)).
-harmonic_eval(h::Harmonic, th::Real) = fma(h.r, libm_sin(Float64(th)), fma(h.q, libm_cos(Float64(th)), h.p))
+# C++ `p + q*cos + r*sin`: the cos/sin pair is one __sincos_stret call, and the sum is
+# contracted left to right: fma(r, sin, fma(q, cos, p)).
+function harmonic_eval(h::Harmonic, th::Real)
+    s, c = libm_sincos(Float64(th))
+    return fma(h.r, s, fma(h.q, c, h.p))
+end
 # std::hypot / std::atan2 / std::acos of the C++ are Apple libm (as in generators.jl); the
 # sub-ulp differences to Julia's own decide whether the tau = 0 artefact root of a class-2
 # harmonic lands at +1e-17 or -1e-17, i.e. inside or outside (0, eps].
@@ -84,7 +98,7 @@ function orient_from_vectors(U::Vec2, V::Vec2, P::Vec2, Q::Vec2)
 end
 
 function dot_from_vectors(U::Vec2, V::Vec2, P::Vec2, Q::Vec2)
-    a = dot(U, P); b = dot(V, Q); cc = dot(U, Q); dd = dot(V, P)
+    a = _dotu(U, P); b = _dotu(V, Q); cc = _dotu(U, Q); dd = _dotu(V, P)
     return Harmonic(0.5 * (a + b), 0.5 * (a - b), 0.5 * (cc + dd))
 end
 
@@ -196,11 +210,13 @@ function harmonic_roots_deflated(h::Harmonic, lo::Real, hi::Real, rel_tol::Real 
         A = h.p - h.q; B = 2.0 * h.r
         if A_zero
             # A = C = 0 => h = r sin(theta): the only remaining root on (0, pi] is pi.
-            return (pi > lo && pi <= hi + 1e-15) ? [Float64(pi)] : Float64[]
+            # M_PI as a double (an Irrational `pi` would compare exactly and lose the endpoint)
+            PI = Float64(pi)
+            return (PI > lo && PI <= hi + 1e-15) ? [PI] : Float64[]
         end
         tau = -B / A
         (!(tau > 0) || !isfinite(tau)) && return Float64[]
-        th = 2.0 * atan(tau)
+        th = 2.0 * libm_atan(tau)
         return (th > lo && th <= hi + 1e-15) ? [th] : Float64[]
     else
         return harmonic_roots(h, lo, hi)
@@ -225,8 +241,7 @@ function harmonic_fit(th::Vector{Float64}, y::Vector{Float64})
     sc = 0.0
     for i in 1:n
         M[i, 1] = 1.0
-        M[i, 2] = cos(th[i])
-        M[i, 3] = sin(th[i])
+        M[i, 3], M[i, 2] = libm_sincos(th[i])
         sc = max(sc, abs(y[i]))
     end
     s = qr(M, ColumnNorm()) \ y   # Eigen colPivHouseholderQr().solve

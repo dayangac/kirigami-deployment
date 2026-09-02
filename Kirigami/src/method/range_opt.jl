@@ -82,7 +82,7 @@ function setup!(ob::RangeObjective, cc::CutStructure, X0::Vector{Vec2}, P::Abstr
         for i in eachindex(vs)
             a = X0[vs[i]]
             b = X0[vs[mod1(i + 1, length(vs))]]
-            s += a[1] * b[2] - a[2] * b[1]
+            s += fma(a[1], b[2], -(a[2] * b[1]))   # C++ inline a*b - c*d, contracted
         end
         ob.area0[f] = 0.5 * s
     end
@@ -185,7 +185,9 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
             tol = 1e-12 * max(1e-300, lscale)
             (s < -tol || s > l2 + tol) && continue
             th[i] = r
-            dFdtheta[i] = -det.q * sin(r) + det.r * cos(r)
+            # C++ `-q*sin(r) + r*cos(r)`: one __sincos_stret, contracted as fma(-q, sin, r*cos)
+            sr, cr = libm_sincos(r)
+            dFdtheta[i] = fma(-det.q, sr, det.r * cr)
             has[i] = true
             break
         end
@@ -209,8 +211,8 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
         alpha = exp(-(th[i] - mn) / opt.kappa) / Z
         alpha < 1e-12 && continue
         a, b, p = ob.active[i]
-        cc = cos(0.5 * th[i]); ss = sin(0.5 * th[i])
-        Ya = cc * basis_c(B, a) + ss * basis_s(B, a)
+        ss, cc = libm_sincos(0.5 * th[i])
+        Ya = cc * basis_c(B, a) + ss * basis_s(B, a)   # Eigen: unfused per component
         Yb = cc * basis_c(B, b) + ss * basis_s(B, b)
         Yp = cc * basis_c(B, p) + ss * basis_s(B, p)
         A = Yb - Ya; Bv = Yp - Ya
@@ -235,7 +237,7 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
         s = 0.0
         for i in 1:nf
             u = vs[i]; v = vs[mod1(i + 1, nf)]
-            s += X[u, 1] * X[v, 2] - X[u, 2] * X[v, 1]
+            s += fma(X[u, 1], X[v, 2], -(X[u, 2] * X[v, 1]))   # C++ inline a*b - c*d, contracted
         end
         area = 0.5 * s
         ob.area0[f] == 0 && continue

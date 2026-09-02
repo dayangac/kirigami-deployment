@@ -12,18 +12,19 @@
 # addition to the C++ CHECKs themselves. The synthetic-harmonic cases draw their
 # coefficients from the bit-exact MT19937 with the C++ seeds.
 #
-# Bit-exactness caveat: the deploy basis (C, S) and every harmonic coefficient reproduce the
-# C++ bit for bit (fma placement as clang contracts it), but the tie-sensitive DIAGNOSTIC
-# counters (ExactRangeReport.n_roots, ValidityCertificate.n_roots_undeflated, the 1e-9 dedup
-# length of C(X)) depend on the last ulp of atan2/acos/hypot, and the Julia here is an
-# x86_64 build running under Rosetta whose libm differs from the arm64 libm of the C++ on
-# those. The scientific quantities (theta_max, C(X) as a set, the certificate verdicts and
-# first_root, mobility, gradients) are asserted at 1e-12; those counters are asserted loosely.
+# Bit-exactness: on the arm64 Julia (PORTING.md) the deploy basis, every harmonic
+# coefficient, every root, C(X), the witnesses and all certificate counters reproduce the C++
+# bit for bit (fma placed as clang contracts it, __sincos_stret for sin/cos pairs, unfused
+# Eigen dots, libm atan2/acos/hypot/atan), and the tie-sensitive fields are asserted exactly.
+# On a non-arm64 Julia (x86_64 under Rosetta: different libm ulps) the tie-sensitive
+# DIAGNOSTIC counters -- ExactRangeReport.n_roots, ValidityCertificate.n_roots_undeflated,
+# the 1e-9 dedup length of C(X) -- are asserted loosely (M1_EXACT_TIES = false).
 include("helpers.jl")
 import JSON
 using SparseArrays: spzeros
 
 const K = Kirigami
+const M1_EXACT_TIES = K._USE_SYSTEM_LIBM
 const M1 = JSON.parsefile(joinpath(CORPUS, "method_fixtures", "test_method_1.json"))
 
 struct M1Case
@@ -279,11 +280,13 @@ end
         @test ep.n_pairs == e["n_pairs"]
         @test ep.n_candidates == e["n_candidates"]
         # n_roots counts roots at or below the running best and so depends on the order in
-        # which exact ties (regular tilings have many) resolve at the 1e-15 slack; the
-        # libm of the x86_64 Julia (Rosetta) and of the arm64 C++ differ by an ulp there,
-        # so the C++ value is only reported, not asserted (see the header of this file).
-        ep.n_roots == e["n_roots"] || @info "$name: n_roots $(ep.n_roots) (C++ $(e["n_roots"])), tie-order dependent"
-        @test ep.n_roots >= (e["found"] ? 1 : 0)
+        # which exact ties (regular tilings have many) resolve at the 1e-15 slack.
+        if M1_EXACT_TIES
+            @test ep.n_roots == e["n_roots"]
+        else
+            ep.n_roots == e["n_roots"] || @info "$name: n_roots $(ep.n_roots) (C++ $(e["n_roots"])), tie-order dependent"
+            @test ep.n_roots >= (e["found"] ? 1 : 0)
+        end
         @test ep.n_zero_contacts == e["n_zero_contacts"]
         @test ep.first.found == e["found"]
         @test isapprox(ep.theta_max, fx["theta_exact_pruned"]; rtol = 1e-12, atol = 1e-13)
@@ -299,14 +302,18 @@ end
         ov = K.exact_theta_max_overlap(cs.c, B, pruned, 1e-9, pi, 1e-9)
         o = fx["overlap_pruned"]
         @test isapprox(ov.theta_max, fx["theta_overlap_pruned"]; rtol = 1e-12, atol = 1e-13)
-        # C(X) as a set at 1e-6 resolution: a tangential (double) root has |p| = amp, so its
-        # existence and its position (acos near 1: error ~ sqrt(ulp) ~ 1e-8) are decided by
-        # the last ulp, and the 1e-9 dedup chain can then split or merge one near-coincident
-        # pair (trunc_4_0: an extra root 2.6e-8 from 3pi/4). The lengths may differ by one.
         cc = Float64.(o["candidates"])
-        @test all(any(abs(v - w) < 1e-6 for w in cc) for v in ov.candidates)
-        @test all(any(abs(v - w) < 1e-6 for v in ov.candidates) for w in cc)
-        @test abs(length(ov.candidates) - length(cc)) <= 1
+        if M1_EXACT_TIES
+            @test ov.candidates == cc
+        else
+            # C(X) as a set at 1e-6 resolution: a tangential (double) root has |p| = amp, so
+            # its existence and position (acos near 1: error ~ sqrt(ulp) ~ 1e-8) are decided
+            # by the last ulp, and the 1e-9 dedup chain can then split or merge one
+            # near-coincident pair (trunc_4_0: an extra root 2.6e-8 from 3pi/4).
+            @test all(any(abs(v - w) < 1e-6 for w in cc) for v in ov.candidates)
+            @test all(any(abs(v - w) < 1e-6 for v in ov.candidates) for w in cc)
+            @test abs(length(ov.candidates) - length(cc)) <= 1
+        end
         @test ov.i_star == o["i_star"]
         @test ov.n_intervals_tested == o["n_intervals_tested"]
         @test ov.zero_range == o["zero_range"]
@@ -752,11 +759,12 @@ function m1_check_cert(cert, fx)
         @test getfield(cert, fld) == fx[string(fld)]
     end
     # n_roots_undeflated counts the tau = 0 artefact, a root at ~1e-16 whose side of 0 is
-    # decided by the last ulp of atan2/acos/hypot; those differ between the arm64 libm of
-    # the C++ and the x86_64 libm the Rosetta Julia calls, so only the order of magnitude
-    # is pinned.
-    # (on t3_4_3_12 at eps = 3 the C++ reports 141 and the Julia 169: many class-2 pairs)
-    @test abs(cert.n_roots_undeflated - fx["n_roots_undeflated"]) <= 0.25 * fx["n_roots_undeflated"] + 5
+    # decided by the last ulp of atan2/acos/hypot: exact on the arm64 libm only.
+    if M1_EXACT_TIES
+        @test cert.n_roots_undeflated == fx["n_roots_undeflated"]
+    else
+        @test abs(cert.n_roots_undeflated - fx["n_roots_undeflated"]) <= 0.25 * fx["n_roots_undeflated"] + 5
+    end
     @test isapprox(cert.eps, fx["eps"]; rtol = 1e-15)
     @test isapprox(cert.theta_1, fx["theta_1"]; rtol = 1e-15)
     @test isapprox(cert.min_signed_area, fx["min_signed_area"]; rtol = 1e-12)

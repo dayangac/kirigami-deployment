@@ -49,9 +49,10 @@ function swept_discs(c::CutStructure, B::DeployBasis)
         for pv in pf
             x = basis_c(B, pv) - gc
             chi = basis_s(B, pv) - gs
-            sd.rho[f] = max(sd.rho[f], sqrt(dot(x, x) + dot(chi, chi)))
-            sd.rho_max[f] = max(sd.rho_max[f], max(norm(x), norm(chi)))
-            sd.circum[f] = max(sd.circum[f], norm(x))
+            # Eigen squaredNorm()/norm(): unfused reductions
+            sd.rho[f] = max(sd.rho[f], sqrt(_sqnormu(x) + _sqnormu(chi)))
+            sd.rho_max[f] = max(sd.rho_max[f], max(_normu(x), _normu(chi)))
+            sd.circum[f] = max(sd.circum[f], _normu(x))
         end
     end
     return sd
@@ -63,9 +64,14 @@ function min_center_distance(sd::SweptDiscs, f::Int, g::Int, theta_hi::Real)
     b = Vec2(sd.gs[f, 1] - sd.gs[g, 1], sd.gs[f, 2] - sd.gs[g, 2])
     # |cos(t) a + sin(t) b|^2 on t in [0, theta_hi/2]; stationary at
     # tan(2t) = 2 a.b / (|a|^2 - |b|^2).
-    aa = dot(a, a); bb = dot(b, b); ab = dot(a, b)
+    aa = _sqnormu(a); bb = _sqnormu(b); ab = _dotu(a, b)
     hi = 0.5 * theta_hi
-    val(t) = (ct = cos(t); st = sin(t); sqrt(max(0.0, aa * ct * ct + 2 * ab * ct * st + bb * st * st)))
+    # C++ `aa*ct*ct + 2*ab*ct*st + bb*st*st` with clang's contraction of (fadd (fmul x y) z)
+    # -> fma(x, y, z), applied twice left to right; cos/sin pair -> __sincos_stret
+    function val(t)
+        st, ct = libm_sincos(t)
+        return sqrt(max(0.0, fma(bb * st, st, fma(aa * ct, ct, ((2 * ab) * ct) * st))))
+    end
     best = min(val(0.0), val(hi))
     phi = 0.5 * atan(2 * ab, aa - bb)
     for k in -2:2
@@ -124,7 +130,7 @@ function candidate_pairs(c::CutStructure, sd::SweptDiscs, theta_hi::Real, prune:
             for g in cellv
                 g <= f && continue
                 d = use_static ?
-                    norm(Vec2(sd.gc[f, 1] - sd.gc[g, 1], sd.gc[f, 2] - sd.gc[g, 2])) :
+                    _normu(Vec2(sd.gc[f, 1] - sd.gc[g, 1], sd.gc[f, 2] - sd.gc[g, 2])) :
                     min_center_distance(sd, f, g, theta_hi)
                 d <= rr[f] + rr[g] && push!(out, (f, g))
             end
@@ -183,9 +189,9 @@ function exact_theta_max(c::CutStructure, B::DeployBasis, pairs::Vector{Tuple{In
                 dscale <= 0 && continue
                 if check_zero_contacts
                     # Diagnostic only: how many candidates are already in contact at theta = 0.
-                    geo0 = norm(U) * norm(P)
+                    geo0 = _normu(U) * _normu(P)
                     if abs(harmonic_eval(det, 0.0)) <= 1e-9 * geo0
-                        s0 = dot(U, P); l0 = dot(U, U)
+                        s0 = _dotu(U, P); l0 = _sqnormu(U)
                         t0 = 1e-12 * max(1e-300, l0)
                         (s0 >= -t0 && s0 <= l0 + t0) && (rep.n_zero_contacts += 1)
                     end
@@ -426,7 +432,7 @@ function validity_certificate(c::CutStructure, B::DeployBasis, X::Vector{Vec2},
             s = 0.0
             for i in 1:n
                 p = X[vs[i]]; q = X[vs[mod1(i + 1, n)]]
-                s += p[1] * q[2] - q[1] * p[2]
+                s += fma(p[1], q[2], -(q[1] * p[2]))   # C++ face_signed_area: inline a*b - c*d, contracted
             end
             a = 0.5 * s
             if first
@@ -475,7 +481,7 @@ function validity_certificate(c::CutStructure, B::DeployBasis, X::Vector{Vec2},
                 cert.n_candidates += 1
                 # The identity test of T3.H.1, on the COEFFICIENTS, before any classification:
                 # these are the permanent incidences and are struck from the C-list entirely.
-                geo = norm(U) * norm(P)
+                geo = _normu(U) * _normu(P)
                 sc = max(scale(det), geo)
                 if abs(det.p) + abs(det.q) + abs(det.r) <= 1e-11 * max(1e-300, sc)
                     cert.n_identically_zero += 1

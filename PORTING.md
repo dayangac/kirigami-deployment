@@ -73,3 +73,7 @@ differs from the arm64 libm the C++ reference used (1-ulp trig/hypot differences
 `for a in A, b in B ... break` is ONE loop in Julia: `break` leaves both. A C++ nested loop that
 breaks only the inner one must be written as explicitly nested `for` blocks. (`continue` is safe.)
 Swept 2026-09-20: the only instance was in check_l1.jl, fixed.
+
+## `M_PI` in comparisons
+Julia's `pi` is an `Irrational`; `pi <= x` is an exact comparison, so `pi <= Float64(pi)` is false.
+Wherever the C++ compares against `M_PI`, use `Float64(pi)`. (Found via a dropped root at θ = π.)
