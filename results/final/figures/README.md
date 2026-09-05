@@ -2,7 +2,7 @@
 
 Data sources and the exact command that produced everything here:
 `arch -arm64 /usr/local/bin/python3 code/scripts/plot_final.py` (reads only; does not
-re-run any C++ solver).
+re-run any Julia solver).
 
 | figure | what it shows | data source(s) |
 |---|---|---|
