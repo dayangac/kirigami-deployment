@@ -20,16 +20,16 @@ tied at the maximal certified range. **This is hero2.**
 
 ## Why kiri_design cannot reproduce this point (and what was done instead)
 
-`kiri_design --maximise-eps` runs `design_constrained` (`method/design.cpp`), whose stage-1
+`kiri_design --maximise-eps` runs `design_constrained` (`method/design.jl`), whose stage-1
 embedding is `convex_embed`'s **proximity-to-X_ini** objective (the K9 arm), and only then
 conditionally runs `range_opt` stage B from *that* point. K9c's winning point for these
 three designs (`best_src = k9c/x0+B` in `k9c.csv`) instead comes from `range_embed`'s
-**stage-A margin-maximisation** (`method/range_embed.hpp`), warm-started from **t = 0**
+**stage-A margin-maximisation** (`method/range_embed.jl`), warm-started from **t = 0**
 (`"x0"`), not from the proximity point — a different starting point feeding a different
 objective, so `kiri_design` cannot be relied on to land in the same basin.
 
 This was checked empirically, not just argued: a throwaway program
-(`dump_k9c_graph.cpp`, not committed) that replicates `kill_k9c.cpp`'s exact per-graph
+(`dump_k9c_graph.jl`, not committed) that replicates `kill_k9c.jl`'s exact per-graph
 pipeline line-for-line (same `convex_embed`/`range_embed`/`maximize_margin_range` calls,
 same seed formula `9300 + 7*id + which`) was compiled and run standalone on `delaunay_130
 sigma_mc`. It did **not** reproduce the archived point: it found `theta_exact = 2.68985`
@@ -44,16 +44,16 @@ directly**, recovered from `results/kill/k9c/gallery/delaunay_130_sigma_mc_close
 That file is a `deployment_json` dump (`c.prime_faces` topology — one vertex per face
 corner, `theta=0`, `max_mismatch=0`), not the `vertices`/`faces`/`orientation` mesh
 contract `kiri_export` reads, so a second throwaway program
-(`reconstruct_k9c_graph.cpp`) rebuilds the *same deterministic, non-random* topology
+(`reconstruct_k9c_graph.jl`) rebuilds the *same deterministic, non-random* topology
 (`make_graph` + `make_cut`, no optimisation, no RNG) and folds the gallery's per-corner
 positions back onto the original N=71-vertex indexing: for every face `f`, corner `k`,
 `X_orig[faces[f][k]] := gallery.vertices[prime_faces[f][k]]`. All prime-copies of the
 same original vertex agreed to within `5e-15` (float noise), confirming the fold is exact.
-A third throwaway program (`characterize_k9c.cpp`) then calls `method::characterize` — the
+A third throwaway program (`characterize_k9c.jl`) then calls `method::characterize` — the
 same pure, deterministic function `kiri_design` uses to fill its `characterization` field —
 directly on the reconstructed graph, independently reproducing `k9c.csv`'s archived
 `theta_exact = eps_max = π` to full precision. None of the three throwaway programs were
-added to the CMake build; they are graph-topology/measurement plumbing, not new method
+added to the package; they are graph-topology/measurement plumbing, not new method
 code.
 
 ## Numbers (`hero2_characterization.json`, `method::characterize`)
@@ -103,23 +103,19 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
 ## Reproduction
 
 1. **Dump the exact K9c-population graph** (topology + sigma_mc, bit-identical to what
-   `apps/kill_k9c.cpp` builds for `id=130`), same throwaway-utility pattern as hero's
-   `dump_hero_graph.cpp`:
+   `apps/kill_k9c.jl` builds for `id=130`), same throwaway-utility pattern as hero's
+   `dump_hero_graph.jl`:
    ```
-   clang++ -std=c++20 -O2 -arch arm64 \
-     -I code/src -I code/apps -I /opt/homebrew/include -I /opt/homebrew/include/eigen3 \
-     dump_hero2_input.cpp code/build/libkiri_core.a -o dump_hero2_input
+julia --project=Kirigami export/hero2/dump_hero2_input.jl
    ./dump_hero2_input 130 800 export/hero2/hero2_input.json
    ```
-   (`dump_hero2_input.cpp` calls `kiri::kill::make_graph(130, 100, 800, 1400)`, K9c's
+   (`dump_hero2_input.jl` calls `kiri::kill::make_graph(130, 100, 800, 1400)`, K9c's
    population parameters, and `save_mesh_json`.) Output: V=71, F=130, kind=delaunay.
 
 2. **Recover the archived K9c winning embedding** from the gallery dump (kiri_design
    cannot reproduce it — see above):
    ```
-   clang++ -std=c++20 -O2 -arch arm64 \
-     -I code/src -I code/apps -I /opt/homebrew/include -I /opt/homebrew/include/eigen3 \
-     reconstruct_k9c_graph.cpp code/build/libkiri_core.a -o reconstruct_k9c_graph
+julia --project=Kirigami export/hero2/reconstruct_k9c_graph.jl
    ./reconstruct_k9c_graph 130 800 \
      results/kill/k9c/gallery/delaunay_130_sigma_mc_closed.json export/hero2/hero2_graph.json
    ```
@@ -132,9 +128,7 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
    only on the recovered X and `method::characterize`, the same function `kiri_design`
    uses):
    ```
-   clang++ -std=c++20 -O2 -arch arm64 \
-     -I code/src -I code/apps -I /opt/homebrew/include -I /opt/homebrew/include/eigen3 \
-     characterize_k9c.cpp code/build/libkiri_core.a -o characterize_k9c
+julia --project=Kirigami export/hero2/characterize_k9c.jl
    ./characterize_k9c export/hero2/hero2_graph.json export/hero2/hero2_characterization.json
    ```
    Prints `theta_max=3.14159 eps_max=3.14159 theta_bisect=3.14159 certified=1
@@ -162,7 +156,7 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
      --3mf export/hero2/hero2_130_sigma_mc_open_0.9tm.3mf \
      --json export/hero2/hero2_130_sigma_mc_open_0.9tm.json
    ```
-   `--theta-frac` reports `theta_max=3.14159` at every fraction (export/solid.hpp's
+   `--theta-frac` reports `theta_max=3.14159` at every fraction (export/solid.jl's
    independent geometric cross-check), agreeing with the certified value.
 
    Deployment sequence, 6 frames at `theta = k/5 * Theta_max`, `k = 0..5`:
@@ -220,9 +214,9 @@ export/hero2/
     hero2_130_seq_k{0..5}.{svg,json,png}  # theta = k * Theta_max / 5, k = 0..5 (deployment figure)
 ```
 
-`dump_hero2_input.cpp`, `reconstruct_k9c_graph.cpp`, `characterize_k9c.cpp` (the
+`dump_hero2_input.jl`, `reconstruct_k9c_graph.jl`, `characterize_k9c.jl` (the
 throwaway utilities above) were compiled and run from the scratch directory, not added to
-the repository or the CMake build — they are graph-topology dump / fold-back /
+the repository or the package — they are graph-topology dump / fold-back /
 measurement plumbing around existing library code (`kiri::kill::make_graph`,
 `kiri::make_cut`, `kiri::method::characterize`), not new method code or a deliverable.
 `export/hero/` is unmodified.
