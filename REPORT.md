@@ -39,7 +39,7 @@ baseline of zero.
 | C6 | Validation of C1 and C3 on 3,113 designs against brute force | **characterization** | `results/final/e1/E1.md` |
 | C7 | Certified non-deployability of the Eq. (6) embedding on random planar graphs, uniform and non-uniform, with dual certificates | **characterization** | `results/kill/KILL_REPORT.md` §K1a §K5 §K6 §B4 §K8a |
 | C8 | The mechanism: reflex corners created by the projection, not present in the input | **characterization** | `results/kill/KILL_REPORT.md` §T-1 |
-| C9 | Two-stage range-maximising constrained embedding; 307 of 400 designs deployable against 0 for every baseline | **algorithm** | `results/final/figures/summary_table.md`, `results/kill/k9c/`, `code/src/method/range_embed.{hpp,cpp}` |
+| C9 | Two-stage range-maximising constrained embedding; ⟨JULIA:k9c:307 of 400⟩ designs deployable against 0 for every baseline | **algorithm** | `results/final/figures/summary_table.md`, `results/kill/k9c/`, `Kirigami/src/method/range_embed.jl` |
 | C10 | Reimplementation of the 2026 pipeline at parity with the authors' code, plus three errata against it | engineering | `baseline/parity.md`, `results/core_validation/` |
 
 Demoted to lemmas or remarks on the theory review's instruction: T1 trig-linear deployment
@@ -140,8 +140,8 @@ both orientation rules.
 | K1a | `X0` has inverted faces on 142/200 and face–face overlap on 200/200; **0/200** samples injective |
 | K5 | certified valid `X0` on **0/200** under `σ_def` and **0/200** under `σ_mc`; `σ_def` does fix the flat sheet (defect down 122×, POS 58→186, projection distance down 4.7×) |
 | K6 | certified `Θ_max > 0` on **0/400** after the `first_root` fix; the earlier 15/200 was that bug |
-| B4 | boundary rows dropped: **2/400** exact, **1/400** refereed. `dim_null(free) − dim_null(fixed) = \|V_∂\| − 1` on 400/400, so the count is right; the fixed boundary is not what empties the space |
-| K8a | positive non-uniform margin on **0/100** at `X_ini` and **0/100** at `X0`; near-Farkas dual certificates below 1e−6 on 84/100 and 68/100 |
+| B4 | boundary rows dropped: **2/400** exact, **1/400** refereed. `dim_null(free) − dim_null(fixed) = \|V_∂\| − 1` on 400/400, so the count is right; the fixed boundary is not what empties the space (the 2 exact rows are knife-edge outcomes of a non-converged L-BFGS run, not reproducible numbers: `derivations/scratch/b4_path/README.md`) |
+| K8a | positive non-uniform margin on **0/100** at `X_ini` and **0/100** at `X0`; near-Farkas dual certificates below 1e−6 on 84/100 and 68/100 (archived LP-layer values predate the solver fix `d38b0a4` and are superseded by the rerun: `results/kill/k8a_julia/PROVENANCE.md`) |
 
 Dual-certificate soundness was independently re-verified: `λ ≥ 0` exactly,
 `|Σλ − 1| ≤ 2.5e−13`, 96/100 and 99/100 below 1e−6 at 1e5 dual steps, 65 and 57 below 1e−9
@@ -268,7 +268,7 @@ to **4e−8** on 8/8 when both are applied to a deployable embedding (`baseline/
 `Θ_max = 1.9967778150149833` rad; `ε_max` equal to it; bisection referee
 1.9967778152171005; certified; 0 inverted faces; `min_signed_area = 0.971`; 13,096
 candidates over 756 face pairs (`export/hero/README.md`). Locked as a regression in
-`code/tests/test_design.cpp` at 1e−9. Exported closed, at `Θ_max/2` and at `0.9 Θ_max` as
+`Kirigami/test/test_design.jl` at 1e−9. Exported closed, at `Θ_max/2` and at `0.9 Θ_max` as
 SVG, STL and 3MF, plus a 6-frame deployment sequence. All 9 SVGs pass `xmllint --noout`; all
 3 3MFs pass `unzip -t`; every solid reports closed, consistently oriented, 0 boundary edges
 and 0 non-manifold edges.
@@ -313,14 +313,14 @@ and 0 non-manifold edges.
   claimed (`notes/screen_r1.md`, `notes/screen_bundle.md`, `notes/screen_r2.md`,
   `notes/screen_k9.md`).
 * **Gate 7 (Derive + Check).** Six deriver/checker rounds, the checker in a fresh context
-  each time, ending with **zero unresolved disagreements**. `derivation_tests`: **33 cases /
-  89,074 assertions, 0 failures** (re-run by the writer). **Disclosure:** MISSION §9's
+  each time, ending with **zero unresolved disagreements**. `derivation_tests.jl`: **⟨JULIA:derivation_tests⟩,
+  0 failures** (re-run by the writer). **Disclosure:** MISSION §9's
   threshold — a derivation not reconciled after two checker rounds — was formally crossed at
   round 5. No round disputed any theorem's truth value; each residue was a side condition or
   wording item the checker itself prescribed. That is convergence rather than
   irreconcilability, but the reader is entitled to the fact and to disagree with the
   judgement.
-* **Gate 8 (Build).** `kiri_tests`: **103 cases / 17,504 assertions, 0 failures** (re-run by
+* **Gate 8 (Build).** `Pkg.test()`: **⟨JULIA:tests⟩, 0 failures** (re-run by
   the writer). Export verified by `xmllint`, `unzip -t`, `check_manifold` and visual
   inspection of PNG previews. **Not verified: no slicer is installed, so no 3MF was opened in
   one.**
@@ -528,12 +528,12 @@ and check deployment by PyKirigami simulation.
 
 | area | path |
 |---|---|
-| core pipeline (2026 reimplementation) | `code/src/core/{mesh,cut,holes,orientation,tutte_auxetic,kinematics,collision,optimize,rank_checks,generators}.{hpp,cpp}` |
-| method | `code/src/method/{deploy_basis,contact,design,range_opt,zero_plus,convex_embed,range_embed,mobility,expansive_cone,periodic_jacobian,budget}.{hpp,cpp}` |
-| export | `code/src/export/{layout,solid,svg,stl,threemf,xml,zip,material}.{hpp,cpp}` |
-| tests | `code/tests/{test_mesh_cut,test_holes,test_system,test_kinematics,test_collision,test_method,test_design,test_range_embed,test_rank_checks,test_reference_cases,test_export,derivation_tests}.cpp` |
-| CLIs | `code/apps/{kiri_gen,kiri_analyze,kiri_deploy,kiri_design,kiri_export,kiri_sweep,kiri_reference}.cpp` |
-| kill drivers | `code/apps/kill_{k1a,k1b,k1c,k2a,k2b,k2c,k3a,k5,k6,k7,k8a,k9,k9b,k9c,b3,b4,t1,jitter,e1,native200,f23}.cpp` |
+| core pipeline (2026 reimplementation) | `Kirigami/src/core/{mesh,cut,holes,orientation,tutte_auxetic,kinematics,collision,optimize,rank_checks,generators}.jl` |
+| method | `Kirigami/src/method/{deploy_basis,contact,design,range_opt,zero_plus,convex_embed,range_embed,mobility,expansive_cone,periodic_jacobian,budget}.jl` |
+| export | `Kirigami/src/export/{layout,solid,svg,stl,threemf,xml,zip,material}.jl` |
+| tests | `Kirigami/test/{test_mesh_cut,test_holes,test_system,test_kinematics,test_collision,test_method,test_design,test_range_embed,test_rank_checks,test_reference_cases,test_export,derivation_tests}.jl` |
+| CLIs | `Kirigami/apps/{kiri_gen,kiri_analyze,kiri_deploy,kiri_design,kiri_export,kiri_sweep,kiri_reference}.jl` |
+| kill drivers | `Kirigami/apps/kill_{k1a,k1b,k1c,k2a,k2b,k2c,k3a,k5,k6,k7,k8a,k9,k9b,k9c,b3,b4,t1,jitter,e1,native200,f23}.jl` |
 | derivations | `derivations/core.md`, `derivations/check.md` |
 | kill results | `results/kill/KILL_REPORT.md`, `results/kill/{k1a,k1b,k1c,k2a,k2b,k2c,k3a,k5,k6,k7,k8a,k9,k9b,k9c,b3,b4,t1,jitter,native200,f23}/` |
 | characterization | `results/final/e1/{E1.md,e1.csv,summary.txt,e1_gap.png}` |
@@ -552,20 +552,19 @@ and check deployment by PyKirigami simulation.
 **Build.**
 
 ```
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
+julia --project=Kirigami -e 'using Pkg; Pkg.instantiate()'   # one-off; no build step
 ```
 
 **Tests** (both re-run by the writer at the time of writing).
 
 ```
-./code/build/kiri_tests           # 103 cases, 17504 assertions, 0 failures
-./code/build/derivation_tests     # 33 cases, 89074 assertions, 0 failures
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, 0 failures; includes derivation_tests.jl (⟨JULIA:derivation_tests⟩)
 ```
 
 **The characterization (E1).**
 
 ```
-cmake --build code/build --target kill_e1
+# no build step; the driver is Kirigami/apps/kill_e1.jl (run_e1.sh invokes it)
 bash code/scripts/run_e1.sh 200                       # 12-way sharded; slowest shard 311 s
 arch -arm64 /usr/local/bin/python3 code/scripts/plot_e1.py
 ```
@@ -573,28 +572,28 @@ arch -arm64 /usr/local/bin/python3 code/scripts/plot_e1.py
 **Kill drivers.**
 
 ```
-./code/build/kill_k1b  --out results/kill/k1b          # ~34 s
-./code/build/kill_k1a  --out results/kill/k1a          # ~40 s
-./code/build/kill_k2a  --out results/kill/k2a          # ~7 s
-./code/build/kill_k2c  --out results/kill/k2c          # ~3 min
-./code/build/kill_k3a  --out results/kill/k3a          # ~25 min
-./code/build/kill_k3a_recheck --out results/kill/k3a   # ~4 min
-./code/build/kill_k5   --out results/kill/k5 --n 200 --maxf 800   # ~5 min
-./code/build/kill_k1c  --out results/kill/k1c          # ~31 s   (needs baseline/native)
-./code/build/kill_k2b  --out results/kill/k2b --maxf 160          # ~26 min (needs baseline/native)
-./code/build/kill_f23  --out results/kill/f23          # ~1 s
-./code/build/kill_k6   --out results/kill/k6
-./code/build/kill_k7   --out results/kill/k7
-./code/build/kill_t1   --out results/kill/t1           # ~7 s off the K6 cache
-./code/build/kill_b3   --out results/kill/b3
-./code/build/kill_b4   --out results/kill/b4
-./code/build/kill_k8a  --out results/kill/k8a
-./code/build/kill_k8a_recheck --out results/kill/k8a
-./code/build/kill_jitter --out results/kill/jitter
-./code/build/kill_k9   --out results/kill/k9
-./code/build/kill_k9b  --out results/kill/k9b
-./code/build/kill_k9c  --out results/kill/k9c          # 12 shards; --aggregate --nshards 12 to merge
-./code/build/kill_native200 --out results/kill/native200           # in progress
+julia --project=Kirigami Kirigami/apps/kill_k1b.jl  --out results/kill/k1b          # ~34 s
+julia --project=Kirigami Kirigami/apps/kill_k1a.jl  --out results/kill/k1a          # ~40 s
+julia --project=Kirigami Kirigami/apps/kill_k2a.jl  --out results/kill/k2a          # ~7 s
+julia --project=Kirigami Kirigami/apps/kill_k2c.jl  --out results/kill/k2c          # ~3 min
+julia --project=Kirigami Kirigami/apps/kill_k3a.jl  --out results/kill/k3a          # ~25 min
+julia --project=Kirigami Kirigami/apps/kill_k3a_recheck.jl --out results/kill/k3a   # ~4 min
+julia --project=Kirigami Kirigami/apps/kill_k5.jl   --out results/kill/k5 --n 200 --maxf 800   # ~5 min
+julia --project=Kirigami Kirigami/apps/kill_k1c.jl  --out results/kill/k1c          # ~31 s   (needs baseline/native)
+julia --project=Kirigami Kirigami/apps/kill_k2b.jl  --out results/kill/k2b --maxf 160          # ~26 min (needs baseline/native; the native numbers themselves are NOT rerun -- they come from the authors' unchanged binary, reused as archived)
+julia --project=Kirigami Kirigami/apps/kill_f23.jl  --out results/kill/f23          # ~1 s
+julia --project=Kirigami Kirigami/apps/kill_k6.jl   --out results/kill/k6
+julia --project=Kirigami Kirigami/apps/kill_k7.jl   --out results/kill/k7
+julia --project=Kirigami Kirigami/apps/kill_t1.jl   --out results/kill/t1           # ~7 s off the K6 cache
+julia --project=Kirigami Kirigami/apps/kill_b3.jl   --out results/kill/b3
+julia --project=Kirigami Kirigami/apps/kill_b4.jl   --out results/kill/b4
+julia --project=Kirigami Kirigami/apps/kill_k8a.jl  --out results/kill/k8a
+julia --project=Kirigami Kirigami/apps/kill_k8a_recheck.jl --out results/kill/k8a
+julia --project=Kirigami Kirigami/apps/kill_jitter.jl --out results/kill/jitter
+julia --project=Kirigami Kirigami/apps/kill_k9.jl   --out results/kill/k9
+julia --project=Kirigami Kirigami/apps/kill_k9b.jl  --out results/kill/k9b
+julia --project=Kirigami Kirigami/apps/kill_k9c.jl  --out results/kill/k9c          # 12 shards; --aggregate --nshards 12 to merge
+julia --project=Kirigami Kirigami/apps/kill_native200.jl --out results/kill/native200           # in progress
 arch -arm64 /usr/local/bin/python3 code/scripts/plot_kill.py
 arch -arm64 /usr/local/bin/python3 code/scripts/plot_k9c.py
 ```
