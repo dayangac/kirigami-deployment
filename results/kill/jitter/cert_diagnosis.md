@@ -1,7 +1,7 @@
 # F32 — the NOROOT false negatives: diagnosis, fix, and re-measurement
 
 Author: subagent (cert-diagnosis). Everything below is measured on this machine with the
-C++ code in `code/`; no number is quoted from memory.
+Julia code in `Kirigami/`; no number is quoted from memory.
 
 ## 1. Symptom (as reported in STATE.md F32)
 
@@ -35,9 +35,9 @@ lie on the **segment**:
         0  <=  <w - a, b - a>  <=  |b - a|^2 .
 ```
 
-`contact.cpp::contact_angles()` (the exact scan) applies exactly that test, with
+`contact.jl::contact_angles()` (the exact scan) applies exactly that test, with
 `s = D.eval(th)`, `l2 = L2.eval(th)`, `tol = 1e-12 * lscale`.
-`contact.cpp::validity_certificate()`'s NOROOT scan did not: it called
+`contact.jl::validity_certificate()`'s NOROOT scan did not: it called
 `harmonic_roots_deflated(det, 0, eps)` and set `noroot = false` on any root.
 
 This was not an implementation slip. `derivations/core.md` T5.2b.0 states it deliberately:
@@ -49,7 +49,7 @@ The 87% rejection rate is the measured price of that drop.
 
 ### Evidence: five rows, every root listed
 
-`code/apps/dbg_cert.cpp` (new) re-runs one jitter row through the identical `measure()`
+`Kirigami/apps/dbg_cert.jl` (new) re-runs one jitter row through the identical `measure()`
 pipeline and prints, for every root the certificate finds in `(0, eps)`, the ordered pair,
 the root, the deflation class, `h(0)`, the projection parameter `s/|e|^2`, whether the
 vertex is inside the segment, and whether the root is a graze (`|h'(theta)|` below
@@ -92,7 +92,7 @@ on 3.4.3.12 and to `-3.0`/`+4.0` on hexagons. The class-2 roots sit at
 
 ## 3. The fix
 
-`code/src/method/contact.cpp`, in `validity_certificate`'s NOROOT scan: build the edge's
+`Kirigami/src/method/contact.jl`, in `validity_certificate`'s NOROOT scan: build the edge's
 squared-length harmonic `L2` and the projection harmonic `D` exactly as `contact_angles`
 does, and keep only the roots that satisfy `-tol <= D.eval(th) <= L2.eval(th) + tol` with
 `tol = 1e-12 * (|L2.p| + L2.amp())`. The test is **inclusive at the tolerance**, so a
@@ -147,18 +147,18 @@ amended (iii) that step now needs the extra sentence. Geometrically it holds: at
 closing, so the endpoint is an endpoint of the overlap of the two collinear segments, and
 the interval predicate holds with equality at worst — which the inclusive tolerance
 admits. It is stated here as the one gap the amendment opens, not as a proved step.
-`derivation_tests`' R5-a…R5-d block (which checks (T5.2b''-1b) on the corpus) passes
+`derivation_tests.jl`' R5-a…R5-d block (which checks (T5.2b''-1b) on the corpus) passes
 unchanged after the fix, but it does not test this admissibility point.
 
 ## 5. Verification
 
-**Regression test** (`code/tests/test_method.cpp`, "F32: NOROOT counts only roots with the
+**Regression test** (`Kirigami/test/test_method.jl`, "F32: NOROOT counts only roots with the
 vertex ON the edge segment"): builds 4.8.8, snub square and 3.4.3.12 at their unjittered
 positions, keeps those with exact `Theta_max >= 1`, and requires `POS`, `NOOVERLAP`,
 `NOROOT`, `n_roots_deflated == 0`, `contact_angles(...,0,eps)` empty, and
 `n_roots_inadmissible > 0` summed over the cases.
 
-* Without the fix (`git stash` of `contact.cpp` only, everything else identical):
+* Without the fix (`git stash` of `contact.jl` only, everything else identical):
   `12 assertions, 7 passed, 5 failed` — `cert.noroot` false, `n_roots_deflated != 0`,
   `inadmissible_total == 0`.
 * With the fix: passes. Reported off-segment roots removed: 2 (snub square,
@@ -172,12 +172,12 @@ changes to the reference computation in the test, not weakenings of the assertio
 "first_root is the minimum over all candidates" test still finds a discriminating case
 (min root 1.0472 vs first-seen 2.0944).
 
-**Suites** (`cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j`):
+**Suites** (`julia --project=Kirigami -e 'using Pkg; Pkg.test()'`):
 
 | suite | result |
 |---|---|
-| `kiri_tests` | 66/66 test cases, **16283/16283 assertions**, SUCCESS |
-| `derivation_tests` | 31/31 test cases, **89055/89055 assertions**, SUCCESS |
+| `Pkg.test()` (whole suite) | ⟨JULIA:tests⟩, SUCCESS |
+| `derivation_tests.jl` | ⟨JULIA:derivation_tests⟩, SUCCESS |
 
 ## 6. Re-measurement of A3 (`kill_jitter`, 12 shards, ~2 s)
 
@@ -275,7 +275,7 @@ smoke run are in §8b.
 
 ### 8b. K6 smoke re-run, completed
 
-`./code/build/kill_k6 --n 20 --no-native` (40 rows = 20 graphs x 2 sigma):
+`julia --project=Kirigami Kirigami/apps/kill_k6.jl --n 20 --no-native` (40 rows = 20 graphs x 2 sigma):
 
 | clause / quantity | count |
 |---|---|

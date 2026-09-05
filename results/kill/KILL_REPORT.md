@@ -1,10 +1,10 @@
 # Phase 5 — kill experiments (Experimenter)
 
 Written incrementally, one experiment at a time. Every number below is measured by the
-C++ drivers in `code/apps/kill_*.cpp` against `code/src/core` and `code/src/method`
+Julia drivers in `Kirigami/apps/kill_*.jl` against `Kirigami/src/core` and `Kirigami/src/method`
 (namespace `kiri::method`); nothing is quoted from memory. Machine: Apple silicon,
 `-O2`, `arm64`. Populations are deterministic functions of the graph id
-(`code/apps/kill_common.hpp`), so every experiment sees the same graphs.
+(`data/corpus/ (frozen populations, see data/corpus/README.md)`), so every experiment sees the same graphs.
 
 Order run: K3a, K1b, K1a, K2c, K2b, K1c, K2a — as instructed. This report was completed
 by a second Experimenter after the first was killed mid-run; K1b, K1a, K2c and K3a are
@@ -15,7 +15,7 @@ recheck and the F23 check are new.
 
 These arrived in four rounds, from `derivations/core.md` (rounds 1-3), `derivations/check.md`
 (the Checker, 29 033 + 59 982 assertions) and the orchestrator. Every one is implemented in
-`code/src/method/` and covered by a doctest in `code/tests/test_method.cpp`.
+`Kirigami/src/method/` and covered by a unit test in `Kirigami/test/test_method.jl`.
 
 1. **`Θ_max` is not the minimum over harmonic roots** (T4.2″). A root can be a *graze* — a
    tangency without a crossing. `hexagons_auto` grazes at `π/3 = 1.047198` and does not
@@ -86,7 +86,7 @@ These arrived in four rounds, from `derivations/core.md` (rounds 1-3), `derivati
 9. **The referee's grid must be fine** (found here, not in a derivation). At 180 samples the
    bisection steps clean over a **genuine overlap window of width `2.9e−3` rad** at
    `θ = 0.9467` on `trunc_square_R20_s2` and reports `2.025` where the closed form says
-   `0.9467`; a `1e−4` fine scan (`code/apps/dbg_k2a_out.cpp`) confirms the closed form. All
+   `0.9467`; a `1e−4` fine scan (`Kirigami/apps/dbg_k2a_out.jl`) confirms the closed form. All
    referee bisections here use 4000 grid points.
 
 ### Which certificate each number uses
@@ -146,9 +146,9 @@ wall 1493 s):
 | Delaunay `m_full` range / `m_core` range | [39, 1875] / [36, 1675] |
 
 **The 15 exceptions are a rank-estimator artifact, not a misassembled `A`.** Every one is
-off by **exactly ±1**, and every one has `F ≥ 879` — above `mobility.hpp`'s
+off by **exactly ±1**, and every one has `F ≥ 879` — above `mobility.jl`'s
 `dense_limit = 700`, where `matrix_rank` switches from `ColPivHouseholderQR` to `SparseQR`.
-`code/apps/kill_k3a_recheck.cpp` regenerates each violator with K3a's exact configuration
+`Kirigami/apps/kill_k3a_recheck.jl` regenerates each violator with K3a's exact configuration
 (the Eq. (6) projection where `N ≤ 1400`, else `X_ini` — `rank(A)` depends on the pin
 positions, so this had to match) and recomputes both ranks densely
 (`results/kill/k3a/{k3a_recheck.csv,recheck_summary.txt}`):
@@ -196,7 +196,7 @@ completely different kinds.**
   should not be quoted as a general figure.
 
 Artifacts: `results/kill/k3a/k3a.csv`, `summary.txt`, `k3a_recheck.csv`,
-`recheck_summary.txt`. Driver: `code/apps/kill_k3a.cpp`, `code/apps/kill_k3a_recheck.cpp`.
+`recheck_summary.txt`. Driver: `Kirigami/apps/kill_k3a.jl`, `Kirigami/apps/kill_k3a_recheck.jl`.
 
 ---
 
@@ -228,7 +228,7 @@ in `theta` to `1e-12`."
 `4e−12` over 207 096 triples, and faces are rigid to `6.7e−14`. Everything downstream
 (B1, B3, B17, B20, the whole closed-form contact calculus) is cleared to proceed.
 
-Artifacts: `results/kill/k1b/{k1b.csv,summary.txt}`. Driver: `code/apps/kill_k1b.cpp`.
+Artifacts: `results/kill/k1b/{k1b.csv,summary.txt}`. Driver: `Kirigami/apps/kill_k1b.jl`.
 
 ---
 
@@ -271,11 +271,11 @@ for R1 is the one `ranking.md` anticipated: on this population the usable region
 not reachable by isotropic sampling of the Tutte auxetic null space around `X0`, so R1 is
 "the emptiness paper", not "the algorithm paper" — **for random planar graphs.** It is not
 empty in general: the authored tilings supply 187 valid deployable configurations
-(`deployable_population()` in `kill_common.hpp`), which is exactly the population K2a and
+(`deployable_population()` in `kill_common.jl (populations frozen in data/corpus/)`), which is exactly the population K2a and
 K1c run on. The honest statement is that validity is a *strong* constraint that random
 graphs miss, not that `U(ε)` is empty.
 
-Artifacts: `results/kill/k1a/{k1a.csv,summary.txt}`. Driver: `code/apps/kill_k1a.cpp`.
+Artifacts: `results/kill/k1a/{k1a.csv,summary.txt}`. Driver: `Kirigami/apps/kill_k1a.jl`.
 
 ---
 
@@ -341,7 +341,7 @@ is refuted rather than merely unproved.** The words "`O(n)`", "certified active 
 (sound with no hypothesis) that is empirically tight — a good algorithm, not a theorem.
 
 Artifacts: `results/kill/k2c/{k2c.csv,k2c_drift.csv,summary.txt,k2c_locality.png}`. Driver:
-`code/apps/kill_k2c.cpp`.
+`Kirigami/apps/kill_k2c.jl`.
 
 ---
 
@@ -350,7 +350,7 @@ Artifacts: `results/kill/k2c/{k2c.csv,k2c_drift.csv,summary.txt,k2c_locality.png
 **PASS rule, copied from `ideas/ranking.md`:** "Compute `theta_max` two ways: (i) closed-form
 smallest positive root over all ordered (vertex, edge) pairs, each root filtered by the two
 closed-form interval tests `0 <= dot(y_b - y_a, y_v - y_a) <= ||y_b - y_a||^2` evaluated at
-that root; (ii) `theta_max` from `collision.hpp` (grid scan + bisection, faces shrunk by
+that root; (ii) `theta_max` from `collision.jl` (grid scan + bisection, faces shrunk by
 relative `1e-6` per deviation 9). PASS if `|theta_max_exact - theta_max_bisect| <= 1e-5` rad
 on every graph. FAIL on any exceedance. Secondary output, reported either way: whether the
 binding pair is a split-edge pair."
@@ -376,6 +376,8 @@ is unchanged at **187 / 187**, worst error `1.817e−10`, and the referee is now
 tolerance-independent — the min-over-roots row reads **182 / 187** at `1e−6`, `1e−9` and
 `1e−12` alike, instead of 149 / 187 at `1e−6`. The certificate columns do not move.
 
+*Provenance (Julia port, 2026-09-20).* The archived `k2a.csv` column `bis_1e6` (149 / 187) predates the F34 referee fix; the current code, C++ and Julia alike, gives `bis_1e6 == bis_1e9` (`results/kill/k2a_julia/`).
+
 Secondary numbers:
 
 | quantity | value |
@@ -396,7 +398,7 @@ rare degeneracy; it holds *identically* on the whole shape space of a symmetric 
 symmetric tilings are what both papers ship.
 
 The scan is cheap: the mean candidate set has 40.8 angles and the scan stops after 1.9
-overlap probes. Reproducing the Deriver's table exactly (`code/apps/dbg_t422.cpp`):
+overlap probes. Reproducing the Deriver's table exactly (`Kirigami/apps/dbg_t422.jl`):
 
 | pattern | \|C\| | `θ₁` (first contact) | `Θ_max` (T4.2″) | bisection | `min β` |
 |---|--:|--:|--:|--:|--:|
@@ -428,7 +430,7 @@ would be empty. Second, T5.2b′ is confirmed: wherever the certificate holds, t
 bisection agrees that `Θ_max ≥ ε`, with no exceptions. Third, as originally run the certificate was a strict
 **inner** approximation — 65 certified against 173 actually valid — because `NOROOT` dropped
 the two interval tests (collinearity with the edge's infinite line counted as a contact).
-That was F32; with the interval tests restored (`contact.cpp`, §A3) the re-run gives
+That was F32; with the interval tests restored (`contact.jl`, §A3) the re-run gives
 173 certified against 173 valid, 0 violations. `NOOVERLAP` (173/187) is now the binding
 clause, `POS` is 187/187.
 
@@ -437,8 +439,8 @@ the first contact is between faces sharing a split edge — is false on at least
 187 configurations. It is also true 131/187 of the time, so the assumption is a good
 heuristic and a bad theorem.
 
-Artifacts: `results/kill/k2a/{k2a.csv,summary.txt}`. Drivers: `code/apps/kill_k2a.cpp`,
-`code/apps/dbg_t422.cpp`, `code/apps/dbg_k2a_out.cpp`.
+Artifacts: `results/kill/k2a/{k2a.csv,summary.txt}`. Drivers: `Kirigami/apps/kill_k2a.jl`,
+`Kirigami/apps/dbg_t422.jl`, `Kirigami/apps/dbg_k2a_out.jl`.
 
 ---
 
@@ -448,7 +450,7 @@ Artifacts: `results/kill/k2a/{k2a.csv,summary.txt}`. Drivers: `code/apps/kill_k2
 gamma ladder `{1e-4, ..., 10}`, best kept) to get `Y_9`. For every split-edge pair evaluate
 `P, R` in closed form and count pairs with `P < 0`, `R > 0`, and
 `theta* = 2 arctan(-R/P) < theta_max(Y_9)`. Cross-check every reported `theta*` against
-`collision.hpp`'s bisection to `<= 1e-6` rad. PASS if the fraction of gamma-ladder-certified
+`collision.jl`'s bisection to `<= 1e-6` rad. PASS if the fraction of gamma-ladder-certified
 designs with at least one re-closure below `theta_max` is `>= 3%`. FAIL below 3% — B17 dies,
 R1 survives without its §5."
 
@@ -517,7 +519,7 @@ split edges to zero length** across this population; the authors' native `preven
 171 of theirs, and it is an independent reason (beyond F18) not to quote our Eq. (9)
 reimplementation as a baseline for anything.
 
-Artifacts: `results/kill/k1c/{k1c.csv,summary.txt}`. Driver: `code/apps/kill_k1c.cpp`.
+Artifacts: `results/kill/k1c/{k1c.csv,summary.txt}`. Driver: `Kirigami/apps/kill_k1c.jl`.
 
 ---
 
@@ -581,7 +583,7 @@ a bad `σ`, and choosing `σ` against the defect instead is cheap and works.
 `Θ_max = 0` on all 400. That is not a single-probe artefact: a log-spaced ladder
 (`1e−12 … 1.0`) finds an interior overlap at the **first or second rung on every graph that
 overlaps at all** (as measured: `1e−12` on every one of them with the pre-F34 predicate;
-after the fix, `1e−12` on 36 and `1e−10` on the other 89 — `results/core_validation/referee_fix.md`), and a direct scan (`code/apps/dbg_k5.cpp`) confirms overlap at
+after the fix, `1e−12` on 36 and `1e−10` on the other 89 — `results/core_validation/referee_fix.md`), and a direct scan (`Kirigami/apps/dbg_k5.jl`) confirms overlap at
 `1e−2`, `0.1` and `0.5` as well, where the shrink tolerance is not in question. The flat
 sheet is a valid planar cut pattern; it self-intersects the instant the cuts open.
 
@@ -613,7 +615,7 @@ referee number to report.
 (our contract: `vertices`, `faces`, `orientation`), 200 files, for Builder-Method to reuse.
 
 Artifacts: `results/kill/k5/{k5.csv,summary.txt,sigma/,k5_orientation.png}`. Driver:
-`code/apps/kill_k5.cpp`, diagnostic `code/apps/dbg_k5.cpp`.
+`Kirigami/apps/kill_k5.jl`, diagnostic `Kirigami/apps/dbg_k5.jl`.
 
 ---
 
@@ -622,7 +624,7 @@ Artifacts: `results/kill/k5/{k5.csv,summary.txt,sigma/,k5_orientation.png}`. Dri
 **PASS rule as amended by the orchestrator:** "Baseline for K2b is the AUTHORS' native code:
 `baseline/native/build/tuttekiri_cli`, subcommand `prevent` (their Eq. 9) with published
 defaults plus their parameter ladder, best kept; referee both by OUR collision bisection
-(their own `theta_max` routine is buggy, `STATE.md` F24). Keep our `collision.hpp` Eq.(9) as
+(their own `theta_max` routine is buggy, `STATE.md` F24). Keep our `collision.jl` Eq.(9) as
 a secondary column. PASS if the median relative gain is `>= 25%` over the best baseline with
 certified validity on `>= 20` graphs; report FAIL honestly otherwise."
 
@@ -723,7 +725,7 @@ the cycle — so no closure constraint is needed, and their extra row only shrin
 The check asked for: deploy **our** `X0` by forward kinematics from two different seed faces
 and confirm all `M′` vertex positions agree to `< 1e−9` and all hinges open by `θ`.
 
-**Measured** (`code/apps/kill_f23.cpp`), stronger than asked: **every** seed face, not two,
+**Measured** (`Kirigami/apps/kill_f23.jl`), stronger than asked: **every** seed face, not two,
 plus 20 randomised BFS visit orders, at four angles.
 
 | pattern | F | n_split | H | rank(L) | dim_null | Eq. (2) residual of our `X0` |
@@ -756,7 +758,7 @@ hinge opening by exactly `θ` and every split-edge duplicate pair staying parall
 harmless in the sense that their own `X0` still satisfies our system — it only removes
 admissible designs, one dimension of shape space on each of these two patterns.
 
-Artifacts: `results/kill/f23/{f23.csv,summary.txt}`. Driver: `code/apps/kill_f23.cpp`.
+Artifacts: `results/kill/f23/{f23.csv,summary.txt}`. Driver: `Kirigami/apps/kill_f23.jl`.
 
 ---
 
@@ -836,9 +838,9 @@ strength of the evidence for the out-harmonic characterization.
 **Blocked on a build item (orchestrator decision, recorded).** Every mobility rank above 700
 faces goes through `SparseQR`, whose rank estimate is wrong by ±1 on 15 of 508 graphs where
 the singular gap is `1e−5` to `1e−3` (K3a recheck). **No rank above 700 faces is to be
-quoted** until `mobility.hpp`'s `matrix_rank` is fixed or the dense path is forced; a dense
+quoted** until `mobility.jl`'s `matrix_rank` is fixed or the dense path is forced; a dense
 recheck on a subsample is accepted as sufficient evidence for now, and that is what
-`code/apps/kill_k3a_recheck.cpp` provides (7 of 7 violators small enough for a dense QR have
+`Kirigami/apps/kill_k3a_recheck.jl` provides (⟨JULIA:kill_k3a_recheck:7 of 7⟩ violators small enough for a dense QR have
 the identity restored exactly). The 8 larger violators, `F` from 1644 to 4902, are not
 claimed either way. Every rank-derived number in K3a's table above `F = 700` inherits this
 caveat, including the median `m_full` and `m_core` and their ranges.
@@ -855,7 +857,7 @@ whether the jam is *repairable inside the shape space itself* — the null space
 (median `dim_null` 126 under `σ_mc`, 321 under `σ_def`), so is there a point in it at which
 every cut opens outward?
 
-**The 0⁺ calculus** (`code/src/method/zero_plus.{hpp,cpp}`, derived there in full). By T1.B
+**The 0⁺ calculus** (`Kirigami/src/method/zero_plus.jl`, derived there in full). By T1.B
 the two copies of a split edge `e` differ by a pure translation `sin(θ/2)·dS_e`, so the sign
 `q_e := det(dS_e, d_e)` decides the side: `q_e > 0` the cut opens, `q_e ≤ 0` the copies move
 into each other and `Θ_max = 0`. The same first-order argument for a **corner** — a copy of
@@ -949,7 +951,7 @@ printed in `results/kill/k6/native/summary.txt` (`referee: … 11 / 12, worst 2.
 **pass v2 and the 40-graph native run are both affected**; passes v1 and the first `shards/`
 run predate the primary/secondary split and are superseded regardless.
 
-The fix is the three-line guard now at `code/src/method/contact.cpp:339` — keep a root only
+The fix is the three-line guard now at `Kirigami/src/method/contact.jl:339` — keep a root only
 if it is smaller than the incumbent. Pass **v3** (`shards_v3/`, merged to `k6_final.csv`) is
 the corrected run: `theta_exact > 0` on **0 / 400**, referee agreement `|Θ_exact − bisection|
 ≤ 1e−5` on **1 / 1** where it could be evaluated, soundness `eps_max ≤ bisection Θ_max` on
@@ -975,37 +977,36 @@ strengthened, and the constructive half moves to periodic patterns, where the sh
 not generically empty (K7).
 
 Artifacts: `results/kill/k6/{k6_final.csv, k6_full.csv, k6.csv, run.log, shards_v1..v4/,
-native/, smoke/}`. Driver `code/apps/kill_k6.cpp`, method `code/src/method/zero_plus.{hpp,cpp}`,
-diagnostic `code/apps/dbg_k6.cpp`.
+native/, smoke/}`. Driver `Kirigami/apps/kill_k6.jl`, method `Kirigami/src/method/zero_plus.jl`,
+diagnostic `Kirigami/apps/dbg_k6.jl`.
 
 ---
 
 ## Reproducing
 
 ```
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
-./code/build/kiri_tests                    # 53 cases, 16004 assertions, all passing
-./code/build/kill_k3a  --out results/kill/k3a          # ~25 min
-./code/build/kill_k3a_recheck --out results/kill/k3a   # ~4 min
-./code/build/kill_k1b  --out results/kill/k1b          # ~34 s
-./code/build/kill_k1a  --out results/kill/k1a          # ~40 s
-./code/build/kill_k5   --out results/kill/k5 --n 200 --maxf 800   # ~5 min
-./code/build/kill_k2c  --out results/kill/k2c          # ~3 min
-./code/build/kill_k2a  --out results/kill/k2a          # ~7 s
-./code/build/kill_k1c  --out results/kill/k1c          # ~31 s   (needs baseline/native)
-./code/build/kill_k2b  --out results/kill/k2b --maxf 160   # ~26 min (needs baseline/native)
-./code/build/kill_f23  --out results/kill/f23          # ~1 s
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
+julia --project=Kirigami Kirigami/apps/kill_k3a.jl  --out results/kill/k3a          # ~25 min
+julia --project=Kirigami Kirigami/apps/kill_k3a_recheck.jl --out results/kill/k3a   # ~4 min
+julia --project=Kirigami Kirigami/apps/kill_k1b.jl  --out results/kill/k1b          # ~34 s
+julia --project=Kirigami Kirigami/apps/kill_k1a.jl  --out results/kill/k1a          # ~40 s
+julia --project=Kirigami Kirigami/apps/kill_k5.jl   --out results/kill/k5 --n 200 --maxf 800   # ~5 min
+julia --project=Kirigami Kirigami/apps/kill_k2c.jl  --out results/kill/k2c          # ~3 min
+julia --project=Kirigami Kirigami/apps/kill_k2a.jl  --out results/kill/k2a          # ~7 s
+julia --project=Kirigami Kirigami/apps/kill_k1c.jl  --out results/kill/k1c          # ~31 s   (needs baseline/native)
+julia --project=Kirigami Kirigami/apps/kill_k2b.jl  --out results/kill/k2b --maxf 160   # ~26 min (needs baseline/native)
+julia --project=Kirigami Kirigami/apps/kill_f23.jl  --out results/kill/f23          # ~1 s
 arch -arm64 /usr/local/bin/python3 code/scripts/plot_kill.py
 ```
 
 Figures: `k2a/k2a_agreement.png`, `k1c/k1c_rates.png`, `k3a/k3a_mobility.png`,
 `k2c/k2c_locality.png`, `k2c/k2c_hloc.png`, `k2b/k2b_margin.png`, `k5/k5_orientation.png`.
 
-Method code changed for the corrections: `code/src/method/deploy_basis.{hpp,cpp}`
+Method code changed for the corrections: `Kirigami/src/method/deploy_basis.jl`
 (`classify_harmonic`, `harmonic_roots_deflated`, `harmonic_no_root_in`) and
-`code/src/method/contact.{hpp,cpp}` (`exact_theta_max_overlap`, `validity_certificate`, the
-exact face-frame radius in the broad phase). New doctest coverage in
-`code/tests/test_method.cpp`: the hexagon graze; `Θ_max` vs bisection and pruning
+`Kirigami/src/method/contact.jl` (`exact_theta_max_overlap`, `validity_certificate`, the
+exact face-frame radius in the broad phase). New unit test coverage in
+`Kirigami/test/test_method.jl`: the hexagon graze; `Θ_max` vs bisection and pruning
 invariance; completeness of `C(X)`; the swept radius in both frames; the three harmonic
 classes and Lemma T5.1e; deflated roots vs a `τ`-chart-free sign-change scan on 60 000
 harmonics; and the certificate implying no overlap on `(0, ε)`.
@@ -1033,7 +1034,7 @@ collapse, or if every predictor has AUC < 0.9.
 
 ### How it was run
 
-* **Driver** `code/apps/kill_jitter.cpp`. No `core/` or `method/` source was modified.
+* **Driver** `Kirigami/apps/kill_jitter.jl`. No `core/` or `method/` source was modified.
 * **Population.** The eight `reference_cases()` authored tilings — the same patches K2a/K5
   use — with `X[v] ← X[v] + a·(median edge)·N(0, I)` on **interior vertices only**, for `a` on
   **20 log-spaced steps in [0.005, 1.0]**, **20 seeds** each, plus one `a = 0` baseline per
@@ -1050,7 +1051,7 @@ collapse, or if every predictor has AUC < 0.9.
   `ε = 0.006` (the idea file's value) and `ε = 0.3` (K5's), and the **exact** `Θ_max` by
   `exact_theta_max_overlap` — the T4.2″ interval scan K2a validated.
 * **Sharding.** 12 shards by design index mod 12, `xargs -P 12`. **Wall 2.2 s.** Analysis
-  (`--analyze`) is also C++; python draws the figure only.
+  (`--analyze`) is also Julia; python draws the figure only.
 * **Predictors scored.** From `(G, σ, X_ini)` before any null space: `rho_geom` (the idea's
   own ratio — median over split-forest components of geometric diameter / median face
   inradius), `rho_hop`, `rho_max`, `psplit = |E_split|/|F|`, `badq_ini` (fraction of split
@@ -1066,8 +1067,8 @@ system has a **unique** solution — and the authored positions already satisfy 
 projection therefore sends **any** jittered interior geometry back to the authored tiling
 **exactly**: measured `‖X0 − X_base‖_∞ = 0.0000` at every amplitude up to `a = 1.0`, while
 `‖X0 − X_ini‖_∞` reaches 2.8 median edges. Those four curves are flat at 1.0 not because they
-tolerate jitter but because **they never left the start point**. New doctest in
-`code/tests/test_method.cpp` ("split-free tiling: Eq. (6) projection undoes an arbitrary
+tolerate jitter but because **they never left the start point**. New unit test in
+`Kirigami/test/test_method.jl` ("split-free tiling: Eq. (6) projection undoes an arbitrary
 interior jitter"): `dim_null = 0`, `‖X0 − X_base‖ < 1e−9` at `a ∈ {0.05, 0.5, 1.0}`. This is a
 result in its own right and it means **the ladder is only informative on the four
 split-bearing tilings** (`hexagons_auto` 5, `truncated_square_488` 12, `snub_square_33434` 13,
@@ -1161,14 +1162,13 @@ the "8" should carry the split-free caveat above.
 ### Reproducing
 
 ```
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
-./code/build/kiri_tests                              # 65 cases, 16229 assertions, all passing
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
 mkdir -p results/kill/jitter
-seq 0 11 | xargs -P 12 -I{} ./code/build/kill_jitter --shard {} --nshards 12 \
+seq 0 11 | xargs -P 12 -I{} julia --project=Kirigami Kirigami/apps/kill_jitter.jl --shard {} --nshards 12 \
     --out results/kill/jitter                        # ~2 s wall
 cd results/kill/jitter && head -1 jitter_0.csv > jitter.csv \
   && for f in jitter_[0-9]*.csv; do tail -n +2 $f; done | sort -t, -k1,1 -k2,2n -k4,4n -k8,8 >> jitter.csv
-./code/build/kill_jitter --analyze results/kill/jitter/jitter.csv --out results/kill/jitter
+julia --project=Kirigami Kirigami/apps/kill_jitter.jl --analyze results/kill/jitter/jitter.csv --out results/kill/jitter
 arch -arm64 /usr/local/bin/python3 code/scripts/plot_jitter.py results/kill/jitter
 ```
 
@@ -1206,9 +1206,9 @@ second closed state. C2 has no numeric bar in the spec beyond "verify `< 1e-9` a
 
 ### How it was run
 
-* **Driver** `code/apps/kill_k7.cpp`, stages `main`, `c3`, `c4bounded`, `nu`, `c4sweep`,
+* **Driver** `Kirigami/apps/kill_k7.jl`, stages `main`, `c3`, `c4bounded`, `nu`, `c4sweep`,
   `perdbg`. The periodic layer it uses — lattice detection, the torus quotient, the super
-  patch, `periodic_jacobian`, the achievable set — is `code/src/method/periodic_jacobian.{hpp,cpp}`,
+  patch, `periodic_jacobian`, the achievable set — is `Kirigami/src/method/periodic_jacobian.jl`,
   new in this experiment. `core/` was not modified.
 * **Why a quotient and not a finite patch.** `code/README.md` deviation 11 imposes Eqs. (3b)–(3c)
   on a patch whose boundary edges are *not* topologically identified, so every hole preimage
@@ -1407,7 +1407,7 @@ tori instead of random Delaunay patches, tilings as well as random Voronoi. That
 it independently is the strongest evidence in the bundle that the `0⁺` obstruction is a
 property of the problem and not of one generator.
 
-**New doctest.** `code/tests/test_method.cpp`, "C4: theta_c = 2 atan2(tr K, 1 − det K) is where
+**New unit test.** `Kirigami/test/test_method.jl`, "C4: theta_c = 2 atan2(tr K, 1 − det K) is where
 forward kinematics recloses" — builds `hexagons_2x2` and `t3_4_3_12_2x2` through the same
 `make_tiling_pattern` the experiment uses, checks the two forms of the closed form against each
 other and against the recorded values (2.09439510239 and 2.72771226181), checks the harmonic
@@ -1419,25 +1419,24 @@ assertions**. Whole suite after the concurrent F32 certificate change and its ow
 ### Reproducing
 
 ```
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
-./code/build/kiri_tests                              # 66 cases, 16283 assertions, all passing
-./code/build/kiri_tests -tc="C4: theta_c*"           # the K7 doctest alone: 24 assertions
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
+julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["C4: theta_c"])'   # the K7 test alone: ⟨JULIA:tests:C4⟩
 mkdir -p results/kill/k7
 
 # main stage: 33 rows, 12 shards. Wall is set by voronoi_torus_11_n200 (~30 min alone).
-for i in $(seq 0 11); do ./code/build/kill_k7 --stage main --out results/kill/k7 \
+for i in $(seq 0 11); do julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage main --out results/kill/k7 \
     --shard $i --nshard 12 > results/kill/k7/shard_$i.log 2>&1 & done; wait
 
 # C3 (50 rows), the bounded-patch C4 table, the nu curves, and the two diagnostics
-for i in $(seq 0 11); do ./code/build/kill_k7 --stage c3 --out results/kill/k7 \
+for i in $(seq 0 11); do julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage c3 --out results/kill/k7 \
     --shard $i --nshard 12 > results/kill/k7/c3_$i.log 2>&1 & done; wait
 mkdir -p results/kill/k7/c3_v2   # same stage re-run after the F32 certificate change
-for i in $(seq 0 11); do ./code/build/kill_k7 --stage c3 --out results/kill/k7/c3_v2 \
+for i in $(seq 0 11); do julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage c3 --out results/kill/k7/c3_v2 \
     --shard $i --nshard 12 > results/kill/k7/c3_v2/log_$i.txt 2>&1 & done; wait
-./code/build/kill_k7 --stage c4bounded --out results/kill/k7
-./code/build/kill_k7 --stage nu        --out results/kill/k7
-./code/build/kill_k7 --stage c4sweep   --out results/kill/k7   # the |det P| artefact
-for i in $(seq 0 11); do ./code/build/kill_k7 --stage perdbg --out results/kill/k7 \
+julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage c4bounded --out results/kill/k7
+julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage nu        --out results/kill/k7
+julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage c4sweep   --out results/kill/k7   # the |det P| artefact
+for i in $(seq 0 11); do julia --project=Kirigami Kirigami/apps/kill_k7.jl --stage perdbg --out results/kill/k7 \
     --shard $i --nshard 12 > results/kill/k7/perdbg_$i.log 2>&1 & done; wait
 
 # merge (k7_main.csv, k7_c3_all.csv, k7_periodicity.csv), then figures
@@ -1475,7 +1474,7 @@ budget identity (B.4) of that file, the total first-order hole-opening rate is a
 of the **border** alone, so freezing the border freezes the budget.
 
 **The three boundary variants**, all on K6's population verbatim (the same 200 graphs from
-`kill_common::make_graph`, the same `σ_mc` from Eq. (1) and `σ_def` read back from
+`kill_common.jl::make_graph` (frozen in `data/corpus/`), the same `σ_mc` from Eq. (1) and `σ_def` read back from
 `results/kill/k5/sigma/`, the same `X_ini`, the same repair objective, weights
 `w_corner = 0.05`, `w_prox = 1e3`, `λ = 1e−6`, `max_iter = 1200`, 3 Gaussian starts and the
 same seeds `6000 + 7·id + which`):
@@ -1497,6 +1496,8 @@ secondary label, with the independent overlap bisection as referee. 12 disjoint 
 `0/400` under `fixed`.
 
 ### Measured — `results/kill/b4/b4.csv`, 1200 rows (200 graphs × 2 σ × 3 variants)
+
+*Provenance (Julia port, 2026-09-20).* The `free` rows that reach `Θ_max > 0` (`voronoi_93`: 0.2484 rad, `voronoi_96`: 0.241884 rad) and their feasibility flags are knife-edge outcomes of a non-converged 1 199-iteration L-BFGS run: with bit-identical `X0`, `Phi` the C++ and Julia iterates agree to 1e−15 for ~20 iterations and then diverge by rounding (`derivations/scratch/b4_path/README.md`). Quote them as archived values, not as reproducible numbers.
 
 | variant \| σ | designs | median `dim_null` | median `min q` at `t=0` | 0⁺-feasible (split-only) | 0⁺-feasible (primary) | **exact `Θ_max > 0`** | certified `eps_max > 0` |
 |---|--:|--:|--:|--:|--:|--:|--:|
@@ -1578,15 +1579,15 @@ B1/B2/B3: whatever makes the periodic case work, the `|V_∂|` border handles ar
 which `ideas/round2_theorist_b.md` explicitly gates on B4, should be run on the periodic
 population rather than on the fixed-boundary one.
 
-No core or method source was modified for this run; `code/apps/kill_b4.cpp` builds its
+No core or method source was modified for this run; `Kirigami/apps/kill_b4.jl` builds its
 variant systems from `assemble_system(..., BoundaryMode::None)` and appends the pin rows
 itself.
 
 Artifacts: `results/kill/b4/{b4.csv, summary.txt, shards/, cache/}`. Driver
-`code/apps/kill_b4.cpp`.
+`Kirigami/apps/kill_b4.jl`.
 
 ```
-./code/build/kill_b4 --n 200 --nshards 12 --shard I --out results/kill/b4/shards \
+julia --project=Kirigami Kirigami/apps/kill_b4.jl --n 200 --nshards 12 --shard I --out results/kill/b4/shards \
     --cache results/kill/b4/cache        # ~45 min wall with 12 shards concurrent
 ```
 
@@ -1596,17 +1597,19 @@ Artifacts: `results/kill/b4/{b4.csv, summary.txt, shards/, cache/}`. Driver
 
 **Verdict: FAIL on the PASS rule (0 of 100, bar was ≥ 20 of 100), PASS on the hard
 soundness control (4 of 4), PASS on the Euler-step sanity (72 of 72, bar was ≥ 10).**
-Driver `code/apps/kill_k8a.cpp`, method `code/src/method/expansive_cone.{hpp,cpp}`,
-artifacts `results/kill/k8a/` (`k8a.csv`, `summary.txt`, `log_*.txt`), 5 new doctests in
-`code/tests/test_method.cpp` (suite now 71 cases / 16 488 assertions, all passing).
+Driver `Kirigami/apps/kill_k8a.jl`, method `Kirigami/src/method/expansive_cone.jl`,
+artifacts `results/kill/k8a/` (`k8a.csv`, `summary.txt`, `log_*.txt`), 5 new unit tests in
+`Kirigami/test/test_method.jl` (suite now ⟨JULIA:tests⟩).
+
+*Provenance (Julia port, 2026-09-20).* Every combinatorial and geometric column of `k8a.csv` reproduces exactly. The archived LP-layer values (margins, dual bounds, the "dual-certified" tallies) predate the C++ solver fix `d38b0a4` and are superseded by the rerun; the σ-chart on non-deployable `X_ini` and the margins on the truncated-square family depend on a degenerate-row artefact in `normalise_rows` and are not reproducible in either implementation (`results/kill/k8a_julia/PROVENANCE.md`).
 
 ### What was solved
 
 A flex of the flat structure gives every face an angular velocity and a translation,
 `V_f(y) = ω_f J y + w_f`, and the hinge edges impose `V_f(p_i) = V_g(p_i)` at the pin —
-which is exactly `mobility.hpp::build_rigidity`. Because every copy of a source vertex
+which is exactly `mobility.jl::build_rigidity`. Because every copy of a source vertex
 sits at `X_v` at `θ = 0` and `X` is held fixed, every `0⁺` separation condition of
-`zero_plus.hpp` becomes a **strict linear inequality in the flex**:
+`zero_plus.jl` becomes a **strict linear inequality in the flex**:
 
 ```
 split edge e :  row_e = det( V_{f1}(X_v) - V_{f0}(X_v), d_e )   = q_e / 2
@@ -1615,10 +1618,10 @@ corner (p into the corner of f at v) :  -g1 = det(dV, e1),  -g2 = -det(dV, e2),
 ```
 
 The two identities `row_e = q_e/2` and `max/min(-g1,-g2) = mu/2` are asserted exactly (to
-`1e-9` relative) against `zero_plus_q` and `zero_plus_corner_margin` in the doctest *"the
+`1e-9` relative) against `zero_plus_q` and `zero_plus_corner_margin` in the unit test *"the
 cone rows reproduce zero_plus's q_e and corner margins at the sigma ray"*, on three
 tilings. The flex basis is built as `ker A` (dense SVD of `build_A`) plus the integrated
-translations plus one free translation pair per component of `Γ`; the doctest checks
+translations plus one free translation pair per component of `Γ`; the unit test checks
 `dim ker R = dim ker A + 2 c(Γ)` against an independent dense `ColPivHouseholderQR` rank
 of `build_rigidity`, checks orthonormality, and checks that the uniform ray lies in the
 computed span. Over all 277 configurations run, `max |R N| / max|R| = 7.8e-14`.
@@ -1628,7 +1631,7 @@ polyhedral cone of infinitesimal motions decided by an LP* is Rote–Santos–St
 (Lemma 3.2) and Connelly–Demaine–Rote 2003. Nothing here is a new *kind* of object; what
 is instantiated is that construction on a **body-and-pin framework with a cut structure**,
 where the rows are per split edge and per corner incidence rather than per point pair.
-The header of `expansive_cone.hpp` carries this citation.
+The header of `expansive_cone.jl` carries this citation.
 
 ### The LP, and the two-sided bracket
 
@@ -1646,7 +1649,7 @@ solver is local code, no LP library: a log-sum-exp smoothing annealed from `mu =
 either loop is feasible for its side, so the reported `margin_l2` is a rigorous lower
 bound and `dual_bound` a rigorous upper bound on the LP value** — the solver never has to
 be trusted. A small dual bound is an approximate Farkas certificate. The three hand-solved
-LPs of the doctest *"cone_lp solves three hand-solved linear programs"* pin the solver:
+LPs of the unit test *"cone_lp solves three hand-solved linear programs"* pin the solver:
 `{z1 > 0, -z1 > 0}` (value 0, `lambda = (1/2,1/2)` exactly), two orthogonal rows (value
 `1/sqrt 2`), and `{z1 > 0, z2 - z1 > 0}` (bracket tight to `1e-2`).
 
@@ -1680,7 +1683,7 @@ the LP independently finds a strictly positive margin on all four. (`tiling_3_4_
 evaluated at its Eq. (6) projection, the others at `X_ini`, following the rule "X_ini if
 Eq. (2) holds there, else the projection" — the same rule the method tests use.)
 
-Extended control, `kill_common::deployable_population` (authored tilings at five clip
+Extended control, `kill_common.jl::deployable_population` (frozen in `data/corpus/`) (authored tilings at five clip
 radii plus shape-space samples, 73 configurations): σ ∈ `P(X)` on **71 of 73**, LP margin
 > 0 on **72 of 73**.
 
@@ -1737,18 +1740,17 @@ structure is tested for face–face overlap. **72 of 72 are collision-free**, 64
 already at `eps = 0.5` (half a median edge of vertex travel), 5 at 0.2, 2 at 0.1, 1 at
 0.03. All four reference tilings reach `eps = 0.5`.
 
-*Deviation, stated:* `contact.hpp`'s T4.2″ scan is parameterised by the **uniform** angle
+*Deviation, stated:* `contact.jl`'s T4.2″ scan is parameterised by the **uniform** angle
 `θ` and has no meaning along a non-uniform flex, so it cannot be used here. The predicate
 used is `has_collision` / `polygons_overlap` — the same exact overlap primitive T4.2″
-itself calls at every interval midpoint — and a doctest checks that along the uniform ray
+itself calls at every interval midpoint — and a unit test checks that along the uniform ray
 the Euler step agrees with the exact kinematics `deploy(c, X, h)` to `1e-3` median edges.
 
 ### Reproducing
 
 ```bash
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
-./code/build/kiri_tests
-for i in $(seq 0 7); do ./code/build/kill_k8a --n 100 --x0 --dual-iters 100000 \
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'
+for i in $(seq 0 7); do julia --project=Kirigami Kirigami/apps/kill_k8a.jl --n 100 --x0 --dual-iters 100000 \
     --out results/kill/k8a --cache results/kill/cache --shard $i --nshard 8 \
     > results/kill/k8a/log_$i.txt 2>&1 & done; wait
 cd results/kill/k8a && head -1 k8a_0.csv > k8a.csv \
@@ -1757,7 +1759,7 @@ arch -arm64 /usr/local/bin/python3 code/scripts/summarise_k8a.py results/kill/k8
   | tee results/kill/k8a/summary.txt
 ```
 
-Every graph is a deterministic function of its id (`kill_common::make_graph(id, 100, 800,
+Every graph is a deterministic function of its id (`kill_common.jl::make_graph(id, 100, 800,
 1400)`), so shards may be run in any order and a single graph re-run with
 `--nshard 100 --shard i`. Wall time 44–141 s per shard on 8 shards.
 
@@ -1784,7 +1786,7 @@ Every graph is a deterministic function of its id (`kill_common::make_graph(id, 
 Full write-up `results/kill/k8a/recheck.md`; artifacts `results/kill/k8a/recheck_k9.csv`,
 `recheck_k9_summary.txt`, `results/kill/k8a/recheck/` (20 000 dual steps, controls
 included) and `results/kill/k8a/recheck100k/` (100 000 steps, K1a only). Driver
-`code/apps/kill_k8a_recheck.cpp`, 4 new doctests. **Nothing above is deleted; every number
+`Kirigami/apps/kill_k8a_recheck.jl`, 4 new unit tests. **Nothing above is deleted; every number
 in this subsection is a re-measurement.**
 
 **The bug.** `cone_lp` computed the two ends of its bracket with two unrelated algorithms.
@@ -1854,7 +1856,7 @@ recheck's contribution is that the evidence is now evidence rather than a solver
 and that on the one population where `P(X)` is provably non-empty (K9's 23), the same four
 charts find a witness immediately.
 
-**Test suite.** 4 new doctests in `code/tests/test_method.cpp`: the bracket closes to `1e−9`
+**Test suite.** 4 new unit tests in `Kirigami/test/test_method.jl`: the bracket closes to `1e−9`
 on two unit rows at a known angle (`val = cos(φ/2)` exactly, four angles); a 1 200-row,
 60-dimension narrowly feasible system where the old solver returned 0 and the new one beats
 the explicit witness `z = e₀`; `farkas_residual` on hand certificates including one off the
@@ -1863,14 +1865,14 @@ passes (103 cases / 17 504 assertions at the time of the run).
 
 ## B3 — tr K as the expansion budget
 
-`code/apps/kill_b3.cpp`, library `code/src/method/budget.{hpp,cpp}` (5 new doctests in
-`code/tests/test_method.cpp`; suite 80 cases / 16,785 assertions pass). Outputs
+`Kirigami/apps/kill_b3.jl`, library `Kirigami/src/method/budget.jl` (5 new unit tests in
+`Kirigami/test/test_method.jl`; suite ⟨JULIA:tests⟩ pass). Outputs
 `results/kill/b3/{b3_b1_global.csv, b3_retro.csv, b3_constrained.csv, summary.txt}`.
 
 **Verdict — theorem PASS after a repair to its derivation, algorithm FAIL, and B3's own
 hard-fail clause TRIGGERED.**
 
-**B1 global half (the part `derivations/scratch/check_b1.cpp` could not close).** On the
+**B1 global half (the part `derivations/scratch/check_b1.jl` could not close).** On the
 same 10 fixed-boundary patches, the total void area — the shoelace of the deployed border
 half-edges minus the θ-independent face-area sum, so holes *and* notches with no walk
 tracing — equals the border functional's first harmonic to `3.41e-15` at 6 angles, and
@@ -1945,7 +1947,7 @@ conjunction, and that is the one that fails. So the reflex corners are **created
 unconstrained projection of Eq. (6), not by the graph, and the question is whether putting
 them back inside the shape space buys deployment range that K6's `q`-only repair could not.
 
-**The problem solved** (`code/src/method/convex_embed.{hpp,cpp}`, derived there in full).
+**The problem solved** (`Kirigami/src/method/convex_embed.jl`, derived there in full).
 Inside the affine shape space `X(t) = X0 + Φ t`,
 
 ```
@@ -2018,7 +2020,7 @@ certified 0). Non-convex corners at `X0`: **35 323 / 656 736 = 5.38 %**.
 ### The referee audit — resolved by the F34 predicate fix
 
 Four of the 36 exact positives (delaunay 13, 40, 103, 190, all `σ_mc`) refereed as
-`Θ_bisect = 0` at the historical shrink `1e−12`. `code/apps/dbg_k9.cpp` traces every one to
+`Θ_bisect = 0` at the historical shrink `1e−12`. `Kirigami/apps/dbg_k9.jl` traces every one to
 the bisection's early-exit `has_collision(1e−7)` firing on a pair of **hinge-adjacent** faces,
 which touch at the pin **by construction** — and the firing is **non-monotone in `θ`**: true
 at `1e−8, 1e−7, 1e−5`, false at `1e−9, 1e−6, 1e−4, 1e−3, 1e−2, 0.05, 0.1`. It is numerical
@@ -2048,8 +2050,8 @@ held on 396 / 400 before the fix and on **400 / 400** after; arms `X0` and (a) r
 
 On the 30 (b)-feasible designs the LP of K8a found **no** witness (0 / 30) — but on **23** of
 them the uniform ray `σ` is itself in `P(X)` by direct measurement (`min q > 0` **and**
-`min μ > 0`, and `expansive_cone.hpp`'s rows equal `q/2` and `μ/2` at the `σ` flex, asserted
-by doctest). A strictly feasible point therefore **provably exists** on those 23 and the LP
+`min μ > 0`, and `expansive_cone.jl`'s rows equal `q/2` and `μ/2` at the `σ` flex, asserted
+by unit test). A strictly feasible point therefore **provably exists** on those 23 and the LP
 failed to recover it; its dual bounds there run `2.0e−2` to `5.4e−2`, far above the `1e−7`
 threshold at which infeasibility would be claimed, so the LP asserts nothing. These `0 / 30`
 are **cone_lp non-convergence, not emptiness**, and K8a's caveat 1 applies with force: K8a's
@@ -2075,8 +2077,8 @@ unconstrained Eq. (6)**, and only sparsely non-empty when convexity and the spli
 imposed together inside the null space.
 
 Artifacts: `results/kill/k9/{k9.csv, summary.txt, shards/, smoke/}`. Driver
-`code/apps/kill_k9.cpp`, method `code/src/method/convex_embed.{hpp,cpp}`, referee diagnostic
-`code/apps/dbg_k9.cpp`, doctests in `code/tests/test_method.cpp` (hand-checked
+`Kirigami/apps/kill_k9.jl`, method `Kirigami/src/method/convex_embed.jl`, referee diagnostic
+`Kirigami/apps/dbg_k9.jl`, unit tests in `Kirigami/test/test_method.jl` (hand-checked
 `corner_crosses`, a hand-known constrained minimiser on the 2×2 grid, the phase-A gradient
 against a central difference, the FEASIBLE-is-exact invariant, and barrier-stage
 monotonicity).
@@ -2090,7 +2092,7 @@ certificate **fixed** and pushes only the solver, to decide whether 9 % is a pro
 design space or of the search. The answer is neither of the two the task expected: **more
 search made it worse**, and the reason is informative.
 
-**The four levers** (`code/apps/kill_k9b.cpp`), in the order the plan ranked them:
+**The four levers** (`Kirigami/apps/kill_k9b.jl`), in the order the plan ranked them:
 
 * **(i) per-graph best of `σ`.** Nothing new is computed — both `σ` already run on every
   graph — so this is a reporting convention, always given as "best-of-2 over graphs" beside
@@ -2100,7 +2102,7 @@ search made it worse**, and the reason is informative.
   repair point; 10 barrier stages (K9: 6).
 * **(iii) a sweep of `δ = δ′` over `{1e−4, 1e−3, 3e−3, 1e−2}·med²`**, tried best-first and
   cut short once a design is certified past `ε = 0.1` or a 200 s per-design budget is spent.
-* **(iv) stage 2**, `range_opt.hpp`'s softmin-of-first-contact objective (the T6 analytic
+* **(iv) stage 2**, `range_opt.jl`'s softmin-of-first-contact objective (the T6 analytic
   gradients) re-centred at the feasible point, then **gated**: accepted only if the exact
   convexity and split constraints still hold and the exact `Θ_max` actually improved. The
   barriers are enforced by exact rejection, not inside the stage-2 objective — weaker than
@@ -2180,7 +2182,7 @@ budget-limited**; K9b's 9 lost-and-still-feasible designs are the evidence, and 
 amended to say that increasing the search budget by roughly 4× moves the count *down*.
 
 Artifacts: `results/kill/k9b/{k9b.csv, summary.txt, shard_*.csv, shard_*.txt, gallery/,
-logs/, k9b_gallery.png, k9b_hist.png}`. Driver `code/apps/kill_k9b.cpp`, plots
+logs/, k9b_gallery.png, k9b_hist.png}`. Driver `Kirigami/apps/kill_k9b.jl`, plots
 `code/scripts/plot_k9b.py`.
 
 ---
@@ -2203,17 +2205,17 @@ certificate fixed, and replaces only the objective.
 
 ### What is maximised
 
-`code/src/method/range_embed.{hpp,cpp}` derives it in full. The scalar is the **0⁺
+`Kirigami/src/method/range_embed.jl` derives it in full. The scalar is the **0⁺
 deployment margin**, in units of `med²`,
 
 ```
 m(X) = min( min_e q_e(X) , min_j mu_j(X) ) / med^2
 ```
 
-— the joint minimum of `zero_plus.hpp`'s two first-order separation families, the split-edge
+— the joint minimum of `zero_plus.jl`'s two first-order separation families, the split-edge
 sign `q_e = det(dS_e, d_e)` and the corner (vertex-into-edge) margin `mu_j`. Both are
 **quadratic** in `t`; `mu` additionally carries the max/min disjunction whose branch is the
-sign of `cross = det(e1, e2)` — the *same* cross that `convex_embed.hpp` constrains, since
+sign of `cross = det(e1, e2)` — the *same* cross that `convex_embed.jl` constrains, since
 `det(X_v − X_prev, X_next − X_v) = det(e1, e2)`. Inside the convexity barrier every corner is
 convex, so the reflex branch cannot occur while feasible.
 
@@ -2227,8 +2229,8 @@ M_kappa(t) = -kappa * log sum_i exp(-c_i(t)/kappa)   <=   min_i c_i(t)
 
 which is a **lower bound on `m` for every `t`**, and **tight at the point where the branch
 modes were read** — so maximising it maximises a certified lower bound, and the reported `m`
-is always the exact minimum, never the surrogate. Two doctests check exactly those two
-claims (`code/tests/test_range_embed.cpp`), and two more finite-difference the analytic
+is always the exact minimum, never the surrogate. Two unit tests check exactly those two
+claims (`Kirigami/test/test_range_embed.jl`), and two more finite-difference the analytic
 gradient of the whole stage-A objective — softmin plus both log barriers, split term and
 corner term — against a central difference on two tilings and two barrier weights.
 
@@ -2236,7 +2238,7 @@ Stage A minimises `−M_kappa + w·(convexity + split log barriers)` with `w` de
 geometrically over 6 continuation stages and the branch modes refreshed between them; once
 feasibility is reached the continuation never leaves the feasible set, and the point kept is
 the one with the largest **exact** `m`. Stage B, from a point with `m > 0`, pushes the exact
-`Θ_max` with `range_opt.hpp`'s softmin-of-first-contact objective (the T6 analytic
+`Θ_max` with `range_opt.jl`'s softmin-of-first-contact objective (the T6 analytic
 gradients, active set refreshed) under a **shrinking trust region** — caps of `0.25, 0.10,
 0.04` median edges on `‖X − X_prev‖_∞` — accepting a step only if the exact convexity, the
 exact split signs, a margin floor (`m ≥ ½ m₀`) and an actual `Θ_max` improvement all hold.
@@ -2420,14 +2422,16 @@ broadly deployable and that K9's 9 % was a property of the proximity objective a
 "first non-zero constructive result" framing in D9 and F36 is superseded, not contradicted.
 
 Artifacts: `results/kill/k9c/{k9c.csv, summary.txt, shard_*.csv, gallery/, logs/,
-k9c_gallery.png, k9c_hist.png}`. Driver `code/apps/kill_k9c.cpp`, method
-`code/src/method/range_embed.{hpp,cpp}`, doctests `code/tests/test_range_embed.cpp`, plots
+k9c_gallery.png, k9c_hist.png}`. Driver `Kirigami/apps/kill_k9c.jl`, method
+`Kirigami/src/method/range_embed.jl`, unit tests `Kirigami/test/test_range_embed.jl`, plots
 `code/scripts/plot_k9c.py`.
 
 ---
 
 ## Native200 — the authors' full pipeline on the K9 population (stopped at 573/600)
 
+
+*Native baseline, not rerun.* Every number from the authors' pipeline (Native200, the K2b ladders, the `native` cells of the regime study) comes from their unchanged binary (`baseline/native/`, `tuttekiri_cli`) and is reused as archived; the Julia port reruns our side only.
 **Hypothesis (fair baseline).** Every prior comparison against the authors' code was capped:
 K2b ran their `prevent` on 30 live designs; K6's native subsection on 8 of 400 that reached a
 valid flat state, refereed 0/80. Neither is the authors' *full* pipeline — their own
@@ -2435,7 +2439,7 @@ valid flat state, refereed 0/80. Neither is the authors' *full* pipeline — the
 **unconditionally**, with no pre-filter, on the same 200-graph population K5/K6/K9/K9b/K9c
 use. Native200 is that run.
 
-**How run.** `code/apps/kill_native200.cpp`, three variants per graph: *native* (their own
+**How run.** `Kirigami/apps/kill_native200.jl`, three variants per graph: *native* (their own
 coloring, via the CLI's `color` subcommand, fed to `prevent`), *sigma_mc* (our max-cut `σ`
 baked into the input JSON), *sigma_def* (K5's defect-minimising `σ`). Each (graph, variant)
 cell is `baseline/native/build/tuttekiri_cli prevent … --collisions --dump …`, wrapped in
@@ -2512,11 +2516,11 @@ this population supplies, which is itself informative about the published method
 independent of the `0⁺` obstruction.
 
 Artifacts: `results/kill/native200/{native200.csv, summary.txt, shards/, logs/, run_all.log,
-run_shard_{}.log}`. Driver `code/apps/kill_native200.cpp`. K9's numbers for the same 200
+run_shard_{}.log}`. Driver `Kirigami/apps/kill_native200.jl`. K9's numbers for the same 200
 graphs are `results/kill/k9/k9.csv`; nothing there was recomputed.
 
 ```
-./code/build/kill_native200 --n 200 --maxf 800 --timeout 600 --shard {} --nshards 12 \
+julia --project=Kirigami Kirigami/apps/kill_native200.jl --n 200 --maxf 800 --timeout 600 --shard {} --nshards 12 \
   --out results/kill/native200/shards --work /tmp/kiri_native200/shard_{} \
   --logdir results/kill/native200/logs --sigma results/kill/k5/sigma   # needs baseline/native
 ```

@@ -19,7 +19,7 @@ from **two unrelated algorithms**:
   is in the simplex so every value is a rigorous upper bound;
 * the **primal** end by a separate log-sum-exp smoothing loop with projected gradient
   ascent on the unit ball, annealed `mu = 1 -> 1e-5` in 17 stages of 60 iterations
-  (`expansive_cone.cpp` lines 208–243 of the original), started from `z = 0` with step
+  (`expansive_cone.jl` lines 208–243 of the original), started from `z = 0` with step
   `mu / smax^2`.
 
 That second loop is hopelessly under-converged on the real systems (about 1 000 steps of
@@ -41,7 +41,7 @@ the primal sat at `0`, leaving an *open* bracket `[0, 3e-2]` that the driver's
 
 ## 2. The fix
 
-`code/src/method/expansive_cone.cpp`, `cone_lp`:
+`Kirigami/src/method/expansive_cone.jl`, `cone_lp`:
 
 * the dual loop is now **away-step Frank–Wolfe** (Lacoste-Julien & Jaggi, NeurIPS 2015),
   which is linearly convergent on a polytope where vanilla FW is `O(1/t)` and zig-zags at
@@ -71,7 +71,7 @@ Two new report fields make the solver testable without trusting it:
 
 ## 3. Step 1 — the known-feasible test (`results/kill/k8a/recheck_k9.csv`)
 
-`code/apps/kill_k8a_recheck.cpp` regenerates K9's variant-(b) embeddings bit-identically
+`Kirigami/apps/kill_k8a_recheck.jl` regenerates K9's variant-(b) embeddings bit-identically
 (same seeds, same three starts, same two fallbacks, `delta = delta' = 1e-3 med^2`,
 600 L-BFGS iterations, 6 barrier stages) and runs the corrected LP at each. All **30**
 designs K9 ran the cone on are reproduced.
@@ -136,7 +136,7 @@ because the margin is identically 0, so the LP value is pinned to within `4e-10`
 
 ## 5. Step 3 — the K1a population, re-run
 
-`code/apps/kill_k8a.cpp`, 100 graphs, both embeddings, 8 shards, corrected solver:
+`Kirigami/apps/kill_k8a.jl`, 100 graphs, both embeddings, 8 shards, corrected solver:
 
 | | at `X_ini` | at `X0` |
 |---|---|---|
@@ -218,15 +218,14 @@ K8a's 0/100 FAIL stands."*
 ## Reproducing
 
 ```bash
-cmake -S code -B code/build -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build code/build -j
-./code/build/kiri_tests                      # 4 new K8a-recheck cases
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 4 K8a-recheck cases included
 
 # step 1 / step 4: K9's variant (b) embeddings, 12 shards
-for i in $(seq 0 11); do ./code/build/kill_k8a_recheck --out results/kill/k8a \
+for i in $(seq 0 11); do julia --project=Kirigami Kirigami/apps/kill_k8a_recheck.jl --out results/kill/k8a \
     --shard $i --nshards 12 & done; wait
 
 # steps 2-3: the K1a population with the corrected solver
-for i in $(seq 0 7); do ./code/build/kill_k8a --n 100 --x0 --dual-iters 100000 \
+for i in $(seq 0 7); do julia --project=Kirigami Kirigami/apps/kill_k8a.jl --n 100 --x0 --dual-iters 100000 \
     --out results/kill/k8a/recheck100k --cache results/kill/cache \
     --shard $i --nshard 8 & done; wait
 ```

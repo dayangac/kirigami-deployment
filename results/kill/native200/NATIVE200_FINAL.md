@@ -2,7 +2,7 @@
 
 **PARTIAL -- rerun in progress, 4 of 389 cells done** (3600 s rerun of the timed-out and never-dispatched cells), plus 26 of 39 crash-fixed cells. Regenerate with `code/build/native200_merge`.
 
-Every number below is computed by `code/apps/native200_merge.cpp` from `results/kill/native200/native200_final.csv`, which is itself merged from `native200.csv` (the 600 s run), `rerun3600/shard_*.csv` (the 3600 s rerun of the timed-out and never-dispatched cells) and `crashfix3600/shard_*.csv` (the 39 crashed cells against the F24-patched CLI). One row per (graph id, variant); the 600 s status of a superseded cell is kept in `first_status`.
+Every number below is computed by `Kirigami/apps/native200_merge.jl` from `results/kill/native200/native200_final.csv`, which is itself merged from `native200.csv` (the 600 s run), `rerun3600/shard_*.csv` (the 3600 s rerun of the timed-out and never-dispatched cells) and `crashfix3600/shard_*.csv` (the 39 crashed cells against the F24-patched CLI). One row per (graph id, variant); the 600 s status of a superseded cell is kept in `first_status`.
 
 Grid: 600 cells (200 graphs x {native, sigma_mc, sigma_def}). Rows by run: crashfix3600 26; never dispatched 26; orig (600 s) 544; rerun3600 4; 
 
