@@ -46,7 +46,7 @@ embedding. On these random graphs it never is:
 This is the paper's own open problem (2026 Sec. 6): the shape space X contains
 embeddings with self-intersections and the paper offers no certificate for the valid
 subset. The combinatorial-vs-geometric agreement is instead verified on 60 valid
-instances by `kiri_tests` (see `tests/test_holes.cpp`).
+instances by `Pkg.test()` (see `test/test_holes.jl`).
 
 Worst dense solve time in the sweep: 2382.611 ms.
 
@@ -117,7 +117,7 @@ reference cases (the `dim Z` column above), so there is no basis vector to test 
 `27 / 27` in row 2c counts graphs on which nothing was checked, not residuals that passed.
 The row is consistent with row 2b: `dim Z == 0` is exactly `rank(L) == H`. The check has
 real content only where `dim Z > 0`, which in everything measured means the boundary-free
-patches: the three torus rows above and `tests/test_rank_checks.cpp`, where `dim Z == 1`
+patches: the three torus rows above and `test/test_rank_checks.jl`, where `dim Z == 1`
 and the out-harmonic residual is `3.3e-16 / 7.2e-16 / 5.6e-16`.
 
 ### Identities that failed, and the corrected form
@@ -137,7 +137,7 @@ rows. With `I(v) = 1` iff `K(v)` is a row of `L`:
 (All in-edges of `v` belong to `K(v)`, so the in-degree is all-or-nothing; the
 out-edges are distributed over the preimages of their targets.) This is exactly the
 `y = 1` instance of the out-harmonic characterization of check 2. When there are no
-notches -- the torus patches in `tests/test_rank_checks.cpp` -- it collapses to the
+notches -- the torus patches in `test/test_rank_checks.jl` -- it collapses to the
 naive form, `1^T L == 0` exactly, and `rank(L) == H - 1` (measured, not assumed).
 
 **Check 3 (hinge-graph Euler count) holds exactly as stated**, on all 50 / 50 sweep graphs and all 8 reference cases, with `H` counting only the all-interior preimages:
@@ -154,7 +154,7 @@ reduces to Scout-c's `H = |E_hinge| - |F| + 1`.
 The one place the plane count needs a correction is a boundary-free patch, where
 `Gamma` lives on a surface of Euler characteristic 0 rather than 2 and the count
 overshoots by exactly one: `H == |E_hinge| - |F| + c(Gamma) - 1`, verified in
-`tests/test_rank_checks.cpp` on the 4x4 and 6x4 square tori and the 4x4 triangle torus.
+`test/test_rank_checks.jl` on the 4x4 and 6x4 square tori and the 4x4 triangle torus.
 
 Checks 2a and 2b held on every graph and every reference case measured. Check 2c held
 wherever it had content -- the three torus patches, `dim Z == 1`, residuals `<= 7.3e-16` --

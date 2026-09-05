@@ -1,6 +1,6 @@
 # The bisection referee's collision predicate: the F34 hinge-vertex artefact, fixed
 
-Scope: `code/src/core/collision.{hpp,cpp}` -- `polygons_overlap` / `has_collision`, the
+Scope: `Kirigami/src/core/collision.jl` -- `polygons_overlap` / `has_collision`, the
 primitive under every `theta_bisect` column in the kill runs and under `theta_max()`.
 All numbers below come from a full re-run of K2a, K5, K6 and K9 against a matched baseline
 binary; nothing is quoted from the recorded runs.
@@ -71,7 +71,7 @@ Cost: the predicate is ~3x slower per pair (K2a wall 13.6 s -> 42.4 s for the wh
 
 ## 3. Tests
 
-New, in `code/tests/test_collision.cpp` (written first, failing against the old predicate):
+New, in `Kirigami/test/test_collision.jl` (written first, failing against the old predicate):
 
 * `polygons_overlap: faces sharing a hinge vertex with a reflex sector do not overlap` --
   the two `voronoi_93` polygons verbatim, at tolerances 0, 1e-15, 1e-12, 1e-9, 1e-6, both
@@ -86,24 +86,24 @@ New, in `code/tests/test_collision.cpp` (written first, failing against the old 
   the K5 `voronoi_75` pair verbatim, at five tolerances and in both orders, plus a
   translation invariance check. This is the regression test for the second defect above.
 
-`derivation_tests.cpp` R6-c, the pinned reproduction from checker round 6, is INVERTED:
+`derivation_tests.jl` R6-c, the pinned reproduction from checker round 6, is INVERTED:
 `R6-c2` now asserts that `polygons_overlap` agrees with the dense probe at every tolerance
 (0 misfires of 6 values, both orders), and its comment records the fix.
 
-Suites (both re-run after the fix, from the repo root; the `kiri_tests` totals include test
+Suites (both re-run after the fix, from the repo root; the `Pkg.test()` totals include test
 cases other agents added to the same working tree while this ran):
 
 | suite | cases | assertions | result |
 |---|--:|--:|---|
-| `kiri_tests` | 103 | 17 504 | 0 failures |
-| `derivation_tests` | 33 | 89 074 | 0 failures |
+| `Pkg.test()` (whole suite) | ⟨JULIA:tests⟩ | 0 failures |
+| `derivation_tests.jl` | ⟨JULIA:derivation_tests⟩ | 0 failures |
 
 ## 4. Re-referee: agreement before / after
 
 Every "before" number here was produced by a BASELINE BINARY built from the current source
-tree with only `code/src/core/collision.{hpp,cpp}` reverted to `HEAD` (built out of tree in
+tree with only `Kirigami/src/core/collision.jl` reverted to `HEAD` (built out of tree in
 the scratchpad), so the comparison isolates this fix from the round-6 corrections other
-agents made to `contact.cpp` / `zero_plus.cpp` in the same working tree. The baseline K5 run
+agents made to `contact.jl` / `zero_plus.jl` in the same working tree. The baseline K5 run
 reproduces `results/kill/k5/summary.txt` line for line (only the wall time differs), which
 checks that control.
 
@@ -125,7 +125,7 @@ The headline 187/187 is unchanged and the referee has become tolerance-independe
 remaining are the known grazing designs, where the closed-form min-over-roots rule -- not
 the referee -- is the quantity being tested). Both verdicts unchanged.
 
-### B4 -- the F34 case itself (`derivations/scratch/check_b4_93.cpp`, ids 93 and 96)
+### B4 -- the F34 case itself (`derivations/scratch/check_b4_93.jl`, ids 93 and 96)
 
 | design | exact scan | referee before | referee after |
 |---|--:|--:|--:|
@@ -168,14 +168,14 @@ is 0 on all 400 designs before and after.
 The two designs are `voronoi 12 / sigma_def` (`Theta_max = 0.002937`) and
 `voronoi 93 / sigma_def` (`Theta_max = 0.238947`, the F34 design itself). They move because
 `polygons_overlap` is called INSIDE the exact scan too (`exact_theta_max_overlap`'s interval
-probe, `contact.cpp`), not only in the referee: the same hinge artefact was rejecting the
+probe, `contact.jl`), not only in the referee: the same hinge artefact was rejecting the
 first interval. Both are still uncertified (`cert_noroot = 0`), and 2 / 400 = 0.5 % is far
 under K6's 20 % bar, so the verdict does not move -- but the sentence "`Theta_max = 0` on all
 400" is no longer true and is corrected in `KILL_REPORT.md`.
 
 Control: the baseline binary reproduces `results/kill/k6/k6_final.csv` on every column
 except `sec_eps_max` on 15 rows, which is another agent's round-6 change to
-`method/zero_plus.cpp` in the same working tree, not this fix.
+`method/zero_plus.jl` in the same working tree, not this fix.
 
 ### K9 -- 400 designs, the convexity + split-inward embedding
 
