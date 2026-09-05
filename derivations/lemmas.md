@@ -1,7 +1,7 @@
 # lemmas.md — two results that `core.md` / `KILL_REPORT.md` currently state as MEASURED
 
 Deriver-L, mission 2 / WP1. Companion to `derivations/core.md`; nothing here edits that file,
-`code/src` or `code/tests`. Notation is `core.md` §0 throughout (`c = cos(θ/2)`, `s = sin(θ/2)`,
+`Kirigami/src` or `Kirigami/test`. Notation is `core.md` §0 throughout (`c = cos(θ/2)`, `s = sin(θ/2)`,
 `τ = tan(θ/2)`, `J` the `+π/2` rotation, `σ : F → {±1}`, `u` the face potential of T1 Step 3,
 `Y_θ = cC + sS` with `C_{(v,f)} = x_v`, `S_{(v,f)} = J(2u_f − σ_f x_v)`).
 
@@ -38,7 +38,7 @@ New, and used only where named:
   first bullet of L1.4(i). Without it the catalogue is still correct in the direction the
   certificate uses, but not exhaustive: split-adjacent pairs with a non-opening cut, and type-(d)
   pairs, also have `h ≡ 0`. The first clause is exactly the `0⁺` separation predicate of
-  `zero_plus.hpp`; `[F, K5 / F30]` reports non-opening split cuts as the observed failure mode, so
+  `zero_plus.jl`; `[F, K5 / F30]` reports non-opening split cuts as the observed failure mode, so
   H-L3 fails precisely on designs with `Θ_max = 0`, where no contact calculus is needed.
 * **H-L2 (non-degenerate lattice).** `P₀ = [t_h t_v]` is invertible. This is automatic for a
   lattice: two independent periods. Without it `K = Q P₀⁻¹` is undefined and `J(θ)` is not a
@@ -52,7 +52,7 @@ New, and used only where named:
 
 **[D] L1.0a (candidate pair).** A *candidate pair* is `π = (w, (a,b))` where `(a,b)` is an
 `M′`-edge of some face `f` (two cyclically consecutive corners of `f`) and `w` is a corner of a
-face `g ≠ f`. Write `ρ : V′ → V` for the source map (`cut.hpp::prime_to_original`) and
+face `g ≠ f`. Write `ρ : V′ → V` for the source map (`cut.jl::prime_to_original`) and
 `v_a = ρ(a)`, `v_b = ρ(b)`, `v_w = ρ(w)`. The *orientation harmonic* of `π` is
 `h_π(θ) = det(Y_b − Y_a, Y_w − Y_a) = p + q cos θ + r sin θ`, coefficients by (T3.2).
 
@@ -145,7 +145,7 @@ printed (iii) as "(converse, under H-L1)", which mislabelled an unconditional st
 
 **(iv)** *(H-L1 fails, and how)* **[R2 correction: D-L1-4]** Every count in this paragraph and in
 Check L1 is an **instance** count — one unit per `(candidate pair, shape-space sample)` — not a
-count of distinct pairs; `check_l1.cpp` increments once per sample. The Checker's independent run
+count of distinct pairs; `check_l1.jl` increments once per sample. The Checker's independent run
 reports **pair** counts, which is why its structural figure (7 624 pairs) is ~20× smaller than the
 174 354 instances below while its accidental figure (1 116) coincides with mine, those pairs each
 occurring in a single sample. On the corpus of Check L1 (84 graphs, 30 119 368 candidate-harmonic
@@ -250,7 +250,7 @@ tilings do. This is why the count is non-zero, `ε`-independent, and small (core
 
 1. **[A]** `v_w = v` and `ρ(a*) = v`, so `C_w = C_{a*} = x_v` and `Y_w − Y_{a*} = s (S_w − S_{a*})`
    by (T1.5): the `cos(θ/2)` part cancels identically. That is the sentence after (L1.7), and it
-   is the same computation as `zero_plus.hpp`'s header (`dC_e = 0`, `dS_e`) generalised from split
+   is the same computation as `zero_plus.jl`'s header (`dC_e = 0`, `dS_e`) generalised from split
    edges to every coincident copy.
 2. **[A]** In the frame of L1.0b, `C_aw = C_w − C_a`. If `v = v_a` then `C_aw = 0`, i.e.
    `α = β = 0`, and `S_aw = dS`. If `v = v_b` then `C_aw = C_ab`, i.e. `α = 1, β = 0`, and
@@ -350,7 +350,7 @@ by L1.1(ii) as amended they share a hinge edge at `v_w`, share a split edge at `
 edge containing `v_w`. H-L3's first clause kills the split case via (L1.10), its second clause kills
 type (d), and the hinge case is (L1.9). ∎
 
-**H-L3 is not free.** Its first clause is exactly the predicate `zero_plus.hpp` is written to
+**H-L3 is not free.** Its first clause is exactly the predicate `zero_plus.jl` is written to
 measure (`q_e ∝ ⟨d, Δu⟩`-type first-order separation), and `[F, K5 / F30 / KILL_REPORT]` reports
 non-opening split cuts as the *observed* failure mode of projected designs. So H-L3 holds on every
 design that survives the `0⁺` test and fails on exactly the designs that do not — which are the ones
@@ -396,10 +396,10 @@ split-adjacent, `0` are non-adjacent — and, sharper, all of them have `w == a`
    (type (a)); **0** are split-adjacent, **0** have no shared edge, and **0** have
    `v_w ∉ {v_a, v_b}` (the `λ ∉ {0,1}` branch of (L1.9) is empty on this corpus).
    Sharper still: **all 239 892** have `w == a` or `w == b` **as `M′`-vertices**, not merely as
-   copies of the same `M`-vertex — the hinge point is welded by `cut.hpp::corner_to_prime` into a
+   copies of the same `M`-vertex — the hinge point is welded by `cut.jl::corner_to_prime` into a
    single `M′`-vertex shared by the two faces. So the identity class is decided by an **index
    comparison**, the cheapest possible combinatorial filter, and that is exactly what
-   `contact.cpp`'s `if (p == a || p == b) continue;` already does, *before* the numeric identity
+   `contact.jl`'s `if (p == a || p == b) continue;` already does, *before* the numeric identity
    test of T3.H.1. On this corpus the numeric identity test therefore fires on nothing the index
    comparison has not already removed. ∎
 
@@ -446,27 +446,22 @@ under-counts the `C = 0` class. The consequence is *not* unsoundness: routing su
 and it is the **unsafe** direction — (T5.1c)'s first atom `g(0)·g(T) > 0` fails and the pair is
 reported as having a root, which makes `NOROOT` *conservative*, i.e. `R(ε)` shrinks. So the
 practical rule stands: **classify by `|h(0)| ≤ tol` numerically, and use the combinatorics only to
-know that the answer is structural.** That is what `contact.cpp` already does.
+know that the answer is structural.** That is what `contact.jl` already does.
 
 **Proof.** (i) is L1.1(i)+(ii), L1.2 step 5 and L1.3; (ii) is L1.1(iii); (iii) is L1.1(iv) plus the
 direction of failure of (T5.1c) recorded in core.md T5.2b.2. ∎
 
 ## Check L1
 
-**Program** `derivations/scratch/check_l1.cpp`. **Build line** (in the file header; the repo's
-`clang++` needs `DEVELOPER_DIR` pointed at Xcode on this machine, see the note at the end of this
+**Program** `derivations/scratch/check_l1.jl`. **Run line** (in the file header):
 section):
 
 ```
-clang++ -std=c++20 -arch arm64 -O2 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 \
-  -I code/src -I code/apps derivations/scratch/check_l1.cpp \
-  code/src/core/mesh.cpp code/src/core/cut.cpp code/src/core/holes.cpp \
-  code/src/core/kinematics.cpp code/src/core/orientation.cpp code/src/core/generators.cpp \
-  code/src/core/tutte_auxetic.cpp code/src/core/collision.cpp code/src/core/optimize.cpp \
+julia --project=Kirigami derivations/scratch/check_l1.jl
   -o /tmp/check_l1 && /tmp/check_l1 140 20
 ```
 
-**Corpus.** The 8 Phase-2 reference cases (`kill_common.hpp::reference_cases()`) plus
+**Corpus.** The 8 Phase-2 reference cases (`kill_common.jl::reference_cases (population frozen in data/corpus/)()`) plus
 `make_graph(id, 18, 46, 220)` for `id = 0 … 139` (the K1a population: Voronoi / Delaunay /
 quad-random with `assign_orientation_relaxation` σ), of which **84 graphs** survive projection,
 deployability (`1e−7`) and positive orientation. Per graph: `X₀` plus up to 19 Gaussian null-space
@@ -542,9 +537,7 @@ spec asks for; only the residual `1 116` are removed by perturbation, and those 
 set of L1.1(iii).
 
 **Toolchain note (not a result).** On this machine `xcode-select` points at an Xcode whose
-`xcodebuild` fails to load, so a bare `clang++` aborts. Both scratch programs were built with
-`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` and the Xcode toolchain compiler
-`.../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++` with
+(Toolchain note obsolete after the Julia port: no compiler is involved; both scratch programs are run with `julia --project=Kirigami derivations/scratch/check_l{1,2}.jl`.)
 `-isysroot .../MacOSX.sdk`. Compiler flags are otherwise exactly the header build line.
 
 ---
@@ -555,10 +548,10 @@ set of L1.1(iii).
 
 Throughout Part L2, `(M, σ)` is a **periodic** pattern given by a fundamental domain (one face per
 translation class) together with the period matrix `P₀ := T = [t_h  t_v] ∈ R^{2×2}` (H-L2), and the
-quotient system of `periodic_jacobian.hpp` supplies `X(t) = X₀ + Φ t` with `Φ ∈ R^{n_q × k}`,
+quotient system of `periodic_jacobian.jl` supplies `X(t) = X₀ + Φ t` with `Φ ∈ R^{n_q × k}`,
 `k = dim_null`. `Φ` is a null-space basis of the **scalar** system `[L; e_pin]`, and the design
 coordinate is `t ∈ R^{2k}`: `Φ` acts on the `x` and the `y` coordinate **separately**, and the code
-orders `t` as `(t_{2i}, t_{2i+1}) = ` (`φ_i` on `x`, `φ_i` on `y`) — `kill_k7.cpp::shape_point`.
+orders `t` as `(t_{2i}, t_{2i+1}) = ` (`φ_i` on `x`, `φ_i` on `y`) — `kill_k7.jl::shape_point`.
 
 **[A] L2.0a (the period law for the face potential).** For a lattice vector `τ ∈ {t_h, t_v}` there
 is a **constant** `w_τ ∈ R²` with
@@ -573,7 +566,7 @@ the translated picture. Across `e + τ` between `f + τ` and `g + τ` the requir
 `(u_g + w_τ + σ_g τ/2) − (u_f + w_τ + σ_f τ/2) = σ_g x_{src(e)} + (σ_g − σ_f) τ/2 = σ_g x_{src(e)} + σ_g τ`,
 using `σ_f = −σ_g` on a hinge (0.2). The two agree. Since `Γ` is connected (H2), a solution of the
 increment system is unique up to one additive constant, so `w_τ` exists and is a single vector,
-independent of `f`. ∎ This is the header derivation of `periodic_jacobian.hpp`, written out.
+independent of `f`. ∎ This is the header derivation of `periodic_jacobian.jl`, written out.
 
 **[A] L2.0b (the deployed period).** From (T1.5) and (L2.1),
 
@@ -772,22 +765,20 @@ that vanishes at most at isolated `θ`. Conversely, if `J(θ₀) ∈ span{I,J}` 
 
 **What it replaces.** The 2026 paper's §5.1 sentence "once the derivative of the conformal
 distortion vanishes at `θ = 0`, the deployment remains conformal for all opening angles", asserted
-*empirically*; and the corresponding one-line note in `periodic_jacobian.hpp`'s header, which states
+*empirically*; and the corresponding one-line note in `periodic_jacobian.jl`'s header, which states
 the argument but is not a numbered result anywhere. With L2.1 it is a two-line consequence, and by
 (L2.8) the two equations (L2.11) can be written directly in terms of `D` and `P₀`.
 
 ## Check L2
 
-**Program** `derivations/scratch/check_l2.cpp`. Its population, quotient/super-patch pipeline and
-`achievable()` are copied **verbatim** from `code/apps/kill_k7.cpp` (lines 36–243) so the numbers
+**Program** `derivations/scratch/check_l2.jl`. Its population, quotient/super-patch pipeline and
+`achievable()` are copied **verbatim** from `Kirigami/apps/kill_k7.jl` (lines 36–243) so the numbers
 compare directly with `results/kill/k7/k7_main.csv`; nothing in `code/` is modified.
 
 **Build line** (in the file header; same `DEVELOPER_DIR` note as Check L1):
 
 ```
-clang++ -std=c++20 -arch arm64 -O2 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 \
-  -I code/src -I code/apps derivations/scratch/check_l2.cpp \
-  code/src/core/*.cpp code/src/method/*.cpp -o /tmp/check_l2 && /tmp/check_l2 100
+julia --project=Kirigami derivations/scratch/check_l2.jl 100
 ```
 
 **Corpus.** The 33 K7 patterns (7 tiling families × {2×2, 3×2, 3×3} = 21, plus the 12 Voronoi tori
@@ -877,7 +868,7 @@ carry the same `u_f`. My candidate enumeration takes `(a,b)` from `c.prime_faces
 corners, so it holds by construction *in my check*. It is a hypothesis about the certificate's
 candidate list, not a theorem about it.
 
-**How to attack it.** I read `code/src/method/contact.cpp`'s `validity_certificate` and its
+**How to attack it.** I read `Kirigami/src/method/contact.jl`'s `validity_certificate` and its
 `scan` lambda: it takes `a = E[i]`, `b = E[(i+1) % ne]` from `E = PF[fe] = prime_faces[fe]`, so
 `a` and `b` **are** consecutive corners of one face today, and L1.0b applies to the current
 candidate list. Re-check this whenever the list changes. If any candidate has `pa` and `pb` in different faces — for instance if
@@ -897,11 +888,11 @@ with the **same scalar** `d_τ(φ)` for `e = e_x` and for `e = e_y`."
 system is `[L; e_pin] X = [−(T n_k)ᵀ ; x_pin]`: the right-hand side genuinely *differs* between the
 two coordinates. I claim that this affects `X₀` only and not `Φ`, so the two copies of `φ_i` are
 both null directions and carry the same `d_τ(φ_i)`. If that is wrong, `D` as computed by
-`kill_k7.cpp` — which reads it off the **even** generators only (`if (j % 2 == 0)`) — is not the
+`kill_k7.jl` — which reads it off the **even** generators only (`if (j % 2 == 0)`) — is not the
 object in Lemma L2.1 and the lemma is a coincidence.
 
 **How to attack it.** The non-circular half of my check is the comparison of the **odd** generators
-`M_{2i+1}` against row `i` of `D`, which `kill_k7.cpp` never touches; Check L2 reports
+`M_{2i+1}` against row `i` of `D`, which `kill_k7.jl` never touches; Check L2 reports
 `5.271e−14` over 133 patterns. Attack it by breaking the symmetry deliberately: modify a scratch
 copy of the pipeline so that the `x` and `y` copies of `φ_i` are scaled differently, or so that a
 pattern has anisotropic periods with `T` far from a multiple of the identity (`voronoi_torus`
@@ -927,23 +918,9 @@ and compare with `AchievableSet::D`. I did **not** do that; my `D` is the one th
 
 ```
 # Check L1  (84 graphs, 30 119 368 candidate harmonics, ~0.6 s)
-clang++ -std=c++20 -arch arm64 -O2 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 \
-  -I code/src -I code/apps derivations/scratch/check_l1.cpp \
-  code/src/core/mesh.cpp code/src/core/cut.cpp code/src/core/holes.cpp \
-  code/src/core/kinematics.cpp code/src/core/orientation.cpp code/src/core/generators.cpp \
-  code/src/core/tutte_auxetic.cpp code/src/core/collision.cpp code/src/core/optimize.cpp \
-  -o /tmp/check_l1 && /tmp/check_l1 140 20
-
-# Check L2  (133 periodic patterns, ~1.0 s)
-clang++ -std=c++20 -arch arm64 -O2 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 \
-  -I code/src -I code/apps derivations/scratch/check_l2.cpp \
-  code/src/core/*.cpp code/src/method/*.cpp -o /tmp/check_l2 && /tmp/check_l2 100
+julia --project=Kirigami derivations/scratch/check_l1.jl
+julia --project=Kirigami derivations/scratch/check_l2.jl 100
 ```
 
-On this machine `xcode-select` points at an Xcode whose `xcodebuild` aborts, so a bare `clang++`
-fails before it reaches the source. Prefix both lines with
-`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` and use
-`/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++`
-with `-isysroot .../Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk`. This is an environment
-defect, not a property of the code; `code/tests` were not run because they go through the same
+(The Xcode/`clang++` toolchain note that stood here is obsolete: the Julia port needs no compiler. The package test suite was run with `Pkg.test()`.)
 compiler and this file changes no code.

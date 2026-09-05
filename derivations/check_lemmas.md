@@ -7,8 +7,8 @@
    was `derivations/lemmas_statements.md` (statements + standing hypotheses only),
    `derivations/core.md` §0, T1, T3, T5.1 + the deflation block (T5.2b.1/T5.2b.2/Lemma T5.1e/
    the three-class atom list), T5.3, `derivations/check.md` entries D5, R2.5, R3.1a and Round 6,
-   and the code (`deploy_basis.hpp`, `contact.hpp`, `zero_plus.hpp`, `periodic_jacobian.hpp`,
-   `apps/kill_b3.cpp::achievable/shape_point`, `tests/derivation_tests.cpp`).
+   and the code (`deploy_basis.jl`, `contact.jl`, `zero_plus.jl`, `periodic_jacobian.jl`,
+   `apps/kill_b3.jl::achievable/shape_point`, `test/derivation_tests.jl`).
    **`derivations/lemmas.md` was NOT opened**, by me or by any tool, until this Pass-1 section
    had been written to disk in full. Every algebraic identity in Pass 1 was re-derived from
    (T1.5)/(T3.2) by hand in the code's sign convention (0.7).
@@ -80,7 +80,7 @@ Consistent, but the two numbers should be labelled where they appear. **(wording
 
 **The separation identity.** `C_w = x_v = C_{a*}` since both are copies of the same `v`, so
 `Y_w − Y_{a*} = c·0 + s·(S_w − S_{a*}) = sin(θ/2)·dS`, exactly, for all `θ`. This is the same
-identity `zero_plus.hpp` states as `dC_e = 0` and it is here proved for hinge- and vertex-only
+identity `zero_plus.jl` states as `dC_e = 0` and it is here proved for hinge- and vertex-only
 incidences too, not only for split edges. **PROVED.**
 
 **(L1.8), case `a* = a` (`v_w = v_a`).** `C_aw = 0`, `S_aw = dS`. (T3.2) gives
@@ -124,7 +124,7 @@ including at `θ = π` (`h(π) = 2p`), which matters because H6 runs the deploym
 *The "never a contact" reading is correct and is not weakened by a permanent touching:* a contact
 of the pair `(w,(a,b))` requires `w` to be collinear with `(a,b)`, i.e. `h_π(θ) = 0`; a *permanent*
 touching would require `h_π ≡ 0`, which is the `A = B = C = 0` class, **not** class 3 (class 3 has
-`A ≠ 0`). The two interval predicates of `contact.hpp` are only ever evaluated *at* a root, so no
+`A ≠ 0`). The two interval predicates of `contact.jl` are only ever evaluated *at* a root, so no
 root ⟹ no candidate angle ⟹ the deflated atom `true` is correct. **PROVED.** This also reproduces
 Lemma T5.1e and its R3.1a side-condition, independently.
 
@@ -178,7 +178,7 @@ statement**, not an error in the equivalence.
 the box excludes:
 * `f, g` split-adjacent (or any two faces with `σ_f = σ_g`) with `Δu = 0` **and** `v_w` collinear
   with `(v_a,v_b)`. `Δu = 0` means the split cut never opens — `dS_e = 2JΔu = 0`, exactly the
-  `q_e = 0` degenerate case `zero_plus.hpp` is written to detect — so it is a real, describable
+  `q_e = 0` degenerate case `zero_plus.jl` is written to detect — so it is a real, describable
   configuration, not a vacuous one.
 * type (d), `σ_g = −σ_f`, two faces meeting only at `v_w`, with `2Δu = 2σ_g x_{v_w}` and the
   collinearity. Nothing in H1–H6 forbids it.
@@ -215,7 +215,7 @@ by `φ_i e_yᵀ`, so `δw_τ = d_τ(φ_i) e_y`. With `Q = 2J[w_h w_v]`,
    ∂Q/∂t_{2i+1} = 2 J e_y d_iᵀ = −2 e_x d_iᵀ          (J e_y = −e_x)
 ```
 and right-multiplying by `P₀⁻¹` gives **exactly (L2.8)**, both formulas and both signs. **PROVED.**
-This also matches the code: `kill_b3.cpp::achievable` reads `D(i,0..1) = ½ (M_{2i} T)(row 2)`,
+This also matches the code: `kill_b3.jl::achievable` reads `D(i,0..1) = ½ (M_{2i} T)(row 2)`,
 which is `½ · 2 d_iᵀ = d_iᵀ` — the same convention.
 
 **(L2.9), and the spec's attack on the factorisation.** Put `g_iᵀ := d_iᵀ P₀⁻¹`. Then
@@ -380,7 +380,7 @@ unconditional; H-L1 is the separate assertion that the first branch is empty. Pa
 
 | proof step | verdict | note |
 |---|---|---|
-| 1 (`dC = 0`, `Y_w − Y_{a*} = s·dS`) | **AGREE** | matches `zero_plus.hpp`'s `dC_e = 0`, correctly generalised |
+| 1 (`dC = 0`, `Y_w − Y_{a*} = s·dS`) | **AGREE** | matches `zero_plus.jl`'s `dC_e = 0`, correctly generalised |
 | 2 (`α,β` in both endpoint cases; `A = −γD₀`, `B = δ′D₀`) | **AGREE** | I checked the `v = v_b` case separately: `δ = 1 + δ′`, `α = 1`, so `B = (δ−α)D₀ = δ′D₀`. This is the one place a sign could hide and it does not |
 | 3 (`r = ½det(d,dS)`) | **AGREE** | |
 | 4 (`p = ½σ_f⟨d,dS⟩` via `\|d\|² = −σ_f D₀`) | **AGREE** | identical to my Pass-1 result, reached differently |
@@ -430,7 +430,7 @@ So the box contradicts steps 5–6. What steps 5–7 actually prove is: *on this
    on `t`, not a combinatorial one.
 2. The clean repair is a named hypothesis, and the natural one is **"every split cut opens",
    `Δu ≠ 0` on every split-adjacent face pair** — which is exactly the condition
-   `zero_plus.hpp`/K5/F30 report as *failing* on measured designs. So the hypothesis is not free and
+   `zero_plus.jl`/K5/F30 report as *failing* on measured designs. So the hypothesis is not free and
    should be printed rather than absorbed.
 
 My tests confirm the corpus claim in both directions with zero exceptions (`L1-i`, `L1-j`:
@@ -551,7 +551,7 @@ land in **different** components, so their face potentials carry **independent a
 on the object `K` is measured on, even though the **quotient** `Γ_q` is connected (I checked: 1
 component, quotient residual `2.7e−15`).
 
-`achievable()` in `kill_k7.cpp` / `kill_b3.cpp` **never reads `consistency`**. And note why the
+`achievable()` in `kill_k7.jl` / `kill_b3.jl` **never reads `consistency`**. And note why the
 `rank(A) = 2 rank(D)` equality does not catch it: both sides are read off the same `M_j`, so the
 equality is insensitive to whether those `M_j` mean anything. The `(L2.8)` row-vanishing test
 (`1.59e−14`) is likewise insensitive. Only a `D` built from a different definition sees it.
@@ -611,43 +611,37 @@ the disagreement above.
 
 ## What was added, and where
 
-Four `TEST_CASE`s appended to `code/tests/derivation_tests.cpp` — that file only. Nothing under
-`code/src`, `code/apps`, `code/CMakeLists.txt`, `derivations/lemmas.md` or `derivations/core.md`
-was touched. The file stays standalone doctest.
+Four `@testset`s appended to `Kirigami/test/derivation_tests.jl` — that file only. Nothing under
+`Kirigami/src`, `Kirigami/apps`, `Kirigami/Project.toml`, `derivations/lemmas.md` or `derivations/core.md`
+was touched. The file stays standalone unit test.
 
 1. `L1 (lemmas.md) class prediction from the combinatorics vs the numeric class`
 2. `L1.2a class-3 harmonics: constant sign on (0, pi], theta = pi included`
 3. `L2 (lemmas.md) dim K = 2 rank(D), the (L2.8) generators, and an INDEPENDENT D`
 4. `L2 counterexample search: 2000 random (torus, sigma) draws`
 
-Two additions to the file's includes: `method/periodic_jacobian.hpp` and `apps/kill_common.hpp`
+Two additions to the file's includes: `method/periodic_jacobian.jl` and `apps/kill_common.jl`
 (for `reference_cases()` / `make_graph()` / `median_edge_length()`, so the L1 corpus is the shared
 kill population rather than a private copy). The K7 torus population, `PState`/`prepare`/`K_at`
-and `achievable()` are copied from `code/apps/kill_k7.cpp` / `kill_b3.cpp` so the numbers compare
+and `achievable()` are copied from `Kirigami/apps/kill_k7.jl` / `kill_b3.jl` so the numbers compare
 directly with `results/kill/k7/k7_main.csv`; that copying is marked in the source. The genuinely
 independent piece is `dtau_covector`, written from (L2.5) alone.
 
 ## Build line
 
-The build line in `derivations/check.md`'s header, plus **`-Icode/apps`** (the only change), and
-with the Xcode toolchain compiler by its full path, because a bare `clang++` aborts on this machine
+`derivation_tests.jl` is part of the package test suite; it is run with (no `-I` flags, no compiler --
 (`xcodebuild` fails to load — the environment defect `lemmas.md` also documents):
 
 ```
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ \
-  -std=c++20 -O2 -arch arm64 \
-  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
-  -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 -Icode/src -Icode/apps \
-  code/tests/derivation_tests.cpp code/build/libkiri_core.a \
-  -o code/build/derivation_tests && ./code/build/derivation_tests
+julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["derivation_tests"])'
 ```
 
 ## Whole-file run
 
 ```
-[doctest] test cases:     37 |     37 passed | 0 failed | 0 skipped
-[doctest] assertions: 149115 | 149115 passed | 0 failed |
-[doctest] Status: SUCCESS!
+⟨JULIA:derivation_tests⟩  (test cases)
+⟨JULIA:derivation_tests⟩  (assertions)
+Test Summary: | Pass  Total  -- 0 failures
 ```
 
 Baseline before my additions, rebuilt and re-run first so the delta is honest: **33 test cases,
@@ -691,7 +685,7 @@ L1 corpus: 60 graphs
 | L1-m | L1.2a `sign h = sign p` on `(0,π]`, no zero (`π` included) | 10 000 | 0.000e+00 | 0 | PASS |
 
 **Corpus.** 60 graphs — the 7 non-periodic Phase-2 reference cases from
-`kill_common.hpp::reference_cases()` plus `make_graph(id, 18, 46, 220)` for `id = 0 …` until 60 are
+`kill_common.jl::reference_cases (population frozen in data/corpus/)()` plus `make_graph(id, 18, 46, 220)` for `id = 0 …` until 60 are
 usable — `× 18` samples (`X₀` plus Gaussian null-space perturbations at `0.25`), i.e. **1 080
 `(graph, σ, t)` triples**, well above the spec's 1 000, and **24 460 884 candidate harmonics** over
 every ordered face pair with no broad phase.
@@ -753,7 +747,7 @@ zeros, `h(π) = 2p` to `1e−14` relative, `harmonic_roots_deflated` empty on `(
 | L2-i | L2.2(c) `rank([L;d_h;d_v]) − rank(L) = rank(D)` | 108 | 0.000e+00 | 0 | PASS |
 | L2-j | 2 000-draw counterexample search for `rank(A) = 2rank(D)` | 1 999 | 0.000e+00 | 0 | PASS |
 
-**Corpus.** The **33 K7 patterns** (`l2_k7_population()`, byte-identical to `kill_k7.cpp`'s
+**Corpus.** The **33 K7 patterns** (`l2_k7_population()`, byte-identical to `kill_k7.jl`'s
 `population()`; all 33 build and solve) **plus 110 fresh random Voronoi tori** of 12–45 sites with
 `quotient_sigma` max-cut σ, of which 110 build → **143 patterns**. Ranks are dense `JacobiSVD` with
 threshold `1e−10·σ_max` (floor `1e−13`), as the spec asks. The covector test (L2.10) runs on the
@@ -799,7 +793,7 @@ and is the right thing for the certificate to rely on.
 **Lemma L1.2 — VERIFIED.** The one lemma I would sign without reservation. (L1.8) is right in both
 endpoint cases — I derived it independently before reading the proof, and the `v = v_b` case, where
 the cross terms must cancel, is the place a sign could have hidden and does not. It cross-checks
-exactly against `core.md` (T5.2)/(T5.4) for split edges and against `zero_plus.hpp`'s `dS_e`. The
+exactly against `core.md` (T5.2)/(T5.4) for split edges and against `zero_plus.jl`'s `dS_e`. The
 trichotomy is exhaustive; (L1.2a) reproduces Lemma T5.1e and my attack on its "never a contact"
 reading failed for the right reason (a permanent touching is `h ≡ 0`, which is a *different* class);
 and step 5 is a real contribution, turning `check.md` R3.1a's hand-added `A ≠ 0` side-condition into
@@ -814,11 +808,11 @@ word "**exactly**": the Deriver's own proof steps 5 and 6 concede that split-adj
 `Δu = 0`, and non-adjacent pairs at isolated `t`, also satisfy condition 3 — and step 5's reply
 (such designs are rejected by the certificate) is about the certificate, not about the pair. The
 named hypothesis is not free: `Δu = 0` is exactly the non-opening split cut that
-`zero_plus.hpp`/K5/F30 report as the *observed* failure mode. Relatedly, the box's "decided by
+`zero_plus.jl`/K5/F30 report as the *observed* failure mode. Relatedly, the box's "decided by
 `(M, σ)` … not by `t`" is false for the split branch, `Δu` being linear in `X`. On the corpus the
 characterisation is exact in **both** directions (`223 848 / 223 848`, tests `L1-i`/`L1-j`), and it
 is sharper than the lemma prints: the class is decided by an `M′`-vertex **index comparison**, which
-is what `contact.cpp` already does. So the engineering claim is safe and the theorem needs its
+is what `contact.jl` already does. So the engineering claim is safe and the theorem needs its
 hypothesis printed. **DISPUTED on the word "exactly" (D-L1-3, D-L1-2).**
 
 **Corollary L1.4 — VERIFIED**, inheriting L1.1 and L1.3's caveats. Its (iii) is the most honest

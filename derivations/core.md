@@ -19,10 +19,10 @@ T7 rank/periodic corrections · T8 conjecture list and Checker attack surface.
 
 ## Change log — round 2 (reconciliation with `derivations/check.md`)
 
-The Checker read this file with fresh context and wrote `derivations/check.md` (25 test cases,
-29 033 assertions, its own program `code/tests/derivation_tests.cpp`), raising eleven
+The Checker read this file with fresh context and wrote `derivations/check.md` (⟨JULIA:derivation_tests⟩,
+its own test file `Kirigami/test/derivation_tests.jl`), raising eleven
 disagreements D1–D11. Every one is resolved below. My own round-2 program is
-`derivations/scratch/check_r2.cpp` (build line in its header; `graphs used: 16`, 197 shape-space
+`derivations/scratch/check_r2.jl` (run line in its header; `graphs used: 16`, 197 shape-space
 samples, 2 363 380 atom evaluations); numbers quoted as **[N, R2-x]** come from it.
 
 | # | Checker's claim | resolution | where |
@@ -34,8 +34,8 @@ samples, 2 363 380 atom evaluations); numbers quoted as **[N, R2-x]** come from 
 | **D5** | the printed disjunct is degree 8; a degree-≤ 4 list exists | **ADOPTED with one necessary addition of my own.** The Checker's list is exact only when `g(0) ≠ 0`. `g(0) = p+q = 0` holds *systematically* — every permanent incidence at `θ = 0` (T3.H.2) and every split-edge pair (T5.3). Measured: the printed list disagrees with direct root-finding on **71 877 of 2 363 380** atom evaluations at `ε = 0.02`, and **all 71 877** have `g(0) = 0`; after adding the deflation clause, 0 mismatches — **but that round-2 number is withdrawn in round 3 as circular**, and one more deflation is needed; see the round-3 log below **[N, round 3]** | T5.2b |
 | **D6** | "split cycle ⟺ `Γ` disconnected" holds only one way | **CORRECTED** to the one-directional statement (210/210 split-cycle cases had `c(Γ)>1`; **124** cases had `c(Γ)>1` with a split forest) | T1.H.2 |
 | **D7** | T1 Step 6 is far more robust than my risk assessment; T7.H is too pessimistic | **CORRECTED.** Step 6's row space equals `L`'s on 398/398 random-`σ` cases including 210 with split-cut cycles; Step 6 is demoted from the weak-step list and T7.H is softened to name exactly what fails (the *geometric*-hole reading) and what survives | T1 Step 6, T7.H, T8 |
-| **D8** | `contact.hpp`'s flat-centroid pruning is unsound in principle | **ADOPTED as a note.** My (T4.3) is the sound static test; the flat-centroid variant discards 19 842 pairs the sound test keeps (no observed wrong `Θ_max`, 96/96) | T4.5a |
-| **D9** | `u_f` means different objects here and in `deploy_basis.hpp` | **CORRECTED** by a notation note fixing this file's `u_f` and naming the header's object explicitly. No code was touched (other agents own `code/`) | §0.10 |
+| **D8** | `contact.jl`'s flat-centroid pruning is unsound in principle | **ADOPTED as a note.** My (T4.3) is the sound static test; the flat-centroid variant discards 19 842 pairs the sound test keeps (no observed wrong `Θ_max`, 96/96) | T4.5a |
+| **D9** | `u_f` means different objects here and in `deploy_basis.jl` | **CORRECTED** by a notation note fixing this file's `u_f` and naming the header's object explicitly. No code was touched (other agents own `code/`) | §0.10 |
 | **D10** | the `τ` chart is singular at `θ = π` | **ADOPTED.** Domain and the amplitude/phase fallback stated | T3.4, T3.H.4 |
 | **D11** | the validity certificate has three items, not two | **ADOPTED.** Flat embeddedness is separated from deployment range | T5.1, T6.4 |
 
@@ -50,12 +50,12 @@ incomplete rather than wrong.
 
 `check.md` R2.7 left exactly three items: one substantive disagreement (R2.5) and two labelling
 residues (R2.4a, R2.4b). All three are resolved below, and on all three the Checker was right.
-Round 3's program is `derivations/scratch/check_r3.cpp` (same 16-graph corpus, same seed, same 197
+Round 3's program is `derivations/scratch/check_r3.jl` (same 16-graph corpus, same seed, same 197
 shape-space samples as round 2; build line in its header).
 
 | # | Checker's claim | resolution | where |
 |---|---|---|---|
-| **R2.5** | a **third** structural class `g(0) = g′(0) = 0` (`p = −q`, `r = 0`, `h = p(1 − cos θ)`) is unnamed, and round 2's "0 mismatches" is not reproducible | **CONCEDED, and round 2's number is WITHDRAWN as circular** — `check_r2.cpp` compared the deflated atom list against a reference using the *same* deflation, so it was structurally blind to class 3. New: **Lemma T5.1e** proves `h = p(1 − cos θ)` has constant sign on `(0, π)`, hence is *never* a contact event, so the class deflates by `(1 − cos θ) ∝ τ²` and its atom is the constant `true` (T5.1e′). Re-measured against a `τ`-chart-free crossing test: **0 mismatches of 2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`**, versus **153** (all class 3, `ε`-independent) without the new clause | T5.2b.2, T3.H.5 |
+| **R2.5** | a **third** structural class `g(0) = g′(0) = 0` (`p = −q`, `r = 0`, `h = p(1 − cos θ)`) is unnamed, and round 2's "⟨JULIA:check_r3:mismatches⟩ mismatches" is not reproducible | **CONCEDED, and round 2's number is WITHDRAWN as circular** — `check_r2.jl` compared the deflated atom list against a reference using the *same* deflation, so it was structurally blind to class 3. New: **Lemma T5.1e** proves `h = p(1 − cos θ)` has constant sign on `(0, π)`, hence is *never* a contact event, so the class deflates by `(1 − cos θ) ∝ τ²` and its atom is the constant `true` (T5.1e′). Re-measured against a `τ`-chart-free crossing test: **⟨JULIA:check_r3:mismatches⟩ mismatches of 2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`**, versus **153** (all class 3, `ε`-independent) without the new clause | T5.2b.2, T3.H.5 |
 | **R2.4a** | (T4.1b)'s `≥` direction is measured, not derived, and is printed untagged | **CONCEDED and TAGGED.** `≤` is `[A]` (derived from `β_e ∈ 𝒞` plus the wedge argument); `≥` is `[N]` only — 8 split-free patterns at 8.88e−16 (Checker: 4 patterns, 8.9e−16, test **T4-b**). I have no proof and do not claim one; the equality now carries the tag and the sample size | T4.4 |
 | **R2.4b** | the certificate's `θ = 0` overlap test is a different predicate from `EMB` (`θ = 0⁺`) and does not supply the hypothesis of T5.2b′ | **CONCEDED and REPLACED.** The certificate is now `POS ∧ NOOVERLAP(ε/2) ∧ NOROOT` — an exact polygon–polygon test at the single explicit angle `θ₁ = ε/2`. Proposition T5.2b′ is reproved as a connectedness argument (`O` is clopen in `(0, ε)`; overlap status can change only at a candidate root) and now *implies* `EMB` instead of assuming it. Stated explicitly: the `θ = 0` test is not merely different but **degenerate**, because the two copies of every split edge coincide at `θ = 0` and adjacent faces touch along whole shared edges | T5.2b.0, T5.2b′, T5.1, T6.4 |
 
@@ -88,8 +88,8 @@ list decides them and the degree-≤ 4 bound is unaffected. Measured status: the
 **144 / 144** of the identically-zero pairs on `squares` are coincidences; the classification of the
 other 14 784 on its corpus is not reported, so for those the coincidence classification is assumed.
 
-Deciding numbers for round 4: **unchanged** — `check_r3.cpp` still reports 0 mismatches of
-2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`, and the standalone `code/tests/derivation_tests.cpp`
+Deciding numbers for round 4: **unchanged** — `check_r3.jl` still reports ⟨JULIA:check_r3:mismatches⟩ mismatches of
+2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`, and the standalone `Kirigami/test/derivation_tests.jl`
 still reports 2 test cases, 59 982 assertions, 0 failures. This round changes statements and one
 proof, not measurements.
 
@@ -106,9 +106,9 @@ round 4, **no measured number changes** — the edits are to statements and to o
 | **R4.2 c2** | "`h_o,π′` vanishes at that one angle alone" is false | **CONCEDED.** Case A now prints `h_o,π′(θ) = ± L L′ sin(β_e − θ)` (T5.2b″-1b), with zero set `{β_e, β_e ± π}`; exactly one of the three lies in `(0, π)`, and it is `β_e` precisely when `β_e ∈ (0, π)`, which is the case at hand since `θ* = β_e ∈ (0, ε)`. Only `β_e` is a **transition of the sector-overlap predicate** — at `β_e ± π` the far-side gap is `∓π`, the far edges are anti-parallel and `θ > β_e` does not change value. The proof needs only `h_o,π′ ≢ 0` and `h_o,π′(β_e) = 0`; an extra root only makes `NOROOT` stricter, hence `R(ε)` smaller and still inner | T5.2b′ Case A |
 | **R4.2 c3 / R4.3** | the matching argument (a face keeps a vertex for at most one of its hinge edges) is used silently, and it makes Case B vacuous | **CONCEDED and PRINTED** as **Sub-lemma T5.2b‴**: by 0.2 a hinge edge keeps `v` only at `src(e)`, which in the `σ_f`-traversal of `∂f` is the edge *leaving* `v`, and only one edge leaves `v`; so vertex identification is a *matching*, never a fan, and two faces sharing a hinge point are joined by exactly one hinge edge — which is what makes "the" `β_e` of the pair well defined. **Case B is now stated as vacuous** (Remark [C]): hinge adjacency gives `σ_g = −σ_f`, so the relative map is a rotation by `±θ` (T1.C), which for `θ ∈ (0, π]` fixes exactly one point and cannot fix two — two faces never share two distinct material points. Case B is kept as a remark | T5.2b′ [A0], [C] |
 
-Deciding numbers for round 5: **unchanged**. `check_r3.cpp` still reports 0 mismatches of
+Deciding numbers for round 5: **unchanged**. `check_r3.jl` still reports ⟨JULIA:check_r3:mismatches⟩ mismatches of
 2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}` (class sizes 2 070 850 / 73 446 / 1 138), and
-`code/tests/derivation_tests.cpp` re-runs at **30 test cases, 89 044 assertions, 0 failures**.
+`Kirigami/test/derivation_tests.jl` re-runs at **⟨JULIA:derivation_tests⟩, 0 failures**.
 Round 5, like round 4, changes statements and proofs, not measurements.
 
 ---
@@ -126,7 +126,7 @@ induced by the two (agreeing) `σ`-induced half-edge directions; the cut **keeps
 `src(e)`** and duplicates `dst(e)`. Both endpoints of a split edge are duplicated.
 
 **0.3 [D] The kirigami structure `M′`.** Vertices of `M′` are equivalence classes of face-corners
-(`cut.hpp`: `corner_to_prime`); write `(v, f)` for the copy of `v ∈ V` carried by face `f`, and
+(`cut.jl`: `corner_to_prime`); write `(v, f)` for the copy of `v ∈ V` carried by face `f`, and
 `n′ = |V′|`. Faces of `M′` are the faces of `M` with their corners relabelled.
 
 **0.4 [D] The hinge graph.** `Γ = (F, E_hinge)`: one node per face, one edge per hinge edge joining
@@ -139,7 +139,7 @@ by 0.2, so `σ` is a proper 2-colouring of `Γ`. In particular every cycle of `�
 **0.6 [D] Rotation.** `J = [[0, −1], [1, 0]]` (rotation by `+π/2`), `R(a) = cos(a) I + sin(a) J`.
 Throughout, `c := cos(θ/2)`, `s := sin(θ/2)`, and `τ := tan(θ/2)`.
 
-**0.7 [F, `code/src/core/kinematics.cpp`] The code's sign convention.** Face `f` is transformed by
+**0.7 [F, `Kirigami/src/core/kinematics.jl`] The code's sign convention.** Face `f` is transformed by
 `y = R(a_f) x + t_f` with
 
 ```
@@ -168,9 +168,9 @@ This is not a free relabelling `σ → −σ`: flipping `σ` globally also rever
 `t ∈ R^{k×2}`, `X(t) = X₀ + Φ t`. `[F15]` `k = |E_split|` on 100/100 measured graphs with fixed
 boundary.
 
-**0.10 [D] The symbol `u_f`, and the clash with `deploy_basis.hpp` (D9).** In this file `u_f ∈ R²`
+**0.10 [D] The symbol `u_f`, and the clash with `deploy_basis.jl` (D9).** In this file `u_f ∈ R²`
 is the **face potential** of T1 Step 3, defined by `t_f = 2 sin(θ/2) · J u_f`; it is `θ`-free and
-satisfies the increment law (T1.3). The header comment of `code/src/method/deploy_basis.hpp` writes
+satisfies the increment law (T1.3). The header comment of `Kirigami/src/method/deploy_basis.jl` writes
 `S_pv = −σ_f J x_v + u_f` and by `u_f` means the whole translation *direction*, i.e. the vector
 `ν_f` with `t_f = sin(θ/2) · ν_f` (I avoid the letter `τ`, which 0.6 has already spent on
 `tan(θ/2)`). The two are related by
@@ -182,7 +182,7 @@ satisfies the increment law (T1.3). The header comment of `code/src/method/deplo
 The code is correct — `S` is computed as `2 ∂Y/∂θ|₀ = J(2u_f − σ_f x_v)`, verified to `7.3e−15`
 (Checker **T1-b**) — only the *name* is overloaded. **Everywhere below, `u_f` is this file's
 object (0.10-left).** I did not edit `code/` (other agents own it); whoever next touches
-`deploy_basis.hpp` should rename its comment variable to `ν_f` before either symbol becomes a
+`deploy_basis.jl` should rename its comment variable to `ν_f` before either symbol becomes a
 paper formula.
 
 ---
@@ -269,7 +269,7 @@ survives fully random `σ`. Step 6 is therefore **removed from the weak-step lis
 *uses* F11; what changed is that the proposed failure mode has been searched for and does not
 occur.
 
-**[N] Path-independence check.** `derivations/scratch/check_t1_t2.cpp`, check **C1**: build `u` by BFS
+**[N] Path-independence check.** `derivations/scratch/check_t1_t2.jl`, check **C1**: build `u` by BFS
 over a spanning tree of `Γ`, then evaluate the increment residual on **every** hinge edge (not only
 tree edges), on 30 graphs (7 tilings + Delaunay/Voronoi/quad-random, 3 seeds each) at the solved
 `X₀`. Worst residual `1.60e−14`.
@@ -304,7 +304,7 @@ alone. Hence `u` is linear in `X`, and so is `S = J(2u_{·} − σ_{·} x_{·})`
 `u_f` does not depend on the tree, provided `X ∈ 𝕏`.
 
 **[N] Closed form vs. the code.** Check **C2** of the same program: (T1.5), with `u` built by my own
-BFS, against `kinematics.cpp::deploy()` at `θ ∈ {0, 0.05, 0.3, 0.77, 1.2, 1.9, 2.6, 3.0}` on the same
+BFS, against `kinematics.jl::deploy()` at `θ ∈ {0, 0.05, 0.3, 0.77, 1.2, 1.9, 2.6, 3.0}` on the same
 30 graphs. Worst deviation `1.42e−14` over all vertices, all angles, all graphs. This simultaneously
 verifies the sign convention 0.7–0.8; the opposite sign fails by `O(1)`.
 
@@ -387,7 +387,7 @@ alone, checked at `θ = 0`. This is used as a hypothesis in T3, T4 and T5.
 
 ### T1.Check (for the Checker)
 
-Re-run `derivations/scratch/check_t1_t2.cpp`. Tolerance `1e−12` on C1–C6, `1e−9` on C7. Additionally:
+Re-run `derivations/scratch/check_t1_t2.jl`. Tolerance `1e−12` on C1–C6, `1e−9` on C7. Additionally:
 flip the sign in `S` (use `−J(2u − σx)`) and confirm C2 fails at `O(1)` — that is the test that the
 convention statement 0.8 is doing work.
 
@@ -494,7 +494,7 @@ into contact. This is what makes the candidate list of T4 *complete* — there i
 **T2.Check.** Assemble `A(Y_θ)` from a spanning-tree cycle basis at 10 random `θ ∈ (0, π)` on 50
 graphs and check `‖A(Y_θ) σ‖_∞ ≤ 1e−10 · ‖A‖_∞`. Then check (T2.5) by assembling `A_c, A_s` once and
 comparing `cos(θ/2) A_c + sin(θ/2) A_s` against a direct assembly at each `θ` (should be exact to
-round-off). Independent of `check_t1_t2.cpp`'s C6, which tests the pin equations rather than the
+round-off). Independent of `check_t1_t2.jl`'s C6, which tests the pin equations rather than the
 assembled matrix.
 
 ---
@@ -563,7 +563,7 @@ So `h` has at most two roots in `(−π, π]` and they are the roots of a **quad
 ```
 
 `θ = 0` is a root iff `p + q = 0`. The real-root condition `p² ≤ q² + r²` is "`|p| ≤` amplitude",
-matching `deploy_basis.hpp::harmonic_roots`. Each of `p, q, r` is quadratic in `t`, so the
+matching `deploy_basis.jl::harmonic_roots`. Each of `p, q, r` is quadratic in `t`, so the
 discriminant `q² + r² − p²` is a **quartic** in `t`.
 
 **Domain of the `τ` chart (D10).** `τ = tan(θ/2)` is a diffeomorphism `(−π, π) → R` and does **not
@@ -626,7 +626,7 @@ deviation 9).
 ```
 
 with `Θ_max := 0` if the interiors already overlap for arbitrarily small `θ > 0`. This is the
-quantity `collision.hpp::theta_max` estimates by grid scan + bisection with faces shrunk by a
+quantity `collision.jl::theta_max` estimates by grid scan + bisection with faces shrunk by a
 relative `1e−6`.
 
 **[D] T4.1b (contact event).** An ordered pair `(w, (a,b))` — an `M′`-vertex `w` of face `g`, and a
@@ -684,7 +684,7 @@ first hit. This is exact — not approximate — given the complete candidate li
 `θ_max = min over pairs of the first admissible root`, i.e. `θ₁`. That is **false**: `θ₁` is the
 first *contact*, which need not be an overlap. See the measured counterexample below.
 
-**[N] Measured (`derivations/scratch/check_t4_t5.cpp`, checks D1/D2).** 16 valid embeddings
+**[N] Measured (`derivations/scratch/check_t4_t5.jl`, checks D1/D2).** 16 valid embeddings
 (8 tilings × 2 seeds, plus Voronoi), `X = X₀`:
 
 | pattern | `|𝒞|` | `θ₁` (first contact) | `Θ_max` by (T4.1) | `theta_max` bisection | `min_i β_i` |
@@ -779,7 +779,7 @@ must carry the `[N]` tag and the sample size, or someone must prove the `≥` di
 route is to show that on a split-free pattern every candidate pair whose root is admissible below
 `min β` is itself hinge-local, which I could not do.
 
-**[N] Measured (`derivations/scratch/check_r2.cpp`, R2-C).** On all **8 split-free** patterns
+**[N] Measured (`derivations/scratch/check_r2.jl`, R2-C).** On all **8 split-free** patterns
 tested (squares, triangles, kagome, t3_4_3_12, ×2 seeds), `Θ_max` computed by (T4.1) equals
 `min(min_e β_e, π)` to **8.88e−16**; triangles is precisely the case that separates the two forms.
 Independently reproduced by the Checker (**T4-b**, 8.9e−16), whose own hand recomputation of `β_e`
@@ -819,7 +819,7 @@ harmonic** (T3.4), and (T4.2) holds on a closed-form union of at most two interv
 **Both tests use the MOVING centroid `γ_f(θ)`, and that is not optional (D8).** A variant that
 compares the **flat** centroids, `‖x̄_f − x̄_g‖ ≤ r_f + r_g`, is **unsound in principle**: by T1.D the
 face radii `r_f` are `θ`-invariant while deployment *contracts* centroid distances, so a pair whose
-faces actually approach can be discarded. `code/src/method/contact.hpp::candidate_pairs(...,
+faces actually approach can be discarded. `Kirigami/src/method/contact.jl::candidate_pairs(...,
 use_static = true)` is that variant. Measured by the Checker: it discards **19 842** pairs the sound
 moving test keeps, with `max(‖x̄_f − x̄_g‖ − min_θ‖γ_f(θ) − γ_g(θ)‖) = 6.59`; it nevertheless returned
 the correct `Θ_max` on 96/96 samples (**T4-g**), so this is a soundness defect with no observed
@@ -838,7 +838,7 @@ singular value**, given by (T1.7), and in a *general* frame
 Round 1 concluded from (T4.4) that `ideas/ranking.md` K2c's `ρ_f = max(‖x‖, ‖χ‖)` "is not an upper
 bound", that its pruning is unsound, and that `ρ_f` must be multiplied by `√2`. **That conclusion
 is wrong and is withdrawn.** It measured (T4.4) in the *raw* frame — origin at the BFS seed face —
-which no pruning uses. K2c's spec and `contact.hpp::swept_discs` both work **in the face's own
+which no pruning uses. K2c's spec and `contact.jl::swept_discs` both work **in the face's own
 frame**, `x = C_u − gc_f`, `χ = S_u − gs_f`, and there the inequality is an *equality*:
 
 **[A] Lemma T4.5b′ (the swept radius in the face frame is exact).** With `γ_f(θ) = c·gc_f + s·gs_f`
@@ -859,7 +859,7 @@ norm, so `[x | χ]` is a similarity and
 The swept radius about the moving centroid is **exactly the flat circumradius** — which is just
 T1.D (faces are rigid) written in coordinates. ∎
 
-**[N] Measured (`derivations/scratch/check_r2.cpp`, R2-A).** Over **1 628** `M′`-copies on 16
+**[N] Measured (`derivations/scratch/check_r2.jl`, R2-A).** Over **1 628** `M′`-copies on 16
 graphs, sampling `θ` on `[0, π]`: `| max_θ‖y_u − γ_f‖ − max(‖x‖,‖χ‖) | ≤ 3.11e−15` and
 `| max_θ‖y_u − γ_f‖ − ‖x_u − x̄_f‖ | ≤ 3.11e−15`. The Checker measured the same thing independently
 (**T4-c/T4-d**, 1.4e−14 / 1.9e−14 over 15 132 copies). Round 1's 68 %-violation figure is real but
@@ -867,7 +867,7 @@ is about the raw frame, and it has no consequence for any pruning anyone runs.
 
 **Two consequences round 1 had backwards.**
 
-1. Of the two radii in `contact.hpp`, `rho` (the `√(‖x‖²+‖χ‖²)` form, commented "sound bound") is
+1. Of the two radii in `contact.jl`, `rho` (the `√(‖x‖²+‖χ‖²)` form, commented "sound bound") is
    the one loose by exactly `√2`; `rho_max` (the spec's form) is **tight**. Applying the prescribed
    `√2` factor would have made the pruning looser, not sound.
 2. **K2c's gate test is vacuous.** By (T4.4′), `ρ_f / r_f ≡ 1` for every face of every patch at
@@ -930,9 +930,9 @@ complexity claim exists.** (Recorded as an open direction, not as a conjecture t
 
 ### T4.Check
 
-* Re-run `derivations/scratch/check_t4_t5.cpp` (rules: D1 `≤ 1e−5`, D2 `≤ 1e−12`) **and**
-  `derivations/scratch/check_r2.cpp` (rules: R2-A `≤ 1e−12`, R2-C `≤ 1e−12`, R2-D violations `= 0`;
-  its R2-E line is **withdrawn**, see T5.2b.2) **and** `derivations/scratch/check_r3.cpp`
+* Re-run `derivations/scratch/check_t4_t5.jl` (rules: D1 `≤ 1e−5`, D2 `≤ 1e−12`) **and**
+  `derivations/scratch/check_r2.jl` (rules: R2-A `≤ 1e−12`, R2-C `≤ 1e−12`, R2-D violations `= 0`;
+  its R2-E line is **withdrawn**, see T5.2b.2) **and** `derivations/scratch/check_r3.jl`
   (rule: three-class deflated mismatches `= 0`; two-class mismatches are expected to be nonzero and
   `ε`-independent). Round 1's check D4 stands only as a statement about the
   raw frame; it is **not** evidence about any pruning — see T4.5b.
@@ -1079,7 +1079,7 @@ than the exact region.
                    sufficiently small θ > 0                                    ("θ = 0⁺ atom")
 ```
 
-the negation of `contact.hpp::penetrates_immediately()`. `EMB` is what the proof needs, but it is a
+the negation of `contact.jl::penetrates_immediately()`. `EMB` is what the proof needs, but it is a
 **germ at `0⁺`**, not a test at a point: it quantifies over an unspecified neighbourhood, so a
 certificate cannot report it as a measured fact. Meanwhile T5.1/T6.4 printed a *different*
 predicate — "no face–face interior overlap **at `θ = 0`**" — and the Checker is right
@@ -1498,7 +1498,7 @@ to be printed.
 detected by the *identity* test of T3.H.1 — `|p| + |q| + |r| ≤ tol·scale`, a test on the
 coefficients, not a root test — and the pair is then **struck from the candidate list 𝒞
 altogether**. It is therefore **not** a candidate of (T5.1e′), and no atom of any class is evaluated
-for it. Both `derivations/scratch/check_r3.cpp` and `code/tests/derivation_tests.cpp` implement
+for it. Both `derivations/scratch/check_r3.jl` and `Kirigami/test/derivation_tests.jl` implement
 exactly this (`h.scale() ≤ tol → skip`), which is why their mismatch counts are unaffected by this
 correction; what the correction changes is that the exclusion is now *stated* rather than assumed.
 The price is paid in the proof of Proposition T5.2b′, where the removed pairs must be shown to be
@@ -1520,10 +1520,10 @@ the point) is no longer needed. **(2)** The measurement below classifies pairs b
 `|C| ≤ 1e−11·scale²` and `|B| ≤ 1e−11·scale²`, not by the combinatorial rule, because the program
 works from `(p,q,r)` alone. The two agree on the structural classes by construction.
 
-**[N] Measured, round 3 (`derivations/scratch/check_r3.cpp`).** Round 2's number
-("**0 / 2 363 380** at every `ε`") was **not a valid measurement and is withdrawn**: `check_r2.cpp`
+**[N] Measured, round 3 (`derivations/scratch/check_r3.jl`).** Round 2's number
+("**0 / 2 363 380** at every `ε`") was **not a valid measurement and is withdrawn**: `check_r2.jl`
 compared the deflated atom list against a reference that applied *the same* single deflation, so the
-comparison could not see class 3 at all. `check_r3.cpp` fixes this by computing the truth **without
+comparison could not see class 3 at all. `check_r3.jl` fixes this by computing the truth **without
 the `τ` chart**: `h(θ) = p + q cos θ + r sin θ` is a degree-1 trig polynomial, so it is monotone
 between its critical points (`tan θ = r/q`); splitting `(0, ε)` at those and comparing signs at the
 break points decides "does `h` cross zero in `(0,ε)`" by evaluations of `h` alone. The sign just to
@@ -1703,12 +1703,12 @@ quadratic forms in `X`. This is A1's proposal with the coefficients made explici
   (T5.5). The gap between the two numbers is itself a result.
 * Verify T5.1's negative claim by finding an `X` with all `A_f > 0` and `Θ_max = 0` (two exist in the
   16-graph run; the Checker found 51 of 70; K1a should report how often).
-* **Round 3:** re-run `derivations/scratch/check_r3.cpp` with several `ε`. The **three-class**
+* **Round 3:** re-run `derivations/scratch/check_r3.jl` with several `ε`. The **three-class**
   deflated list must report **0** mismatches out of 2 145 387 — a nonzero count means one of the two
   degenerate classes (T3.H.5) is being mishandled: mishandling `g(0) = 0` makes `R(ε)` empty on every
   pattern with split cuts, mishandling `g(0) = g′(0) = 0` makes membership noise-decided. The
   two-class list is expected to report 153, all in class 3, at every `ε`.
-  Re-run `derivations/scratch/check_r2.cpp` for R2-A/R2-C/R2-D; R2-D must report **0** violations;
+  Re-run `derivations/scratch/check_r2.jl` for R2-A/R2-C/R2-D; R2-D must report **0** violations;
   a violation would falsify Proposition T5.2b′ and, through Lemma T4.2, most of T4 with it.
 * **Attack Proposition T5.2b′ directly** by searching for an `X` that is positively oriented, does
   not penetrate at `θ = 0⁺`, has no orientation-harmonic root in `(0, ε)`, and still has
@@ -1790,7 +1790,7 @@ The refresh itself is exact, so the certificate of T6.4 is unaffected by how big
    and no active set, plus the binding pair. This is the number that goes in the paper, and it must
    be produced by the same routine for the baseline and for ours (as kill experiment K2b already
    specifies).
-5. **Independence** — the same `Θ_max` cross-checked against `collision.hpp`'s bisection, which uses
+5. **Independence** — the same `Θ_max` cross-checked against `collision.jl`'s bisection, which uses
    no part of this derivation. Agreement to `1e−5` (deviation 9's tolerance), as measured in T4.2.
 
 **T6.H What can break.**
@@ -1981,14 +1981,14 @@ argument, because it is refuted — D2).
 
 | program | build | result |
 |---|---|---|
-| `derivations/scratch/check_t1_t2.cpp` | `clang++ -std=c++20 -arch arm64 -O2 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 -I code/src …` linking `code/src/core/*.cpp` | C1 1.60e−14, C2 1.42e−14, C3 9.73e−14, C4 2.08e−14, C5 4.46e−14, C6 1.83e−14, C7 1.68e−10 on 30 graphs × 8 angles |
-| `derivations/scratch/check_t4_t5.cpp` | same | D1 2.09e−6 (rule 1e−5), D2 8.88e−16, D3 4.37e−15 over 72 split edges, D4 719/1061 violations in the **raw** frame, ratio 1.4141 — see T4.5b: this says nothing about any pruning |
-| `derivations/scratch/check_r2.cpp` (round 2) | same, plus `code/src/core/*.cpp`; build line in the file header, takes `ε` as `argv[1]` | R2-A 3.11e−15 (1 628 copies), R2-B drift/`r_f` 4.62→20.03 over diameters 5.66→19.80, R2-C 8.88e−16 (8 split-free patterns), R2-D 0 violations at every `ε ∈ {0.2, 0.05, 0.02, 0.005, 0.001}` on 197 samples. **R2-E is withdrawn** — its deflated reference applied the same deflation as the atom list under test, so the comparison was circular (T5.2b.2) |
-| `derivations/scratch/check_r3.cpp` (round 3) | same corpus and seed; build line in the file header, takes `ε` as `argv[1]` | three-class deflated atom list vs a `τ`-chart-free crossing test: **0** mismatches of 2 145 387 at `ε ∈ {0.2, 0.02, 0.001}` (47 ambiguous, skipped); the round-2 two-class list gets **153** wrong, all in class 3, `ε`-independent; class sizes 2 070 850 / 73 446 / 1 138 |
+| `derivations/scratch/check_t1_t2.jl` | `julia --project=Kirigami derivations/scratch/check_t1_t2.jl` linking `Kirigami/src/core/*.jl` | C1 ⟨JULIA:check_t1_t2:1.60e−14⟩, C2 ⟨JULIA:check_t1_t2:1.42e−14⟩, C3 ⟨JULIA:check_t1_t2:9.73e−14⟩, C4 ⟨JULIA:check_t1_t2:2.08e−14⟩, C5 ⟨JULIA:check_t1_t2:4.46e−14⟩, C6 ⟨JULIA:check_t1_t2:1.83e−14⟩, C7 ⟨JULIA:check_t1_t2:1.68e−10⟩ on 30 graphs × 8 angles |
+| `derivations/scratch/check_t4_t5.jl` | same | D1 ⟨JULIA:check_t4_t5:2.09e−6⟩ (rule 1e−5), D2 ⟨JULIA:check_t4_t5:8.88e−16⟩, D3 ⟨JULIA:check_t4_t5:4.37e−15⟩ over 72 split edges, D4 719/1061 violations in the **raw** frame, ratio 1.4141 — see T4.5b: this says nothing about any pruning |
+| `derivations/scratch/check_r2.jl` (round 2) | same, plus `Kirigami/src/core/*.jl`; run line in the file header, takes `ε` as `ARGS[1]` | R2-A ⟨JULIA:check_r2:3.11e−15⟩ (1 628 copies), R2-B drift/`r_f` 4.62→20.03 over diameters 5.66→19.80, R2-C ⟨JULIA:check_r2:8.88e−16⟩ (8 split-free patterns), R2-D ⟨JULIA:check_r2:violations⟩ violations at every `ε ∈ {0.2, 0.05, 0.02, 0.005, 0.001}` on 197 samples. **R2-E is withdrawn** — its deflated reference applied the same deflation as the atom list under test, so the comparison was circular (T5.2b.2) |
+| `derivations/scratch/check_r3.jl` (round 3) | same corpus and seed; run line in the file header, takes `ε` as `ARGS[1]` | three-class deflated atom list vs a `τ`-chart-free crossing test: **0** mismatches of 2 145 387 at `ε ∈ {0.2, 0.02, 0.001}` (47 ambiguous, skipped); the round-2 two-class list gets **153** wrong, all in class 3, `ε`-independent; class sizes 2 070 850 / 73 446 / 1 138 |
 
 All three are standalone `main()`s; none modifies anything under `code/` (which other agents own in
 this phase). Build lines are in the file headers. The Checker's own program,
-`code/tests/derivation_tests.cpp` (25 cases, 29 033 assertions, 0 failures), was written
+`Kirigami/test/derivation_tests.jl` (⟨JULIA:derivation_tests⟩, 0 failures), was written
 independently and is the cross-check for everything above; where its numbers and mine differ in
 sample size but not in conclusion, both are quoted.
 
@@ -2034,7 +2034,7 @@ the identically-zero harmonics, struck by the coefficient identity test of T3.H.
 The closedness of `E2` is **load-bearing**, not a tolerance choice: R6.2 below produces the
 admissible root with equality on the upper side whenever the two far-side edges have equal length,
 which is the generic situation on a regular tiling (measured: **580 of 9 642** Case-A pairs sit
-exactly at the far endpoint, `derivation_tests` R6-a). `contact.cpp` implements `E2` inclusively at
+exactly at the far endpoint, `derivation_tests.jl` R6-a). `contact.jl` implements `E2` inclusively at
 `tol = 1e−12·(|L2.p| + L2.amp())`, which is the right side to err on.
 
 ### R6.2 T5.2b′ survives: SOUNDNESS is preserved
@@ -2072,7 +2072,7 @@ sentence.**
 > `L′ = L` — the vertex-vertex case of T4.3, which the *closed* segment of T4.1b admits. The root
 > `β_e` of `h_o,π′` is therefore admissible, and `π′ ∈ 𝒞-list` contradicts the amended `NOROOT`. ∎
 >
-> Measured (`derivation_tests` R6-a1/R6-a2, 9 642 Case-A substitute pairs over the corpus with
+> Measured (`derivation_tests.jl` R6-a1/R6-a2, 9 642 Case-A substitute pairs over the corpus with
 > null-space jitter `0.12`, simple faces only): the projection ratio `⟨w−a,b−a⟩/‖b−a‖²` at `β_e`
 > equals `L′/L` to **1.77e−14**, lies in `[0.007307, 1.000000]`, **0** admissibility failures,
 > **9 062** strictly inside and **580** exactly at the far endpoint.
@@ -2145,7 +2145,7 @@ must be added to `NOROOT` for that pair" — is withdrawn. It is replaced by: th
 non-coincident case is closed by the **neighbour-vertex pairs alone** ([D2] with R6.2(3)), and its
 endpoint sub-case does not occur. The interval inequalities `E2` still appear in the certificate, but
 in their T4.1b role — as the **admissibility filter on the roots of the orientation harmonics** — and
-not as separate atoms whose own roots are hunted. This is what `contact.cpp` implements, so the
+not as separate atoms whose own roots are hunted. This is what `contact.jl` implements, so the
 derivation and the code now agree; before this round the code was missing an atom the derivation
 demanded, and demanding an atom the code was right not to have.
 
@@ -2184,7 +2184,7 @@ i.e. **iff the first contact of `X` is already an overlap transition** — no *g
 end. That is precisely Proposition T4.3's genericity hypothesis, which T4.3 itself records as failing
 identically on the symmetric patterns both papers ship.
 
-**[N] Measured counterexample (`derivations/scratch/check_t5_adm.cpp`, and `derivation_tests` R6-b).**
+**[N] Measured counterexample (`derivations/scratch/check_t5_adm.jl`, and `derivation_tests.jl` R6-b).**
 `hexagons` at `X₀`:
 
 | quantity | value |
@@ -2228,7 +2228,7 @@ are the wording the Checker prescribed and item 1 removes a false sentence.
 
 `results/kill/b4/b4.csv` row (id 93, voronoi, `σ_def`, `free`) reports the exact T4.2″ scan and the
 repaired certificate at `Θ_max = 0.2484` and the bisection referee at `0`. Replayed in
-`derivations/scratch/check_b4_93.cpp`: **the scan is right.**
+`derivations/scratch/check_b4_93.jl`: **the scan is right.**
 
 `has_collision(..., 1e−12)` fires on face pair `(94, 184)` for `θ ∈ (0, 0.036255)`, and
 `referee_theta` returns `0` on its `col(1e−7)` probe. The two faces share exactly one `M′`-vertex,
@@ -2258,6 +2258,6 @@ on this row for an unrelated reason.
 
 | program | result |
 |---|---|
-| `derivations/scratch/check_t5_adm.cpp` (new; build line in its header) | A: 1 363 Case-A pairs on the 7 tilings with jitter, ratio `∈ [0.5404, 1.0]`, `|s/‖e‖² − L′/L| ≤ 1.55e−15`, **0** admissibility failures. B: 1 completeness counterexample (`hexagons`, `ε = 1.570796`) |
-| `derivations/scratch/check_b4_93.cpp` (new; build line in its header) | replays B4 ids 93 and 96 from the K6/B4 caches; 93 reproduces scan `0.248400` vs referee `0`, and localizes the referee's misfire to the shared hinge vertex of faces (94, 184) |
-| `code/tests/derivation_tests.cpp` R6 + R6-c cases (new) | R6-a1 **0** failures / 9 642 · R6-a2 `1.77e−14` · R6-a3 `3.53e−14` · R6-b counterexample found · R6-c1 **0** common interior points of 1 442 401 · R6-c2 misfire pinned. Whole file: **33 test cases, 89 074 assertions, 0 failures** |
+| `derivations/scratch/check_t5_adm.jl` (new; run line in its header) | A: 1 363 Case-A pairs on the 7 tilings with jitter, ratio `∈ [0.5404, 1.0]`, `|s/‖e‖² − L′/L| ≤ ⟨JULIA:check_t5_adm:1.55e−15⟩`, **0** admissibility failures. B: 1 completeness counterexample (`hexagons`, `ε = 1.570796`) |
+| `derivations/scratch/check_b4_93.jl` (new; run line in its header) | replays B4 ids 93 and 96 from the K6/B4 caches; 93 reproduces scan `0.248400` vs referee `0`, and localizes the referee's misfire to the shared hinge vertex of faces (94, 184) |
+| `Kirigami/test/derivation_tests.jl` R6 + R6-c cases (new) | R6-a1 ⟨JULIA:derivation_tests:R6-a1⟩ failures · R6-a2 `⟨JULIA:derivation_tests:1.77e−14⟩` · R6-a3 `⟨JULIA:derivation_tests:3.53e−14⟩` · R6-b counterexample found · R6-c1 ⟨JULIA:derivation_tests:R6-c1⟩ common interior points of 1 442 401 · R6-c2 misfire pinned. Whole file: **⟨JULIA:derivation_tests⟩, 0 failures** |

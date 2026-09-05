@@ -36,7 +36,7 @@ New, and used only where named:
 
 **[D] L1.0a (candidate pair).** A *candidate pair* is `π = (w, (a,b))` where `(a,b)` is an
 `M′`-edge of some face `f` (two cyclically consecutive corners of `f`) and `w` is a corner of a
-face `g ≠ f`. Write `ρ : V′ → V` for the source map (`cut.hpp::prime_to_original`) and
+face `g ≠ f`. Write `ρ : V′ → V` for the source map (`cut.jl::prime_to_original`) and
 `v_a = ρ(a)`, `v_b = ρ(b)`, `v_w = ρ(w)`. The *orientation harmonic* of `π` is
 `h_π(θ) = det(Y_b − Y_a, Y_w − Y_a) = p + q cos θ + r sin θ`, coefficients by (T3.2).
 
@@ -186,16 +186,16 @@ under-counts the `C = 0` class. The consequence is *not* unsoundness: routing su
 and it is the **unsafe** direction — (T5.1c)'s first atom `g(0)·g(T) > 0` fails and the pair is
 reported as having a root, which makes `NOROOT` *conservative*, i.e. `R(ε)` shrinks. So the
 practical rule stands: **classify by `|h(0)| ≤ tol` numerically, and use the combinatorics only to
-know that the answer is structural.** That is what `contact.cpp` already does.
+know that the answer is structural.** That is what `contact.jl` already does.
 
 ## L2.0 Set-up: from the null vector to the `2 × 2` matrix
 
 Throughout Part L2, `(M, σ)` is a **periodic** pattern given by a fundamental domain (one face per
 translation class) together with the period matrix `P₀ := T = [t_h  t_v] ∈ R^{2×2}` (H-L2), and the
-quotient system of `periodic_jacobian.hpp` supplies `X(t) = X₀ + Φ t` with `Φ ∈ R^{n_q × k}`,
+quotient system of `periodic_jacobian.jl` supplies `X(t) = X₀ + Φ t` with `Φ ∈ R^{n_q × k}`,
 `k = dim_null`. `Φ` is a null-space basis of the **scalar** system `[L; e_pin]`, and the design
 coordinate is `t ∈ R^{2k}`: `Φ` acts on the `x` and the `y` coordinate **separately**, and the code
-orders `t` as `(t_{2i}, t_{2i+1}) = ` (`φ_i` on `x`, `φ_i` on `y`) — `kill_k7.cpp::shape_point`.
+orders `t` as `(t_{2i}, t_{2i+1}) = ` (`φ_i` on `x`, `φ_i` on `y`) — `kill_k7.jl::shape_point`.
 
 **[D] L2.0c (the period-potential increment of a null vector).** Fix a spanning tree of `Γ` and a
 base face `f₀`. By (T1.6) and (L2.1),

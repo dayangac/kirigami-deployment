@@ -2,22 +2,20 @@
 
 Independent review with fresh context. I saw only `derivations/core.md`, the code, `STATE.md`
 F1–F24 and `notes/paper_2026.md` — not the Deriver's reasoning. Every algebraic step was
-re-derived by hand from the code's own sign convention (`code/src/core/kinematics.cpp`), and
+re-derived by hand from the code's own sign convention (`Kirigami/src/core/kinematics.jl`), and
 every identity was re-tested by a program I wrote from scratch,
-`code/tests/derivation_tests.cpp`, which recomputes the face potential `u`, the harmonic
+`Kirigami/test/derivation_tests.jl`, which recomputes the face potential `u`, the harmonic
 coefficients `(p,q,r)`, the `τ`-quadratic, the T5.3 closed forms, the T6.2 gradient and the
-`Γ`-cycle closure rows **without using the Deriver's scratch programs** (`check_t1_t2.cpp`,
-`check_t4_t5.cpp` were never compiled or run by me).
+`Γ`-cycle closure rows **without using the Deriver's scratch programs** (`check_t1_t2.jl`,
+`check_t4_t5.jl` were never compiled or run by me).
 
 Build and run — one command, from the repo root:
 
 ```
-clang++ -std=c++20 -O2 -arch arm64 -I/opt/homebrew/include -I/opt/homebrew/include/eigen3 \
-  -Icode/src code/tests/derivation_tests.cpp code/build/libkiri_core.a \
-  -o code/build/derivation_tests && ./code/build/derivation_tests
+julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["derivation_tests"])'
 ```
 
-`code/CMakeLists.txt` and every existing file under `code/` are untouched. Result:
+`Kirigami/Project.toml` and every existing file under `code/` are untouched. Result:
 **25 test cases, 29 033 assertions, 0 failures**; 41 recorded identities, all PASS.
 Corpus: 16 `(graph, σ)` cases (7 tilings + 9 random Delaunay/Voronoi/quad, 9–102 hinge edges,
 0–30 split cuts, `dim_null` 0–30), plus 398 random-`σ` pairs and 3 torus patches.
@@ -62,8 +60,8 @@ and `det(Ja, Jb) = det(a, b)` throughout, both verified by direct expansion.
 
 | step | verdict | reason |
 |---|---|---|
-| 0.2, 0.4–0.6 | AGREE | definitions; match `cut.hpp` / `mesh.hpp` verbatim |
-| 0.7, 0.7′ | AGREE | `kinematics.cpp` sets `a = -sigma[f]*theta*0.5`; `R(a) = cI + sJ` expands to `cI − σ_f s J`. Confirmed numerically: the closed form reproduces `deploy()` to 1.4e−14, the sign-flipped form fails by 45 (test **T1-a**) |
+| 0.2, 0.4–0.6 | AGREE | definitions; match `cut.jl` / `mesh.jl` verbatim |
+| 0.7, 0.7′ | AGREE | `kinematics.jl` sets `a = -sigma[f]*theta*0.5`; `R(a) = cI + sJ` expands to `cI − σ_f s J`. Confirmed numerically: the closed form reproduces `deploy()` to ⟨JULIA:check_t1_t2:1.4e−14⟩, the sign-flipped form fails by 45 (test **T1-a**) |
 | 0.8 | AGREE | the geometer/rigidity persona convention is `θ → −θ`; the note that `σ → −σ` is *not* the same relabelling is correct, because `hinge_dir` is recomputed from `σ` |
 
 ### T1
@@ -90,7 +88,7 @@ and `det(Ja, Jb) = det(a, b)` throughout, both verified by direct expansion.
 
 | step | verdict | reason |
 |---|---|---|
-| T2.1 (T2.2) | AGREE | the pin constraint and the circulation formulation are the standard body-and-pin model; matches `mobility.hpp::build_A` |
+| T2.1 (T2.2) | AGREE | the pin constraint and the circulation formulation are the standard body-and-pin model; matches `mobility.jl::build_A` |
 | T2.2 (T2.3, T2.4) | AGREE | re-derived independently. `V(y) = ω_f J y + w_f` with `w_f = t_f' − ω_f J t_f`; `t_f' = cJu_f`, `J t_f = −2s u_f`, so `w_f = cJu_f − σ_f s u_f`. The residual collapses to `s σ_g(u_f − u_g) + s x_v = 0` using only (T1.3). No genericity, no `θ` restriction — correct. **Task 1(d): verified at every `θ` with the code's sign convention**: pin residual 1.3e−14 over 22 392 hinge evaluations at random `θ ∈ [−4,4]` (**T2-a**), and `‖A(Y_θ)σ‖∞/‖A‖∞ ≤ 1.0e−14` over 480 assembled matrices including `θ = 0` (**T2-b**) |
 | T2.3 (T2.5) | AGREE | `p_e(θ)` is affine in `(c,s)` and `A` is linear in `p`. Pencil identity 4.0e−15 (**T2-c**) |
 | T2.4 | AGREE | two hinged faces have distinct `ω`, so the flex is non-rigid whenever `E_hinge ≠ ∅`; the "every termination is a contact" corollary is what makes T4's candidate list complete |
@@ -114,7 +112,7 @@ and `det(Ja, Jb) = det(a, b)` throughout, both verified by direct expansion.
 | T4.1a–c | AGREE | definitions; the interval bound `‖x_b − x_a‖²` is constant by T3.3, correctly justified |
 | Lemma T4.2 | AGREE | proof re-checked line by line. `P ∩ Q ⊆ ∂P ∩ ∂Q` argument is right; transversal crossing forces an interior sector to be shared (four local sectors, each polygon occupies two, they must meet); the maximal-overlap-segment argument correctly produces a vertex on the other boundary because `e_P ∩ e_Q` is a segment whose endpoints are endpoints of `e_P` or `e_Q`. Correct |
 | Cor. T4.2′ | AGREE | continuity + the lemma. Uses T2 to rule out any other way for the configuration to change — correct and worth the emphasis in T5.2d |
-| Thm T4.2″ (T4.1) | **AGREE** | I checked the one gap the statement could have: an *isolated* overlap angle. Interior overlap is an **open** condition in `θ` (an open ball inside both interiors persists under a continuous motion), so the overlap set has no isolated points and `Θ_max = θ_{i*}` exactly. **Task 1(a): the graze treatment is right.** Independently reproduced with my own separating-axis overlap test (not `collision.hpp`): hexagons `θ₁ = 1.047198`, **zero interior overlap at 199 sample angles across `(0, 2.094395)`**, overlap immediately after. `min`-over-roots would report `π/3`, the true range is `2π/3` |
+| Thm T4.2″ (T4.1) | **AGREE** | I checked the one gap the statement could have: an *isolated* overlap angle. Interior overlap is an **open** condition in `θ` (an open ball inside both interiors persists under a continuous motion), so the overlap set has no isolated points and `Θ_max = θ_{i*}` exactly. **Task 1(a): the graze treatment is right.** Independently reproduced with my own separating-axis overlap test (not `collision.jl`): hexagons `θ₁ = 1.047198`, **zero interior overlap at 199 sample angles across `(0, 2.094395)`**, overlap immediately after. `min`-over-roots would report `π/3`, the true range is `2π/3` |
 | T4.3-generic | AGREE with the Deriver | the codimension counting is right, and the proviso ("provided the polynomial is not identically zero on 𝕏") is exactly where it fails. Correctly labelled CONJECTURE and correctly said to be false on the papers' own symmetric figures |
 | T4.3-wedge | AGREE | correctly labelled CONJECTURE |
 | T4.4 | **AGREE with a correction (D3)** | the derivation of `β_e = 2π − α_f − α_g` from the fixed hinge point and rigid sectors is correct; `β_e ∈ 𝒞(X)` is correct. My independent recomputation of `β_e` (CCW interior angle, reflex corners included) matches `hinge_beta()` **exactly** (0.000e+00, 933 hinge edges, **T4-a**). But the `[N]` line "`Θ_max` equals `min_e β_e` to 8.88e−16 on all 8 split-free patterns" contradicts the Deriver's own table (triangles: `Θ_max = 3.141593`, `min β = 4.188790`). The true statement is `Θ_max = min(min_e β_e, π)` on the search range, verified to 8.9e−16 (**T4-b**) |
@@ -163,7 +161,7 @@ and `det(Ja, Jb) = det(a, b)` throughout, both verified by direct expansion.
 that K2c's pruning "as written is *unsound*", and prescribes multiplying `ρ_f` by `√2`.
 
 K2c's spec says: "per face compute `ρ_f = max over its vertices of max(‖x_u‖, ‖χ_u‖)`
-**in the face's own frame**", and `contact.hpp::swept_discs` implements exactly that, with
+**in the face's own frame**", and `contact.jl::swept_discs` implements exactly that, with
 `x = C_u − gc_f`, `χ = S_u − gs_f`. In that frame, using (T1.5),
 
 ```
@@ -188,7 +186,7 @@ and `σ_max` is a sound bound to 7.1e−15, **T4-e**), but it has no consequence
 
 Two consequences the Deriver has backwards:
 
-1. `contact.hpp`'s `rho` (the `√2` form, commented "sound bound") is the one that is loose by
+1. `contact.jl`'s `rho` (the `√2` form, commented "sound bound") is the one that is loose by
    exactly `√2`; `rho_max` (the "spec's form") is tight. Applying the prescribed `√2` factor
    would make the pruning looser, not sound.
 2. **K2c's gate test is vacuous.** `max_f ρ_f / r_f ≡ 1` by the algebra above, so the log–log
@@ -255,7 +253,7 @@ not the same as being contained in `U(ε)`. `Θ_max ≥ ε` requires the interio
 on `(0,ε)`; the root condition constrains only *changes* of overlap status, and says nothing
 about the status just after `θ = 0`. A configuration already penetrating at `θ = 0⁺` has its
 contact **at** `θ = 0`, invisible to any root scan on `(0,T)` — which is exactly why
-`contact.hpp` carries a separate `penetrates_immediately()`, and exactly the failure mode
+`contact.jl` carries a separate `penetrates_immediately()`, and exactly the failure mode
 T5.1's own counterexamples exhibit.
 
 The description therefore needs one more atom: **no face–face interior overlap at `θ = 0⁺`**
@@ -319,10 +317,10 @@ projected `X₀` for random `σ`, (T1.5) built from a **different** spanning for
 them. So T7.H's "all of T7 is then void" should be softened to "the `H`-row interpretation as
 *geometric* holes fails (F16), while `L = RD`, the rank identity and the `H` formula survive".
 
-### D8 — `contact.hpp`'s flat-centroid pruning is unsound in principle (the Deriver's (T4.3) is not)
+### D8 — `contact.jl`'s flat-centroid pruning is unsound in principle (the Deriver's (T4.3) is not)
 
 `core.md` T4.5a's static test (T4.3) minimises the *harmonic* `‖γ_f(θ) − γ_g(θ)‖²`, which is
-sound. `contact.hpp::candidate_pairs(..., use_static = true)` instead uses the **flat**
+sound. `contact.jl::candidate_pairs(..., use_static = true)` instead uses the **flat**
 centroids `‖c_f − c_g‖`. Because deployment contracts centroid distances while face radii stay
 fixed (T1.D), that test can discard a pair whose faces actually approach. Measured: it discards
 **19 842** pairs that the sound moving test keeps, with
@@ -330,7 +328,7 @@ fixed (T1.D), that test can discard a pair whose faces actually approach. Measur
 `Θ_max` on 96/96 samples (**T4-g**), so this is a soundness defect without an observed
 counterexample. Use the moving form (**T4-f**, 0/96 wrong, keeps 42.6 % of pairs).
 
-### D9 — documentation inconsistency in `deploy_basis.hpp`
+### D9 — documentation inconsistency in `deploy_basis.jl`
 
 The header comment says `S_pv = -sigma_f J x_v + u_f`. That `u_f` means `2 J u_f` in `core.md`'s
 notation (the header's `u_f` is the whole translation direction, `t_f = sin(θ/2)·u_f`). The code
@@ -371,7 +369,7 @@ adding it closes both gaps at once.
 
 ## 3. Test results
 
-All from `code/tests/derivation_tests.cpp`; 25 test cases, 29 033 assertions, 0 failures.
+All from `Kirigami/test/derivation_tests.jl`; ⟨JULIA:derivation_tests⟩, 0 failures.
 
 | id | identity / claim | samples | max error | tolerance | verdict |
 |---|---|---|---|---|---|
@@ -491,15 +489,12 @@ proof gap (D4), not a demonstrated falsehood.
 # Round 2 — check of the revised `core.md` (fresh context, changed material only)
 
 Scope: only what round 2 changed or added. Inputs read: `derivations/core.md` (revised),
-this file's round-1 verdicts, `derivations/scratch/check_r2.cpp`, `code/README.md`.
-New program work: two test cases appended to `code/tests/derivation_tests.cpp` (that file only;
-`CMakeLists.txt` and every other source untouched). Rebuilt with the command in its header:
+this file's round-1 verdicts, `derivations/scratch/check_r2.jl`, `Kirigami/README.md`.
+New program work: two test cases appended to `Kirigami/test/derivation_tests.jl` (that file only;
+`Project.toml` and every other source untouched). Rebuilt with the command in its header:
 
 ```
-clang++ -std=c++20 -O2 -arch arm64 -I/opt/homebrew/include \
-  -I/opt/homebrew/include/eigen3 -Icode/src \
-  code/tests/derivation_tests.cpp code/build/libkiri_core.a \
-  -o code/build/derivation_tests && ./code/build/derivation_tests
+julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["derivation_tests"])'
 ```
 
 Result: **27 test cases, 29 054 assertions, 0 failures.**
@@ -624,7 +619,7 @@ correct atom is simply "true") or an explicit membership rule putting this class
 identically-zero harmonics of T3.H.1. It is decided by the combinatorics like the other two classes,
 so this costs nothing in the quantifier-free description.
 
-## R2.6 New tests (appended to `code/tests/derivation_tests.cpp`)
+## R2.6 New tests (appended to `Kirigami/test/derivation_tests.jl`)
 
 `TEST_CASE("R2 T4.5b' exact swept radius in the face frame (randomized)")` — 16 corpus cases ×
 8 shape-space samples (`X₀` plus Gaussian null-space perturbations, σ = 0.25), **20 176 `M′`-copies**,
@@ -671,8 +666,8 @@ required clause, (2) and (3) are one-line edits.
 # Round 3 (final) — confirmation of the three round-3 resolutions
 
 Fresh context. Inputs read: `core.md` round-3 change log and §T3.H.5, T4.4, T5.1, T5.2b.0,
-T5.2b′, T5.2b.1, T5.2b.2, T6.4; `derivations/scratch/check_r3.cpp`. New tests appended to
-`code/tests/derivation_tests.cpp` (that file only): `R3 Lemma T5.1e and the three-class atom
+T5.2b′, T5.2b.1, T5.2b.2, T6.4; `derivations/scratch/check_r3.jl`. New tests appended to
+`Kirigami/test/derivation_tests.jl` (that file only): `R3 Lemma T5.1e and the three-class atom
 list (randomized, chart-free truth)` and `R3 certificate POS ^ NOOVERLAP(eps/2) ^ NOROOT
 implies Theta_max >= eps (randomized)`. Both rebuilt with the header build line and run;
 **2 test cases, 59 982 assertions, 0 failures**.
@@ -702,7 +697,7 @@ so a root lies in `(0,T)` iff `0 < −B/A < T`; multiplying by `A² > 0` gives e
 `A·g(T) > 0`, vertex `−B/(2A) ∈ (0,T)` cleared by `2A² > 0` — and it correctly catches the
 interior tangency `disc = 0` that `g(0)g(T) > 0` alone would miss.
 
-**`check_r3.cpp` rebuilt and rerun.** Its numbers reproduce exactly, at all three `ε`:
+**`check_r3.jl` rebuilt and rerun.** Its numbers reproduce exactly, at all three `ε`:
 
 | `ε` | decided | ambiguous | class 1 / 2 / 3 | round-2 list | round-3 list |
 |---|---|---|---|---|---|
@@ -717,7 +712,7 @@ the class split is the sign at `0⁺`, taken as the first non-vanishing Taylor c
 (`C`, else `B`, else `A`) — and that is an independently correct fact about `h`, not an import
 from the atom list: `h(0) = C`, `h′(0) = r = B/2`, `h″(0) = −q = A/2` when `C = B = 0`. Crucially,
 if Lemma T5.1e were false the oracle would still see the sign change at a break point, so it is
-**not blind to class 3** in the way `check_r2.cpp` was. R2.5's circularity objection is answered.
+**not blind to class 3** in the way `check_r2.jl` was. R2.5's circularity objection is answered.
 
 **Independently reconfirmed with a second, different oracle.** Test **R3-c** decides the truth
 through the *amplitude/phase* form `h = p + Ρcos(θ−φ)` in `long double` — no `τ` chart, no
@@ -745,7 +740,7 @@ puts **all 14 928 of them in class 3** (**R3-c** printout). On the `squares` cas
 they are: all **144** of them have `w` coincident with `a` or with `b` at every `θ` — permanent
 hinge incidences (T3.H.2), 144 / 144, none of any other kind.
 
-Both `check_r3.cpp` and my own test exclude them *before* classifying (`h.scale() ≤ tol → skip`,
+Both `check_r3.jl` and my own test exclude them *before* classifying (`h.scale() ≤ tol → skip`,
 which is T3.H.1's identity test), so the 0-mismatch numbers are correct **as measured** — but they
 are conditional on an exclusion that (T5.1e′) does not state. Two edits close it:
 
@@ -828,7 +823,7 @@ instant, which is the case a `θ = 0` test cannot see. **AGREE**, with the R3.1a
 
 ## R3.4 Tests added
 
-Appended to `code/tests/derivation_tests.cpp` (only that file; no other file touched), built with
+Appended to `Kirigami/test/derivation_tests.jl` (only that file; no other file touched), built with
 the header build line and run: 2 test cases, **59 982 assertions, 0 failures**.
 
 | id | claim | samples | max error | tol |
@@ -875,7 +870,7 @@ the proof of Proposition T5.2b′).
 Fresh context. Scope: the round-4 change log of `derivations/core.md`, the (T5.1e′) side-condition,
 the `𝒞-list` definition in T5.2b.0(iii), and the new Sub-lemma T5.2b″ inside the proof of
 Proposition T5.2b′. New program: the test case
-`R4 Sub-lemma T5.2b'' Case A ...` appended to `code/tests/derivation_tests.cpp` (that file only;
+`R4 Sub-lemma T5.2b'' Case A ...` appended to `Kirigami/test/derivation_tests.jl` (that file only;
 build line unchanged, in its header). Whole file re-run: **30 test cases, 89 044 assertions,
 0 failures**.
 
@@ -1032,7 +1027,7 @@ Fresh context. Scope: `derivations/core.md` "Change log — round 5", Sub-lemma 
 (T5.2b″-1b)/(T5.2b″-1c) and the endpoint/interior sub-cases of [D2]), Sub-lemma T5.2b‴ [A0], the
 simplicity hypothesis in the standing hypotheses of T4–T6, and Remark [C] (Case B vacuous). New
 program: the test case `R5 same-sigma pairs: pure relative translation, constant local predicate;
-and the zero set of h_o,pi' in (0,pi)` appended to `code/tests/derivation_tests.cpp` (that file only;
+and the zero set of h_o,pi' in (0,pi)` appended to `Kirigami/test/derivation_tests.jl` (that file only;
 build line unchanged, in its header). Whole file re-run: **31 test cases, 89 055 assertions,
 0 failures.**
 
@@ -1161,10 +1156,10 @@ Fresh context. Scope: the amendment proposed in `results/kill/jitter/cert_diagno
 `T5.2b.0(iii)` becomes "no **admissible** root in `(0, ε)`", i.e. `𝒞(X) ∩ (0, ε) = ∅`, with the two
 interval tests `E2` of T4.1b included — read against `core.md` T3, T4.1b, T4.2′/T4.2″, T5 (T5.1,
 T5.2a, T5.2b, T5.2b′, T5.2b″ with Cases A/B and [D1]/[D2]/[D3], T5.3, T3.H.1) and the fixed code
-`code/src/method/contact.cpp` (`validity_certificate`, `contact_angles`) with the F32 doctest in
-`code/tests/test_method.cpp`. Two new programs: `derivations/scratch/check_t5_adm.cpp` (standalone,
-build line in its header) and the `R6` test case appended to `code/tests/derivation_tests.cpp`
-(that file only), plus `derivations/scratch/check_b4_93.cpp` and the `R6-c` case for the B4 add-on.
+`Kirigami/src/method/contact.jl` (`validity_certificate`, `contact_angles`) with the F32 unit test in
+`Kirigami/test/test_method.jl`. Two new programs: `derivations/scratch/check_t5_adm.jl` (standalone,
+run line in its header) and the `R6` test case appended to `Kirigami/test/derivation_tests.jl`
+(that file only), plus `derivations/scratch/check_b4_93.jl` and the `R6-c` case for the B4 add-on.
 Whole file re-run: **33 test cases, 89 074 assertions, 0 failures.**
 
 | id | claim | samples | result |
@@ -1205,7 +1200,7 @@ three:
         ⟨ w − a , b − a ⟩ = L L′ ,     ‖ b − a ‖² = L² ,     0 < L′ ≤ L ,
    ```
    so `E2` holds, strictly on the lower side and with **equality on the upper side iff `L′ = L`**.
-   The segment of T4.1b is **closed**, so equality is admissible; `contact.cpp`'s inclusive
+   The segment of T4.1b is **closed**, so equality is admissible; `contact.jl`'s inclusive
    `-tol ≤ s ≤ l2 + tol` implements the right convention and is load-bearing, not cosmetic —
    **580 of 9 642** measured Case-A pairs sit exactly at that endpoint, and every regular tiling in
    the corpus produces only that case at `X₀` (all 34 unjittered pairs have ratio exactly `1`).
@@ -1236,7 +1231,7 @@ there. Neither gap is fatal; both are now closed in `core.md` round 6 (R6.2).
 
 Round 4/5 left [D2]'s **endpoint** sub-case (`w` at an endpoint of `[a,b]` at `θ*`, with
 `h_o,(w,(a,b)) ≡ 0`) to the two extra atoms (T5.2b″-2), and [D3] instructed that they "must be added
-to `NOROOT`". `contact.cpp` never implemented them. **The code was right and [D3] was unnecessary:
+to `NOROOT`". `contact.jl` never implemented them. **The code was right and [D3] was unnecessary:
 the endpoint sub-case cannot occur.**
 
 *Proof.* Say `w(θ*) = a(θ*) =: z`. Then the vertex `a` of `f` coincides with the vertex `w` of `g`,
@@ -1268,7 +1263,7 @@ and by T4.2″ `Θ_max = θ_{i*}` with `i* ≥ 1` whenever the range is positive
 Proposition T4.3's genericity hypothesis, which T4.3 itself records as failing identically on the
 symmetric patterns of both papers.
 
-**Counterexample, measured** (`check_t5_adm.cpp` §B, `derivation_tests` R6-b): `hexagons` at `X₀` has
+**Counterexample, measured** (`check_t5_adm.jl` §B, `derivation_tests.jl` R6-b): `hexagons` at `X₀` has
 `θ₁ = 1.047198 = π/3` (the split-duplicate end-to-end contact, a graze) and `Θ_max = 2.094395 = 2π/3`.
 At `ε = 1.570796` the exact range clears `ε` while the certificate returns
 `(POS, NOOVERLAP, NOROOT) = (1, 1, 0)` with first admissible root `1.047198`. So
@@ -1289,13 +1284,15 @@ probe per interval of `(0, ε) \ 𝒞(X)`; that is exact and finite but its atom
 
 ## R6.5 — B4 `voronoi_93`, scan `0.2484` vs bisection `0`: **REFEREE ARTEFACT**, the scan is right
 
-Replayed through `kill_b4.cpp`'s own pipeline (same graph, same `sigma_def`, same `free` system, same
-seeds and weights) by `derivations/scratch/check_b4_93.cpp`. The row reproduces exactly:
+Replayed through `kill_b4.jl`'s own pipeline (same graph, same `sigma_def`, same `free` system, same
+seeds and weights) by `derivations/scratch/check_b4_93.jl`. The row reproduces exactly:
 `Theta_max` scan `= 0.248400`, referee bisection `= 0`, and `|𝒞(X)| = 3234` with
 `min 𝒞(X) = 0.248400`. Pruning is not the cause: the scan gives `0.248400` on the **pruned** 3 625
 pairs and on **all** 201 295 pairs, with the same `𝒞`.
 
 **Where the referee trips.** `has_collision(..., 1e-12)` fires from `θ = 1e-7` up to `θ = 0.036255`
+
+*Provenance (Julia port, 2026-09-20).* The replay itself is not reproducible: the `free`-variant design is the endpoint of a non-converged 1 199-iteration L-BFGS run, and with bit-identical `X0`, `Phi` the C++ and Julia iterates diverge by rounding after ~20 iterations (`derivations/scratch/b4_path/README.md`). The referee-artefact diagnosis below stands on the archived design.
 on face pair **(94, 184)**, and `referee_theta` returns `0` on its `col(1e-7)` probe before the
 bisection even starts. The exact scan reports **no** contact angle below `0.2484` for that pair — its
 first is `1.809342`.
@@ -1336,10 +1333,10 @@ biases the referee **downward** only, so it cannot manufacture a PASS; the K5/K6
 rest on `zero_plus_q ≤ 0` and on the exact scan, are unaffected. But **`theta_bisect` must not be
 quoted as ground truth against the exact scan**, and B4's referee-agreement line needs the caveat.
 Fixing `polygons_overlap` (offset each polygon along its own inward edge normals rather than toward
-its centroid, or exclude edge pairs that share an endpoint) is a change to `code/src/core/collision.cpp`
+its centroid, or exclude edge pairs that share an endpoint) is a change to `Kirigami/src/core/collision.jl`
 that would move numbers across the whole kill bundle, so it is reported here, not applied.
 
-**Regression case added.** `derivation_tests` `R6-c` pins the reproduction with the two polygons as
+**Regression case added.** `derivation_tests.jl` `R6-c` pins the reproduction with the two polygons as
 literal coordinates — no cache, no repair, no generator — asserting the ground truth (`0` common
 interior points of `1 442 401` probes, `α_g > π`, `β_e = 1.809342`) and pinning the misfire
 (`6 / 6` shrink values wrong). It is a pinned reproduction, to be inverted when the predicate is
