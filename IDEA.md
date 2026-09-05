@@ -168,7 +168,7 @@ no margin-feasible-but-jammed design remains
 ## 5. The algorithm
 
 **Two-stage range-maximising constrained embedding inside the Eq. (4) null space**
-(`code/src/method/range_embed.{hpp,cpp}`). Same population, same shape space
+(`Kirigami/src/method/range_embed.jl`). Same population, same shape space
 `X(t) = X0 + Φt`, same barriers (`cross_i ≥ δ`, `q_e ≥ δ′`), same certificate as K9; only the
 objective changes. **Stage A** maximises the 0⁺ margin
 `m(X) = min(min_e q_e, min_j μ_j)/med²` through a log-sum-exp softmin that is a **proved
@@ -211,7 +211,7 @@ interim snapshot was concordant at 77.5 %.
 **Hero:** K9 population graph `delaunay` id 148, `σ_mc`, F = 101, exact
 `Θ_max = 1.9967778150149833` rad, `ε_max` equal to it, bisection referee
 1.9967778152171005, certified, 0 inverted faces (`export/hero/README.md`, locked as a
-regression in `code/tests/test_design.cpp`). Exported closed, at `Θ_max/2` and at `0.9 Θ_max`
+regression in `Kirigami/test/test_design.jl`). Exported closed, at `Θ_max/2` and at `0.9 Θ_max`
 as SVG, STL and 3MF, plus a 6-frame deployment sequence; all 9 SVGs pass `xmllint`, all 3
 3MFs pass `unzip -t`, and every solid reports closed, consistently oriented, 0 boundary and 0
 non-manifold edges.
