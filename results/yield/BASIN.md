@@ -16,8 +16,8 @@ exactly that.
 
 ## What was run
 
-- Driver `code/apps/kill_basin.cpp`; aggregator `code/apps/kill_basin_agg.cpp`; figure
-  `results/yield/plot_basin.py`. Nothing under `code/src` and nothing under `results/kill`
+- Driver `Kirigami/apps/kill_basin.jl`; aggregator `Kirigami/apps/kill_basin_agg.jl`; figure
+  `results/yield/plot_basin.py`. Nothing under `Kirigami/src` and nothing under `results/kill`
   was modified.
 - **Population, 123 designs.** All 93 rows of `results/kill/k9c/k9c.csv` with
   `theta_exact ≤ 1e-9`, plus 30 successes drawn deterministically as every 10th success in
@@ -34,7 +34,7 @@ exactly that.
   shrink 1e-12 through `characterize`, and at 1e-9 through K9c's own routine) is run only
   on points with `Θ_max > 0`.
 - **Verification that the solver is the K9c solver**: the four locked regression cases in
-  `code/tests/test_design.cpp` ("design_range_max reproduces the K9c CSV row …") pass in
+  `Kirigami/test/test_design.jl` ("design_range_max reproduces the K9c CSV row …") pass in
   this build tree — 6 test cases, 350 assertions, 0 failures.
 - Output: `results/yield/basin.csv` (one row per design × seed, 3-way sharded and merged),
   `results/yield/basin_stats.txt` (every derived number), `results/yield/fig_basin.png`.

@@ -11,7 +11,7 @@ Every number below is reproduced by
 
 ## What was measured
 
-`code/apps/kill_yield.cpp` (added to `code/CMakeLists.txt`) computes, per design, 45 raw
+`Kirigami/apps/kill_yield.jl` (added to `Kirigami/Project.toml`) computes, per design, 45 raw
 features (52 candidate columns after `analyse.py` adds the log transforms) that depend only on the input — the graph, the orientation σ, the input embedding
 `X_ini`, and the cut structure derived from them — plus a separately labelled group of
 **projection-side** quantities produced by the Eq. (6) solve (`proj_*`). No feature is a
@@ -19,7 +19,7 @@ K9c solver output; the solver outputs sit in the outcome columns and are exclude
 bar.
 
 - `results/yield/features.csv` — **400 rows**, the K9c population (ids 0..199, both σ),
-  same graphs and same σ as `code/apps/kill_k9c.cpp`, the Eq. (6) projection read from the
+  same graphs and same σ as `Kirigami/apps/kill_k9c.jl`, the Eq. (6) projection read from the
   `results/kill/k6/cache` shape cache, outcomes joined from `results/kill/k9c/k9c.csv` on
   (id, kind, sigma). `N`, `F`, `n_split`, `dim_null`, `n_corner`, `med_edge` and
   `nonconvex0` were checked to agree with `k9c.csv` on all 400 rows. K9c was not rerun.
@@ -249,7 +249,7 @@ repair.
 
 | file | what |
 |---|---|
-| `code/apps/kill_yield.cpp` | feature extractor, three modes (`k9c`, `fresh`, `check`) |
+| `Kirigami/apps/kill_yield.jl` | feature extractor, three modes (`k9c`, `fresh`, `check`) |
 | `results/yield/features.csv` | 400 rows, features + joined K9c outcomes |
 | `results/yield/fresh.csv` | 200 held-out rows, features + new outcomes |
 | `results/yield/fresh_shard_[0-3].csv`, `.log` | the four shards it was merged from |
