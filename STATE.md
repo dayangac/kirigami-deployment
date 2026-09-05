@@ -4,13 +4,13 @@ Mission: /Users/emredayangac/Desktop/MISSION.md (copy of sections in mind; deliv
 Workspace: /Users/emredayangac/Documents/kirigami-experiments (local git, pre-push hook refuses).
 
 ## Current phase
-- 2026-09-05 00:30: ALL MISSION DELIVERABLES ON DISK AND COMMITTED. IDEA.md, derivations/ (6 rounds), code/ (109 tests / 17,854; derivation 33 / 89,074), results/ (400-design study, figures, E1 3,113), export/hero + hero2 (SVG/3MF/STL), REPORT.md, web explorer code/web. Open: none required by MISSION. Optional follow-ups: rerun Native200 timeouts with longer budget; fabricate hero2; manuscript.
+- 2026-09-05 00:30: ALL MISSION DELIVERABLES ON DISK AND COMMITTED. IDEA.md, derivations/ (6 rounds), code/ (⟨JULIA:tests⟩; derivation 33 / 89,074), results/ (400-design study, figures, E1 3,113), export/hero + hero2 (SVG/3MF/STL), REPORT.md, web explorer code/web. Open: none required by MISSION. Optional follow-ups: rerun Native200 timeouts with longer budget; fabricate hero2; manuscript.
 **Phase 1 — Read** (Readers ×2 ∥ Scouts ×3), started 2026-09-03.
 
 ## Environment (verified)
 - Papers: `papers/paper_2026_tutte.txt` (17 pp, tuttekiri.pdf = Segall/Ren/Sorkine-Hornung 2026, TOG) and
   `papers/paper_2025_hinged.txt` (11 pp, 3757377.3763895.pdf = Segall/Ren/Padilla/Sorkine-Hornung, SA'25). `_flow.txt` = reading-order extraction.
-- Toolchain: clang++ (Apple), cmake 3.29.2, Eigen 5.0.1, nlohmann-json 3.12, doctest 2.5.3 in /opt/homebrew/include.
+- Toolchain: Julia ≥ 1.10 (`Kirigami/Project.toml`): LinearAlgebra, SparseArrays, StaticArrays, JSON, DelaunayTriangulation, Random, Statistics, Printf. No compiler.
   Shell runs under Rosetta (x86_64); compile with `-arch arm64` / `CMAKE_OSX_ARCHITECTURES=arm64` or `arch -arm64`.
 - python3 at /usr/local/bin/python3 (matplotlib availability: unverified).
 - git initialized, no remote, pre-push hook exits 1.
@@ -64,7 +64,7 @@ Workspace: /Users/emredayangac/Documents/kirigami-experiments (local git, pre-pu
 
 ## Decisions (with reasons)
 - D1: Phase 1 and Phase 3 (Scout) run concurrently, as MISSION §4 allows (Readers ∥ Scouts).
-- D3 (human directive 2026-09-03): ALL coding tasks in C++ (core, method, export, tests, experiment drivers, data generation). Python is allowed only for matplotlib plotting of CSV/JSON dumped by C++. Every Builder/Experimenter spec must state this.
+- D3 (human directive 2026-09-03, superseded 2026-09-19 by the Julia port): ALL coding tasks in Julia (core, method, export, tests, experiment drivers, data generation) in the `Kirigami` package. Python is allowed ONLY for matplotlib plotting of CSV/JSON dumped by the Julia apps.
 - D4 (human directive): spawn SEQUENTIALLY to avoid API overload (529s killed 5 agents): Readers ×2 first, then Scouts one or two at a time, then later phases with ≤2 concurrent Opus agents. Instruct all agents to write output incrementally.
 - D5 (2026-09-03 S2, orchestrator, following Critic): FIRST COMMITMENT = R1 'the usable shape space': certified valid (injective, positively oriented) and range-optimal (θ_max ≥ ε) embeddings within the Tutte auxetic null space X (dim = |E_split|), where the paper's Eq.(6) projection is invalid (F17) and Eq.(9) is γ-fragile/ineffective (F18). Load-bearing theorem: since Y_θ is trig-linear in X, the usable region U(ε) is a basic semialgebraic set cut out by quadrics with a finite complete constraint list (completeness via the no-locking lemma). Sections: exact contact calculus (vertex-into-edge), certified active set, Eq.(9) false-negative rate, range-optimal embeddings vs Eq.(6)+(9) on ≥20 graphs. Fallbacks in order: R3 bifurcation spectrum, R4 achievable periodic Jacobians, R2 standalone, R5 defect-vs-max-cut, B20 fully-closed as root coincidence. Dropped: A8 (2025 Fig 10 already shows non-uniform deployment; F20).
 - D6 (S2 22:10, after K1a/K3a): R1 stays the commitment but its core algorithm becomes JOINT orientation + geometry: choose σ by minimizing the deployability defect D(σ) at X_ini (R5, seed 4), then project (Eq. 6) and range-optimize in the null space with exact contact roots (T4–T6), certifying validity by overlap test at θ=0. Headline claim to test (K5): max-cut σ + Eq.(6) → 0/200 valid; defect-minimizing σ → valid on a substantial fraction. If K5 fails too, the deliverable becomes the emptiness characterization with the T1–T7 machinery and the periodic rank correction.
@@ -170,7 +170,7 @@ Goal: close the five gaps between REPORT.md and a TOG submission (WP1 lemmas, WP
 - F41 (scout-jc, orchestrator re-counted): arXiv:2608.30032 v1 (30 Aug 2026, 25 pp, papers/related/jiang_choi_2026.{pdf,txt}) contains 0 occurrences of collision / self-intersect / Tutte / null space / certificate / deployment range / opening angle / convex / reflex; works on N×N rotating-squares quad patterns with IPOPT on raw coordinates; cites Segall 2026 once as [24]. Only overlap: its Eq. (2) cross-product corner inequality = the Choi–Dudte–Mahadevan 2019 primitive. Novelty risk on C9 CLOSED as PARTIAL, not KNOWN. No newer kirigami preprint on arXiv as of 2026-09-08; no Segall/Ren/Sorkine-Hornung follow-up found.
 
 - F42 (exp-native200, orchestrator read the patch): the F24 'get_holes() segfault' attribution is WRONG for the 39 Native200 crashes. Reproduced cause: EXC_BAD_ACCESS in convert::to_eig_mat from Hmesh::merge_close_verts, called by their collision scan on a deployed configuration that collapsed to zero faces (empty vertex list). Patch (results/kill/native200/crashfix.patch) guards V.rows()==0 and also adds the prev()->twin() null check; on 3 completed cells the patched and original binaries agree exactly (Θ, dim_null, embeddings to 0.0), so crash-fixed rows pool with the rest. REPORT.md erratum 4 and techreport §2 must be reworded → Propagator.
-- E1 (environment, 2026-09-08): `cmake --build` / `make` / `lldb` fail (xcode-select shim error 34304). Use `/Applications/Xcode.app/Contents/Developer/usr/bin/make -C code/build <target>` directly. Load average 17–27 with 8 native processes + 2 agents.
+- E1 (environment, 2026-09-08): obsolete after the Julia port — no cmake/make/Xcode dependency remains.
 
 - F43 (exp-yield, orchestrator checked analysis_out.txt): fresh held-out population ids 1000–1099 × 2σ = 200 designs, disjoint from K9's; design_range_max yield 157/200 = 0.785, Wilson [0.723, 0.836] — K9c's 0.768 sits inside, so the 77 % replicates out of sample. Prediction of failure from input-side features: best held-out AUC 0.739 (log_F + hole_size_mean) against the 0.85 bar → FAIL; in-population CV ceiling 0.787 over 52 features. Mechanism: 0⁺ feasibility is a minimum over a constraint set growing ∝|F|^1.02 while dim_null grows ∝|F|^1.23 (dof_ratio flat, AUC 0.58), so the deepest 0⁺ violation at X_ini deepens with the count (median min_mu_ini −5.4 → −14.1 med²; family order voronoi −7.3, delaunay −8.4, quad −16.8 = yield order). Non-predictors: split density 0.53, aspect ratio ≤0.58, hinge diameter 0.51, projection distance 0.47, nonconvex0 0.49. Split-inward binding sits at LOW split density (0.177 vs 0.326).
 
@@ -181,7 +181,7 @@ Goal: close the five gaps between REPORT.md and a TOG submission (WP1 lemmas, WP
 - D13 (orchestrator): §2 hardware line blank at kickoff → WP3 targets felt_laser and pla_print at a 300×300 mm bed, flagged in export/fab/README.md.
 
 ## Mission 2 environment (verified 2026-09-08 21:04)
-- Working tree clean at a18c000. baseline/native/build/tuttekiri_cli present. code/build/{kiri_tests,kill_native200} present. em++ at /opt/homebrew/bin. Bambu Studio installed; PrusaSlicer not. Load average 1.6 (machine idle). python3 matplotlib: use `arch -arm64 /usr/local/bin/python3` as before.
+- Working tree clean. baseline/native/build/tuttekiri_cli must be rebuilt locally if native comparisons are re-run (build tree not migrated). Julia apps run from source; no build products.
 - native200.csv: 573 rows — completed 172, timed_out 362, crashed 39; 27 cells never dispatched.
 
 ## Mission 2 session log
