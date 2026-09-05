@@ -14,7 +14,7 @@ Verdict: report it as "existence, not prevalence" — a certified, non-trivial (
 
 ## 2. Is the method new, or a barrier method with two obvious constraints?
 
-**Mechanically: yes, it is a standard L-BFGS/softplus/log-barrier feasibility-then-proximity solve over two quadratic-in-t constraint families** (`code/src/method/convex_embed.hpp`): corner convexity (`cross_i(t) ≥ δ`) and split-inward sign (`q_e(t) ≥ δ'`). Nothing about the optimizer is novel — continuation on target, Gaussian restarts, geometric barrier decay are textbook.
+**Mechanically: yes, it is a standard L-BFGS/softplus/log-barrier feasibility-then-proximity solve over two quadratic-in-t constraint families** (`Kirigami/src/method/convex_embed.jl`): corner convexity (`cross_i(t) ≥ δ`) and split-inward sign (`q_e(t) ≥ δ'`). Nothing about the optimizer is novel — continuation on target, Gaussian restarts, geometric barrier decay are textbook.
 
 **The intellectual content, such as it is, is upstream of the solver, in three places, and only one is load-bearing:**
 

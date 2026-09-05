@@ -80,7 +80,7 @@ valid flat state to begin with; it optimizes *within* the null space, and K1a al
 ## 3. Is the population representative or adversarial?
 
 **Adversarial in scale, not in generative process.** Voronoi/Delaunay/quad-dominant
-triangulations of uniform random points (`code/src/core/generators.cpp:496-580`) are a
+triangulations of uniform random points (`Kirigami/src/core/generators.jl:496-580`) are a
 standard, unbiased way to produce "arbitrary planar graphs" — nothing is gerrymandered
 against the method. But:
 
