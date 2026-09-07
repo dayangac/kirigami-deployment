@@ -77,3 +77,9 @@ Swept 2026-09-20: the only instance was in check_l1.jl, fixed.
 ## `M_PI` in comparisons
 Julia's `pi` is an `Irrational`; `pi <= x` is an exact comparison, so `pi <= Float64(pi)` is false.
 Wherever the C++ compares against `M_PI`, use `Float64(pi)`. (Found via a dropped root at θ = π.)
+
+## BLAS threads (reproducibility)
+Every app sets `BLAS.set_num_threads(1)` (apps/common_app.jl). OpenBLAS's threaded gemv splits
+reductions across threads, so optimiser trajectories (L-BFGS repairs, Frank-Wolfe) depend on the
+thread count; the C++ reference was single-threaded Eigen. Sharded runs with the default thread
+count also oversubscribe the machine (observed 40-100x slowdowns). Library users keep the default.

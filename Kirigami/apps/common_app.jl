@@ -10,6 +10,13 @@ import JSON
 const K = Kirigami
 const Vec2 = K.Vec2
 
+# One BLAS thread per process, as the C++ (Eigen without OpenMP, STATE.md U10). The
+# optimiser objectives are hundreds of small gemvs per iteration; with OpenBLAS's default
+# thread count, 12 concurrent shards oversubscribe the machine and each gemv stalls on
+# thread synchronisation (measured 330 s vs 3 s per B4 row). The thread count also fixes
+# the gemv reduction order, so it is part of the results' reproducibility.
+BLAS.set_num_threads(1)
+
 # nlohmann-json dumps NaN / +-Inf as `null`; JSON.jl refuses them, so they are mapped
 # here. Dict keys come out sorted, as nlohmann's std::map-backed objects were.
 _json_clean(x::AbstractFloat) = isfinite(x) ? x : nothing
