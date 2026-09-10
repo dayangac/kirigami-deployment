@@ -157,7 +157,7 @@ if grep -q "TODO(julia-port)" Kirigami/scripts/run_scaling.sh; then
   echo "[$(stamp)] SKIP scaling: Kirigami/scripts/run_scaling.sh still drives the C++ binary (TODO(julia-port))"
 else
   run_app scaling "hours; sequential cells with wall caps (see run_scaling.sh)" \
-    "bash Kirigami/scripts/run_scaling.sh results/scaling_julia"
+    "zsh Kirigami/scripts/run_scaling.sh results/scaling_julia"
 fi
 # regime: the C++ ran 4 shards for the constructive arms and 4 for the native cells
 REGIME_SHARDS=4
