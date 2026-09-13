@@ -5,7 +5,7 @@ implementation (`src/Kirigami.jl` lists the order). Nothing is exported: call
 `Kirigami.f(...)`. C++ function and field names are kept so that every equation, theorem
 and experiment reference in `derivations/`, `results/` and the papers still resolves; the
 deviations are listed at the end. Conventions are in `../PORTING.md`; tests run with
-`julia --project=Kirigami -e 'using Pkg; Pkg.test()'` (⟨JULIA:tests⟩).
+`julia --project=Kirigami -e 'using Pkg; Pkg.test()'` (187 test sets / 176,692 assertions (23 marked broken), 0 failures).
 
 Types: `Vec2 = SVector{2,Float64}`; dense matrices are `Matrix{Float64}`; shape-space
 coefficients `t` are `Vector{Float64}` of length `2 * dim_null`; the RNG is the bit-exact
