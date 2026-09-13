@@ -39,7 +39,7 @@ baseline of zero.
 | C6 | Validation of C1 and C3 on 3,113 designs against brute force | **characterization** | `results/final/e1/E1.md` |
 | C7 | Certified non-deployability of the Eq. (6) embedding on random planar graphs, uniform and non-uniform, with dual certificates | **characterization** | `results/kill/KILL_REPORT.md` §K1a §K5 §K6 §B4 §K8a |
 | C8 | The mechanism: reflex corners created by the projection, not present in the input | **characterization** | `results/kill/KILL_REPORT.md` §T-1 |
-| C9 | Two-stage range-maximising constrained embedding; ⟨JULIA:k9c:307 of 400⟩ designs deployable against 0 for every baseline | **algorithm** | `results/final/figures/summary_table.md`, `results/kill/k9c/`, `Kirigami/src/method/range_embed.jl` |
+| C9 | Two-stage range-maximising constrained embedding; 312 of 400 designs deployable against 0 for every baseline | **algorithm** | `results/final/figures/summary_table.md`, `results/kill/k9c/`, `Kirigami/src/method/range_embed.jl` |
 | C10 | Reimplementation of the 2026 pipeline at parity with the authors' code, plus three errata against it | engineering | `baseline/parity.md`, `results/core_validation/` |
 
 Demoted to lemmas or remarks on the theory review's instruction: T1 trig-linear deployment
@@ -313,14 +313,14 @@ and 0 non-manifold edges.
   claimed (`notes/screen_r1.md`, `notes/screen_bundle.md`, `notes/screen_r2.md`,
   `notes/screen_k9.md`).
 * **Gate 7 (Derive + Check).** Six deriver/checker rounds, the checker in a fresh context
-  each time, ending with **zero unresolved disagreements**. `derivation_tests.jl`: **⟨JULIA:derivation_tests⟩,
+  each time, ending with **zero unresolved disagreements**. `derivation_tests.jl`: **38 test sets / 150,191 assertions,
   0 failures** (re-run by the writer). **Disclosure:** MISSION §9's
   threshold — a derivation not reconciled after two checker rounds — was formally crossed at
   round 5. No round disputed any theorem's truth value; each residue was a side condition or
   wording item the checker itself prescribed. That is convergence rather than
   irreconcilability, but the reader is entitled to the fact and to disagree with the
   judgement.
-* **Gate 8 (Build).** `Pkg.test()`: **⟨JULIA:tests⟩, 0 failures** (re-run by
+* **Gate 8 (Build).** `Pkg.test()`: **187 test sets / 176,692 assertions (23 marked broken), 0 failures** (re-run by
   the writer). Export verified by `xmllint`, `unzip -t`, `check_manifold` and visual
   inspection of PNG previews. **Not verified: no slicer is installed, so no 3MF was opened in
   one.**
@@ -558,7 +558,7 @@ julia --project=Kirigami -e 'using Pkg; Pkg.instantiate()'   # one-off; no build
 **Tests** (both re-run by the writer at the time of writing).
 
 ```
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, 0 failures; includes derivation_tests.jl (⟨JULIA:derivation_tests⟩)
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 187 test sets / 176,692 assertions (23 marked broken), 0 failures; includes derivation_tests.jl (38 test sets / 150,191 assertions)
 ```
 
 **The characterization (E1).**
