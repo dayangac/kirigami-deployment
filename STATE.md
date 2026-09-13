@@ -4,7 +4,7 @@ Mission: /Users/emredayangac/Desktop/MISSION.md (copy of sections in mind; deliv
 Workspace: /Users/emredayangac/Documents/kirigami-experiments (local git, pre-push hook refuses).
 
 ## Current phase
-- 2026-09-05 00:30: ALL MISSION DELIVERABLES ON DISK AND COMMITTED. IDEA.md, derivations/ (6 rounds), code/ (⟨JULIA:tests⟩; derivation 33 / 89,074), results/ (400-design study, figures, E1 3,113), export/hero + hero2 (SVG/3MF/STL), REPORT.md, web explorer code/web. Open: none required by MISSION. Optional follow-ups: rerun Native200 timeouts with longer budget; fabricate hero2; manuscript.
+- 2026-09-05 00:30: ALL MISSION DELIVERABLES ON DISK AND COMMITTED. IDEA.md, derivations/ (6 rounds), code/ (187 test sets / 176,692 assertions (23 marked broken); derivation 33 / 89,074), results/ (400-design study, figures, E1 3,113), export/hero + hero2 (SVG/3MF/STL), REPORT.md, web explorer code/web. Open: none required by MISSION. Optional follow-ups: rerun Native200 timeouts with longer budget; fabricate hero2; manuscript.
 **Phase 1 — Read** (Readers ×2 ∥ Scouts ×3), started 2026-09-03.
 
 ## Environment (verified)
