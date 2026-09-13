@@ -75,7 +75,7 @@ tests pass on the frozen corpora; the numerical caveats are in `Kirigami/README.
 | `src/core/*.{hpp,cpp}` (13 units) | `Kirigami/src/core/*.jl`, same basenames, plus `core/kill_common.jl` (the population definitions of `apps/kill_common.hpp`) | ported |
 | `src/method/*.{hpp,cpp}` (11 units) | `Kirigami/src/method/*.jl`, same basenames | ported |
 | `src/export/*.{hpp,cpp}` (8 units) | `Kirigami/src/export/*.jl`, same basenames | ported |
-| `tests/test_*.cpp`, `derivation_tests.cpp`, `test_main.cpp`, `helpers.hpp` | `Kirigami/test/test_*.jl`, `derivation_tests.jl`, `runtests.jl`, `helpers.jl`; `test_method.cpp` is split into `test_method_{1,2,3}.jl` | ported (`⟨JULIA:tests⟩`, `⟨JULIA:derivation_tests⟩`) |
+| `tests/test_*.cpp`, `derivation_tests.cpp`, `test_main.cpp`, `helpers.hpp` | `Kirigami/test/test_*.jl`, `derivation_tests.jl`, `runtests.jl`, `helpers.jl`; `test_method.cpp` is split into `test_method_{1,2,3}.jl` | ported (187 test sets / 176,692 assertions (23 marked broken), 0 failures; `derivation_tests.jl` alone 38 test sets / 150,191 assertions) |
 | `apps/common_app.hpp`, `kill_common.hpp`, `native_common.hpp` | `Kirigami/apps/common_app.jl`, `kill_common.jl`, `native_common.jl` (included files; populations read from `data/corpus/`, `--regenerate` rebuilds them) | ported |
 | `apps/kiri_{gen,analyze,deploy,design,export,reference,sweep}.cpp` | `Kirigami/apps/kiri_*.jl`, same CLI arguments and output formats (checked against the C++ binaries on the same inputs) | ported |
 | `apps/kill_{e1,f23,jitter,k1a,k1b,k1c,k2a,k2b,k2c,k3a,k3a_recheck,k5,k6,k7,k8a,k8a_recheck,k9,k9b,k9c,t1}.cpp` | `Kirigami/apps/kill_*.jl`, same names | ported |

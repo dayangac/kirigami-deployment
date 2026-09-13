@@ -14,9 +14,6 @@
 \usepackage[table]{xcolor}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-% ⟨JULIA:...⟩ placeholders (filled after the Julia reruns) use U+27E8/U+27E9.
-\DeclareUnicodeCharacter{27E8}{\ensuremath{\langle}}
-\DeclareUnicodeCharacter{27E9}{\ensuremath{\rangle}}
 \usepackage[hidelinks,colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -83,7 +80,7 @@ a baseline of zero.
 On $3{,}113$ designs the closed-form range agrees with a tolerance-independent bisection
 referee on $3{,}113/3{,}113$ at $10^{-5}$, worst gap $3.822\times10^{-9}$, with zero
 soundness violations of the certificate. All code is Julia (package \file{Kirigami}); the two test
-suites re-run for this report at ⟨JULIA:tests⟩ (whole suite) and ⟨JULIA:derivation\_tests⟩ (\file{derivation\_tests.jl}), no failures.
+suites re-run for this report at 187 test sets / 176{,}692 assertions (whole suite; 23 assertions are \texttt{@test\_broken} locks on the C++ optimiser path) and 38 / 150{,}191 (\file{derivation\_tests.jl}), no failures.
 \end{abstract}
 
 \tableofcontents
@@ -3499,7 +3496,7 @@ study's native cells) is reused as archived rather than rerun.
 
 \begin{verbatim}
 julia --project=Kirigami -e 'using Pkg; Pkg.instantiate()'   # one-off
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'          # ⟨JULIA:tests⟩, 0 failures; includes derivation_tests.jl (⟨JULIA:derivation\_tests⟩)
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'          # 187 test sets, 176,692 assertions, 23 broken, 0 failures; includes derivation_tests.jl (38 test sets, 150,191 assertions)
 \end{verbatim}
 
 \noindent Both counts were re-run for this report and are the numbers reported, not copied
@@ -3936,7 +3933,7 @@ Konakovi\'c-Lukovi\'c et al.\ (2018).
 \subsection*{Build and test}
 \begin{verbatim}
 julia --project=Kirigami -e 'using Pkg; Pkg.instantiate()'
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩ incl. derivation_tests.jl ⟨JULIA:derivation\_tests⟩, 0 failures
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 187 test sets, 176,692 assertions, 23 broken, 0 failures; incl. derivation_tests.jl 38 test sets, 150,191 assertions
 \end{verbatim}
 
 \subsection*{The characterisation (E1, Section~\ref{sec:e1})}
