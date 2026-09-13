@@ -840,7 +840,7 @@ faces goes through `SparseQR`, whose rank estimate is wrong by ±1 on 15 of 508 
 the singular gap is `1e−5` to `1e−3` (K3a recheck). **No rank above 700 faces is to be
 quoted** until `mobility.jl`'s `matrix_rank` is fixed or the dense path is forced; a dense
 recheck on a subsample is accepted as sufficient evidence for now, and that is what
-`Kirigami/apps/kill_k3a_recheck.jl` provides (⟨JULIA:kill_k3a_recheck:7 of 7⟩ violators small enough for a dense QR have
+`Kirigami/apps/kill_k3a_recheck.jl` provides (7 of 7 violators small enough for a dense QR have
 the identity restored exactly). The 8 larger violators, `F` from 1644 to 4902, are not
 claimed either way. Every rank-derived number in K3a's table above `F = 700` inherits this
 caveat, including the median `m_full` and `m_core` and their ranges.
@@ -985,7 +985,7 @@ diagnostic `Kirigami/apps/dbg_k6.jl`.
 ## Reproducing
 
 ```
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 187 test sets, 176,692 assertions, 23 broken, 0 failures
 julia --project=Kirigami Kirigami/apps/kill_k3a.jl  --out results/kill/k3a          # ~25 min
 julia --project=Kirigami Kirigami/apps/kill_k3a_recheck.jl --out results/kill/k3a   # ~4 min
 julia --project=Kirigami Kirigami/apps/kill_k1b.jl  --out results/kill/k1b          # ~34 s
@@ -1162,7 +1162,7 @@ the "8" should carry the split-free caveat above.
 ### Reproducing
 
 ```
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 187 test sets, 176,692 assertions, 23 broken, 0 failures
 mkdir -p results/kill/jitter
 seq 0 11 | xargs -P 12 -I{} julia --project=Kirigami Kirigami/apps/kill_jitter.jl --shard {} --nshards 12 \
     --out results/kill/jitter                        # ~2 s wall
@@ -1419,8 +1419,8 @@ assertions**. Whole suite after the concurrent F32 certificate change and its ow
 ### Reproducing
 
 ```
-julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # ⟨JULIA:tests⟩, all passing
-julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["C4: theta_c"])'   # the K7 test alone: ⟨JULIA:tests:C4⟩
+julia --project=Kirigami -e 'using Pkg; Pkg.test()'   # 187 test sets, 176,692 assertions, 23 broken, 0 failures
+julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["test_method_3"])'   # the file holding the K7 test (test_args filters by file name); its "C4: theta_c" test set alone: 24 assertions, 0 failures
 mkdir -p results/kill/k7
 
 # main stage: 33 rows, 12 shards. Wall is set by voronoi_torus_11_n200 (~30 min alone).
@@ -1599,7 +1599,7 @@ julia --project=Kirigami Kirigami/apps/kill_b4.jl --n 200 --nshards 12 --shard I
 soundness control (4 of 4), PASS on the Euler-step sanity (72 of 72, bar was ≥ 10).**
 Driver `Kirigami/apps/kill_k8a.jl`, method `Kirigami/src/method/expansive_cone.jl`,
 artifacts `results/kill/k8a/` (`k8a.csv`, `summary.txt`, `log_*.txt`), 5 new unit tests in
-`Kirigami/test/test_method.jl` (suite now ⟨JULIA:tests⟩).
+`Kirigami/test/test_method.jl` (suite now 187 test sets / 176,692 assertions (23 marked broken)).
 
 *Provenance (Julia port, 2026-09-20).* Every combinatorial and geometric column of `k8a.csv` reproduces exactly. The archived LP-layer values (margins, dual bounds, the "dual-certified" tallies) predate the C++ solver fix `d38b0a4` and are superseded by the rerun; the σ-chart on non-deployable `X_ini` and the margins on the truncated-square family depend on a degenerate-row artefact in `normalise_rows` and are not reproducible in either implementation (`results/kill/k8a_julia/PROVENANCE.md`).
 
@@ -1866,7 +1866,7 @@ passes (103 cases / 17 504 assertions at the time of the run).
 ## B3 — tr K as the expansion budget
 
 `Kirigami/apps/kill_b3.jl`, library `Kirigami/src/method/budget.jl` (5 new unit tests in
-`Kirigami/test/test_method.jl`; suite ⟨JULIA:tests⟩ pass). Outputs
+`Kirigami/test/test_method.jl`; suite 187 test sets / 176,692 assertions (23 marked broken), 0 failures). Outputs
 `results/kill/b3/{b3_b1_global.csv, b3_retro.csv, b3_constrained.csv, summary.txt}`.
 
 **Verdict — theorem PASS after a repair to its derivation, algorithm FAIL, and B3's own

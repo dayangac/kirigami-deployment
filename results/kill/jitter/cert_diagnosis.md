@@ -176,8 +176,8 @@ changes to the reference computation in the test, not weakenings of the assertio
 
 | suite | result |
 |---|---|
-| `Pkg.test()` (whole suite) | ⟨JULIA:tests⟩, SUCCESS |
-| `derivation_tests.jl` | ⟨JULIA:derivation_tests⟩, SUCCESS |
+| `Pkg.test()` (whole suite) | 187 test sets / 176,692 assertions (23 marked broken), SUCCESS |
+| `derivation_tests.jl` | 38 test sets / 150,191 assertions, SUCCESS |
 
 ## 6. Re-measurement of A3 (`kill_jitter`, 12 shards, ~2 s)
 
