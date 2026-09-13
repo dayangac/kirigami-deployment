@@ -61,7 +61,7 @@ and `det(Ja, Jb) = det(a, b)` throughout, both verified by direct expansion.
 | step | verdict | reason |
 |---|---|---|
 | 0.2, 0.4–0.6 | AGREE | definitions; match `cut.jl` / `mesh.jl` verbatim |
-| 0.7, 0.7′ | AGREE | `kinematics.jl` sets `a = -sigma[f]*theta*0.5`; `R(a) = cI + sJ` expands to `cI − σ_f s J`. Confirmed numerically: the closed form reproduces `deploy()` to ⟨JULIA:check_t1_t2:1.4e−14⟩, the sign-flipped form fails by 45 (test **T1-a**) |
+| 0.7, 0.7′ | AGREE | `kinematics.jl` sets `a = -sigma[f]*theta*0.5`; `R(a) = cI + sJ` expands to `cI − σ_f s J`. Confirmed numerically: the closed form reproduces `deploy()` to 1.6e−14, the sign-flipped form fails by 45 (test **T1-a**) |
 | 0.8 | AGREE | the geometer/rigidity persona convention is `θ → −θ`; the note that `σ → −σ` is *not* the same relabelling is correct, because `hinge_dir` is recomputed from `σ` |
 
 ### T1
@@ -369,7 +369,7 @@ adding it closes both gaps at once.
 
 ## 3. Test results
 
-All from `Kirigami/test/derivation_tests.jl`; ⟨JULIA:derivation_tests⟩, 0 failures.
+All from `Kirigami/test/derivation_tests.jl`; 38 test sets / 150 191 assertions, 0 failures.
 
 | id | identity / claim | samples | max error | tolerance | verdict |
 |---|---|---|---|---|---|

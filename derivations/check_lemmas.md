@@ -639,9 +639,10 @@ julia --project=Kirigami -e 'using Pkg; Pkg.test(test_args=["derivation_tests"])
 ## Whole-file run
 
 ```
-⟨JULIA:derivation_tests⟩  (test cases)
-⟨JULIA:derivation_tests⟩  (assertions)
-Test Summary: | Pass  Total  -- 0 failures
+38 test sets  (test cases)
+150 191  (assertions; 151 801 with KIRIGAMI_FULL_DERIVATIONS=1)
+Test Summary:        |   Pass   Total
+derivation_tests.jl  | 150191  150191   -- 0 failures
 ```
 
 Baseline before my additions, rebuilt and re-run first so the delta is honest: **33 test cases,

@@ -19,7 +19,7 @@ T7 rank/periodic corrections · T8 conjecture list and Checker attack surface.
 
 ## Change log — round 2 (reconciliation with `derivations/check.md`)
 
-The Checker read this file with fresh context and wrote `derivations/check.md` (⟨JULIA:derivation_tests⟩,
+The Checker read this file with fresh context and wrote `derivations/check.md` (38 test sets / 150 191 assertions,
 its own test file `Kirigami/test/derivation_tests.jl`), raising eleven
 disagreements D1–D11. Every one is resolved below. My own round-2 program is
 `derivations/scratch/check_r2.jl` (run line in its header; `graphs used: 16`, 197 shape-space
@@ -55,7 +55,7 @@ shape-space samples as round 2; build line in its header).
 
 | # | Checker's claim | resolution | where |
 |---|---|---|---|
-| **R2.5** | a **third** structural class `g(0) = g′(0) = 0` (`p = −q`, `r = 0`, `h = p(1 − cos θ)`) is unnamed, and round 2's "⟨JULIA:check_r3:mismatches⟩ mismatches" is not reproducible | **CONCEDED, and round 2's number is WITHDRAWN as circular** — `check_r2.jl` compared the deflated atom list against a reference using the *same* deflation, so it was structurally blind to class 3. New: **Lemma T5.1e** proves `h = p(1 − cos θ)` has constant sign on `(0, π)`, hence is *never* a contact event, so the class deflates by `(1 − cos θ) ∝ τ²` and its atom is the constant `true` (T5.1e′). Re-measured against a `τ`-chart-free crossing test: **⟨JULIA:check_r3:mismatches⟩ mismatches of 2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`**, versus **153** (all class 3, `ε`-independent) without the new clause | T5.2b.2, T3.H.5 |
+| **R2.5** | a **third** structural class `g(0) = g′(0) = 0` (`p = −q`, `r = 0`, `h = p(1 − cos θ)`) is unnamed, and round 2's "0 mismatches" is not reproducible | **CONCEDED, and round 2's number is WITHDRAWN as circular** — `check_r2.jl` compared the deflated atom list against a reference using the *same* deflation, so it was structurally blind to class 3. New: **Lemma T5.1e** proves `h = p(1 − cos θ)` has constant sign on `(0, π)`, hence is *never* a contact event, so the class deflates by `(1 − cos θ) ∝ τ²` and its atom is the constant `true` (T5.1e′). Re-measured against a `τ`-chart-free crossing test: **0 mismatches of 2 111 336 at every `ε ∈ {0.2, 0.02, 0.001}`**, versus **151** (all class 3, `ε`-independent) without the new clause (C++ prototype: 0 of 2 145 387, versus 153) | T5.2b.2, T3.H.5 |
 | **R2.4a** | (T4.1b)'s `≥` direction is measured, not derived, and is printed untagged | **CONCEDED and TAGGED.** `≤` is `[A]` (derived from `β_e ∈ 𝒞` plus the wedge argument); `≥` is `[N]` only — 8 split-free patterns at 8.88e−16 (Checker: 4 patterns, 8.9e−16, test **T4-b**). I have no proof and do not claim one; the equality now carries the tag and the sample size | T4.4 |
 | **R2.4b** | the certificate's `θ = 0` overlap test is a different predicate from `EMB` (`θ = 0⁺`) and does not supply the hypothesis of T5.2b′ | **CONCEDED and REPLACED.** The certificate is now `POS ∧ NOOVERLAP(ε/2) ∧ NOROOT` — an exact polygon–polygon test at the single explicit angle `θ₁ = ε/2`. Proposition T5.2b′ is reproved as a connectedness argument (`O` is clopen in `(0, ε)`; overlap status can change only at a candidate root) and now *implies* `EMB` instead of assuming it. Stated explicitly: the `θ = 0` test is not merely different but **degenerate**, because the two copies of every split edge coincide at `θ = 0` and adjacent faces touch along whole shared edges | T5.2b.0, T5.2b′, T5.1, T6.4 |
 
@@ -88,8 +88,8 @@ list decides them and the degree-≤ 4 bound is unaffected. Measured status: the
 **144 / 144** of the identically-zero pairs on `squares` are coincidences; the classification of the
 other 14 784 on its corpus is not reported, so for those the coincidence classification is assumed.
 
-Deciding numbers for round 4: **unchanged** — `check_r3.jl` still reports ⟨JULIA:check_r3:mismatches⟩ mismatches of
-2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}`, and the standalone `Kirigami/test/derivation_tests.jl`
+Deciding numbers for round 4: **unchanged** — `check_r3.jl` still reports 0 mismatches of
+2 111 336 at every `ε ∈ {0.2, 0.02, 0.001}`, and the standalone `Kirigami/test/derivation_tests.jl`
 still reports 2 test cases, 59 982 assertions, 0 failures. This round changes statements and one
 proof, not measurements.
 
@@ -106,9 +106,9 @@ round 4, **no measured number changes** — the edits are to statements and to o
 | **R4.2 c2** | "`h_o,π′` vanishes at that one angle alone" is false | **CONCEDED.** Case A now prints `h_o,π′(θ) = ± L L′ sin(β_e − θ)` (T5.2b″-1b), with zero set `{β_e, β_e ± π}`; exactly one of the three lies in `(0, π)`, and it is `β_e` precisely when `β_e ∈ (0, π)`, which is the case at hand since `θ* = β_e ∈ (0, ε)`. Only `β_e` is a **transition of the sector-overlap predicate** — at `β_e ± π` the far-side gap is `∓π`, the far edges are anti-parallel and `θ > β_e` does not change value. The proof needs only `h_o,π′ ≢ 0` and `h_o,π′(β_e) = 0`; an extra root only makes `NOROOT` stricter, hence `R(ε)` smaller and still inner | T5.2b′ Case A |
 | **R4.2 c3 / R4.3** | the matching argument (a face keeps a vertex for at most one of its hinge edges) is used silently, and it makes Case B vacuous | **CONCEDED and PRINTED** as **Sub-lemma T5.2b‴**: by 0.2 a hinge edge keeps `v` only at `src(e)`, which in the `σ_f`-traversal of `∂f` is the edge *leaving* `v`, and only one edge leaves `v`; so vertex identification is a *matching*, never a fan, and two faces sharing a hinge point are joined by exactly one hinge edge — which is what makes "the" `β_e` of the pair well defined. **Case B is now stated as vacuous** (Remark [C]): hinge adjacency gives `σ_g = −σ_f`, so the relative map is a rotation by `±θ` (T1.C), which for `θ ∈ (0, π]` fixes exactly one point and cannot fix two — two faces never share two distinct material points. Case B is kept as a remark | T5.2b′ [A0], [C] |
 
-Deciding numbers for round 5: **unchanged**. `check_r3.jl` still reports ⟨JULIA:check_r3:mismatches⟩ mismatches of
-2 145 387 at every `ε ∈ {0.2, 0.02, 0.001}` (class sizes 2 070 850 / 73 446 / 1 138), and
-`Kirigami/test/derivation_tests.jl` re-runs at **⟨JULIA:derivation_tests⟩, 0 failures**.
+Deciding numbers for round 5: **unchanged**. `check_r3.jl` still reports 0 mismatches of
+2 111 336 at every `ε ∈ {0.2, 0.02, 0.001}` (class sizes 2 037 472 / 72 798 / 1 138), and
+`Kirigami/test/derivation_tests.jl` re-runs at **38 test sets / 150 191 assertions, 0 failures**.
 Round 5, like round 4, changes statements and proofs, not measurements.
 
 ---
@@ -1981,14 +1981,14 @@ argument, because it is refuted — D2).
 
 | program | build | result |
 |---|---|---|
-| `derivations/scratch/check_t1_t2.jl` | `julia --project=Kirigami derivations/scratch/check_t1_t2.jl` linking `Kirigami/src/core/*.jl` | C1 ⟨JULIA:check_t1_t2:1.60e−14⟩, C2 ⟨JULIA:check_t1_t2:1.42e−14⟩, C3 ⟨JULIA:check_t1_t2:9.73e−14⟩, C4 ⟨JULIA:check_t1_t2:2.08e−14⟩, C5 ⟨JULIA:check_t1_t2:4.46e−14⟩, C6 ⟨JULIA:check_t1_t2:1.83e−14⟩, C7 ⟨JULIA:check_t1_t2:1.68e−10⟩ on 30 graphs × 8 angles |
-| `derivations/scratch/check_t4_t5.jl` | same | D1 ⟨JULIA:check_t4_t5:2.09e−6⟩ (rule 1e−5), D2 ⟨JULIA:check_t4_t5:8.88e−16⟩, D3 ⟨JULIA:check_t4_t5:4.37e−15⟩ over 72 split edges, D4 719/1061 violations in the **raw** frame, ratio 1.4141 — see T4.5b: this says nothing about any pruning |
-| `derivations/scratch/check_r2.jl` (round 2) | same, plus `Kirigami/src/core/*.jl`; run line in the file header, takes `ε` as `ARGS[1]` | R2-A ⟨JULIA:check_r2:3.11e−15⟩ (1 628 copies), R2-B drift/`r_f` 4.62→20.03 over diameters 5.66→19.80, R2-C ⟨JULIA:check_r2:8.88e−16⟩ (8 split-free patterns), R2-D ⟨JULIA:check_r2:violations⟩ violations at every `ε ∈ {0.2, 0.05, 0.02, 0.005, 0.001}` on 197 samples. **R2-E is withdrawn** — its deflated reference applied the same deflation as the atom list under test, so the comparison was circular (T5.2b.2) |
-| `derivations/scratch/check_r3.jl` (round 3) | same corpus and seed; run line in the file header, takes `ε` as `ARGS[1]` | three-class deflated atom list vs a `τ`-chart-free crossing test: **0** mismatches of 2 145 387 at `ε ∈ {0.2, 0.02, 0.001}` (47 ambiguous, skipped); the round-2 two-class list gets **153** wrong, all in class 3, `ε`-independent; class sizes 2 070 850 / 73 446 / 1 138 |
+| `derivations/scratch/check_t1_t2.jl` | `julia --project=Kirigami derivations/scratch/check_t1_t2.jl` linking `Kirigami/src/core/*.jl` | C1 3.10e−14, C2 1.64e−14, C3 1.56e−13, C4 2.43e−14, C5 9.06e−14, C6 3.13e−14, C7 2.77e−10 on 30 graphs × 8 angles |
+| `derivations/scratch/check_t4_t5.jl` | same | D1 1.18e−11 (rule 1e−5; the C++ prototype gave 2.09e−6), D2 8.88e−16, D3 3.33e−15 over 72 split edges, D4 719/1061 violations in the **raw** frame, ratio 1.4141 — see T4.5b: this says nothing about any pruning |
+| `derivations/scratch/check_r2.jl` (round 2) | same, plus `Kirigami/src/core/*.jl`; run line in the file header, takes `ε` as `ARGS[1]` | R2-A 2.00e−15 (1 628 copies), R2-B drift/`r_f` 4.62→20.03 over diameters 5.66→19.80, R2-C 8.88e−16 (8 split-free patterns), R2-D **0** violations at every `ε ∈ {0.2, 0.05, 0.02, 0.005, 0.001}` on 196 samples (197 in the C++ prototype; the shape-space sample points differ, see `derivations/scratch/README.md`). **R2-E is withdrawn** — its deflated reference applied the same deflation as the atom list under test, so the comparison was circular (T5.2b.2) |
+| `derivations/scratch/check_r3.jl` (round 3) | same corpus and seed; run line in the file header, takes `ε` as `ARGS[1]` | three-class deflated atom list vs a `τ`-chart-free crossing test: **0** mismatches of 2 111 336 at `ε ∈ {0.2, 0.02, 0.001}` (72 ambiguous, skipped); the round-2 two-class list gets **151** wrong, all in class 3, `ε`-independent; class sizes 2 037 472 / 72 798 / 1 138 (the C++ prototype, on different shape-space sample points, gave 0 of 2 145 387, 47 ambiguous, 153 wrong, class sizes 2 070 850 / 73 446 / 1 138; the class-3 count is structural and identical) |
 
 All three are standalone `main()`s; none modifies anything under `code/` (which other agents own in
 this phase). Build lines are in the file headers. The Checker's own program,
-`Kirigami/test/derivation_tests.jl` (⟨JULIA:derivation_tests⟩, 0 failures), was written
+`Kirigami/test/derivation_tests.jl` (38 test sets / 150 191 assertions, 0 failures), was written
 independently and is the cross-check for everything above; where its numbers and mine differ in
 sample size but not in conclusion, both are quoted.
 
@@ -2258,6 +2258,6 @@ on this row for an unrelated reason.
 
 | program | result |
 |---|---|
-| `derivations/scratch/check_t5_adm.jl` (new; run line in its header) | A: 1 363 Case-A pairs on the 7 tilings with jitter, ratio `∈ [0.5404, 1.0]`, `|s/‖e‖² − L′/L| ≤ ⟨JULIA:check_t5_adm:1.55e−15⟩`, **0** admissibility failures. B: 1 completeness counterexample (`hexagons`, `ε = 1.570796`) |
+| `derivations/scratch/check_t5_adm.jl` (new; run line in its header) | A: 1 363 Case-A pairs on the 7 tilings with jitter, ratio `∈ [0.5086, 1.0]` (C++ prototype: `[0.5404, 1.0]`), `|s/‖e‖² − L′/L| ≤ 1.55e−15`, **0** admissibility failures. B: 1 completeness counterexample (`hexagons`, `ε = 1.570796`) |
 | `derivations/scratch/check_b4_93.jl` (new; run line in its header) | replays B4 ids 93 and 96 from the K6/B4 caches; 93 reproduces scan `0.248400` vs referee `0`, and localizes the referee's misfire to the shared hinge vertex of faces (94, 184) |
-| `Kirigami/test/derivation_tests.jl` R6 + R6-c cases (new) | R6-a1 ⟨JULIA:derivation_tests:R6-a1⟩ failures · R6-a2 `⟨JULIA:derivation_tests:1.77e−14⟩` · R6-a3 `⟨JULIA:derivation_tests:3.53e−14⟩` · R6-b counterexample found · R6-c1 ⟨JULIA:derivation_tests:R6-c1⟩ common interior points of 1 442 401 · R6-c2 misfire pinned. Whole file: **⟨JULIA:derivation_tests⟩, 0 failures** |
+| `Kirigami/test/derivation_tests.jl` R6 + R6-c cases (new) | R6-a1 0 failures of 9 642 pairs · R6-a2 `1.77e−14` · R6-a3 `3.57e−14` · R6-b counterexample found · R6-c1 0 common interior points of 1 442 401 · R6-c2 misfire pinned. Whole file: **38 test sets / 150 191 assertions, 0 failures** |
