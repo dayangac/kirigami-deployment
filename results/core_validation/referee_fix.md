@@ -95,8 +95,8 @@ cases other agents added to the same working tree while this ran):
 
 | suite | cases | assertions | result |
 |---|--:|--:|---|
-| `Pkg.test()` (whole suite) | ⟨JULIA:tests⟩ | 0 failures |
-| `derivation_tests.jl` | ⟨JULIA:derivation_tests⟩ | 0 failures |
+| `Pkg.test()` (whole suite) | 187 test sets | 176,692 (23 marked broken) | 0 failures |
+| `derivation_tests.jl` | 38 test sets | 150,191 | 0 failures |
 
 ## 4. Re-referee: agreement before / after
 
