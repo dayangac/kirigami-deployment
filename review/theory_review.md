@@ -21,7 +21,7 @@ letter, and the honest counter.
    the correspondence is known."
 4. **Rebuttal.** The bundle does not claim T1 as a novel *fact*; it claims the derivation *from the paper's own
    hole-preimage formalism*, tying Eq. (2) to the graph closure condition with an explicit, checked sign
-   convention (`derivations/core.md:190-390`, Check C2 vs `kinematics.jl::deploy()`, ⟨JULIA:check_t1_t2:1.42e−14⟩). Acuña et al.
+   convention (`derivations/core.md:190-390`, Check C2 vs `kinematics.jl::deploy()`, 1.64e−14). Acuña et al.
    require collinearity and a fixed 2-colouring; T1 removes both and handles non-bipartite duals via split
    cuts — a real generalization, just not one that needs new mathematics.
 5. **To bullet-proof.** State explicitly, in the paper, that T1 is "the Tay–Whiteley motion assignment made
