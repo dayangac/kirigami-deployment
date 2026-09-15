@@ -74,9 +74,13 @@ function load_config(path::AbstractString)
                   String.(get(g, "keys", String[])), String.(get(g, "skip", ["secs"])), files)
 end
 
-# the sections whose glob matches this file's basename, most specific (longest) last
+# the sections whose glob matches this file, most specific (longest) last. `base` is
+# `<parent dir>/<basename>` (e.g. `k9b_julia/shard_0.csv`); a section name without a `/`
+# matches the basename alone, one with a `/` matches the directory-qualified name, so the
+# shard files of different apps (all called shard_N.csv) can carry different rules.
 function file_sections(cfg::Config, base::AbstractString)
-    secs = [(k, v) for (k, v) in cfg.files if globmatch(k, base)]
+    bn = basename(base)
+    secs = [(k, v) for (k, v) in cfg.files if globmatch(k, occursin('/', k) ? base : bn)]
     sort!(secs; by = kv -> length(kv[1]))
     return secs
 end
@@ -128,8 +132,14 @@ mutable struct ColReport
     example::String
 end
 
-function key_columns(cfg::Config, header::Vector{String})
-    ks = [k for k in cfg.keys if k in header]
+# a file section may name its own `keys = [...]` (e.g. k2c_drift.csv, whose rows are sorted
+# by a column with ties); otherwise the global list applies
+function key_columns(cfg::Config, header::Vector{String}, base::AbstractString = "")
+    keys = cfg.keys
+    for (_, sec) in file_sections(cfg, base)
+        haskey(sec, "keys") && (keys = String.(sec["keys"]))
+    end
+    ks = [k for k in keys if k in header]
     return ks
 end
 
@@ -140,7 +150,7 @@ function compare_tables(cpp::Table, jl::Table, cfg::Config, base::AbstractString
     cols = [c for c in jl.header if c in cpp.header]
     only_cpp = [c for c in cpp.header if !(c in jl.header)]
     only_jl = [c for c in jl.header if !(c in cpp.header)]
-    ks = key_columns(cfg, cols)
+    ks = key_columns(cfg, cols, base)
     ci = Dict(c => i for (i, c) in enumerate(cpp.header))
     ji = Dict(c => i for (i, c) in enumerate(jl.header))
     kci = [ci[k] for k in ks]; kji = [ji[k] for k in ks]
@@ -300,7 +310,7 @@ end
 # ---------------------------------------------------------------- pairing under results/
 
 # every (cpp_csv, julia_csv, subset) pair under `root`
-function find_pairs(root::AbstractString)
+function find_pairs(root::AbstractString, cfg::Config)
     out = Tuple{String,String,Bool}[]
     for (dir, subdirs, files) in walkdir(root)
         endswith(dir, "_julia") || continue
@@ -310,6 +320,11 @@ function find_pairs(root::AbstractString)
             endswith(f, ".csv") || continue
             jl = joinpath(dir, f)
             cpp = joinpath(cppdir, f)
+            # a section may redirect to another C++ file (`cpp = "k6_final.csv"`: the
+            # archived k6.csv is a 25-row partial, k6_final.csv the merged run)
+            for (_, sec) in file_sections(cfg, joinpath(basename(dir), f))
+                haskey(sec, "cpp") && (cpp = joinpath(cppdir, String(sec["cpp"])))
+            end
             if isfile(cpp)
                 push!(out, (cpp, jl, false))
                 continue
@@ -333,7 +348,8 @@ function diff_pair(io::IO, cpp_path::AbstractString, jl_path::AbstractString, cf
         return "NONE"
     end
     cpp = read_csv(cpp_path); jl = read_csv(jl_path)
-    res = compare_tables(cpp, jl, cfg, basename(jl_path); subset = subset, root = root)
+    res = compare_tables(cpp, jl, cfg, joinpath(basename(dirname(jl_path)), basename(jl_path));
+                         subset = subset, root = root)
     return markdown_section(io, title, cpp, jl, res)
 end
 
@@ -363,7 +379,7 @@ function main(args::Vector{String})
         (cfg = Config(something(rtol, cfg.rtol), something(atol, cfg.atol), cfg.keys, cfg.skip, cfg.files))
 
     pairs = if all
-        find_pairs(results)
+        find_pairs(results, cfg)
     else
         length(files) == 2 || error("usage: diff_results.jl CPP.csv JULIA.csv [--rtol r] [--md out.md] | --all")
         [(files[1], files[2], false)]
