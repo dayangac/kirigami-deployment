@@ -9,3 +9,7 @@ results/**/cache/
 **/*.out
 **/*.blg
 Kirigami/gui/exports/
+results/scaling/shape/
+**/*.bbl
+**/*.toc
+**/*.synctex.gz
