@@ -1,16 +1,17 @@
 # Kirigami.jl -- package tour
 
-One module, `Kirigami`, that `include`s one file per C++ translation unit of the reference
-implementation (`src/Kirigami.jl` lists the order). Nothing is exported: call
-`Kirigami.f(...)`. C++ function and field names are kept so that every equation, theorem
-and experiment reference in `derivations/`, `results/` and the papers still resolves; the
-deviations are listed at the end. Conventions are in `../PORTING.md`; tests run with
+One module, `Kirigami`, that `include`s one file per unit (`src/Kirigami.jl` lists the
+order). Nothing is exported: call `Kirigami.f(...)`. Function and field names are the
+ones used in `derivations/`, `results/` and the papers, so every equation, theorem and
+experiment reference resolves (`derivations/` and `ideas/` cited below are the working notes
+in the sibling folder `../../notes/`, outside the repository); the API conventions are listed at the end. Numerical
+conventions are in `../docs/NUMERICS.md`; tests run with
 `julia --project=Kirigami -e 'using Pkg; Pkg.test()'` (187 test sets / 176,692 assertions (23 marked broken), 0 failures).
 
 Types: `Vec2 = SVector{2,Float64}`; dense matrices are `Matrix{Float64}`; shape-space
 coefficients `t` are `Vector{Float64}` of length `2 * dim_null`; the RNG is the bit-exact
-`MT19937`. Indices are 1-based everywhere in memory; JSON files keep the C++ 0-based format
-and convert at the I/O boundary.
+`MT19937`. Indices are 1-based everywhere in memory; JSON files keep the 0-based file
+format and convert at the I/O boundary.
 
 ## `src/core/` -- the 2026 pipeline
 
@@ -34,7 +35,7 @@ cross-check `holes_geometric` / `holes_geometric_cycles` on the deployed M' (Def
 **`tutte_auxetic.jl`** -- `hole_residuals` (the deployability residual, Eq. (2)),
 `assemble_system(c, hs, X_ini, mode::BoundaryMode)` (the Tutte auxetic linear system,
 Eqs. (3)-(5), with `Fixed`, `Periodic` or `None` boundary rows) and `solve_system` (the
-Eq. (6) projection `X0` and the null-space basis `Phi`, dense SVD with the C++ rank rule);
+Eq. (6) projection `X0` and the null-space basis `Phi`, dense SVD with the documented rank rule);
 `rank_only_sparse` for large graphs; `matrix_to_points` / `points_to_matrix`.
 
 **`kinematics.jl`** -- `deploy(c, X, theta) -> Deployment`: forward kinematics of M' (2026
@@ -54,12 +55,13 @@ n_diameters)`: the Eq. (1) max-cut relaxation (2026 Sec. 4.2), bit-exact for a g
 `tiling_triangles`, `tiling_hexagons`, `tiling_kagome`, `tiling_3_4_3_12`,
 `tiling_snub_square`, `tiling_truncated_square`, the `periodic_*` and `torus_*` patches)
 and the random families (`delaunay_of_random_points`, `voronoi_of_random_points`,
-`quad_dominant_random`), all behind `generate(kind, params, rng)`. The random meshes are
-bit-exact with the C++ for a given `MT19937`; the `libm_*` shims call the system libm.
+`quad_dominant_random`), all behind `generate(kind, params, rng)`. The random meshes
+regenerate the frozen corpora bit-exactly for a given `MT19937`; the `libm_*` shims call
+the system libm.
 
 **`mt19937.jl`** -- `MT19937`, `next_u32`, `uniform_real`, `uniform_int`, `shuffle!`,
-`NormalDist`/`normal`: `std::mt19937` and the libc++ distributions the corpus was drawn
-with, bit-exact (`data/corpus/mt19937_vectors.json`).
+`NormalDist`/`normal`: MT19937 with libc++-compatible distributions, so seeds reproduce
+the frozen design populations bit-exactly (`data/corpus/mt19937_vectors.json`).
 
 **`import_soup.jl`** -- `weld_segments`, `read_svg_segments`, `import_svg_soup`: the welding
 importer that turns a polygon soup (the 2025 paper's fabrication SVGs) into a `Mesh`.
@@ -153,29 +155,47 @@ well-formedness checker the 3MF/SVG tests use.
 ## Reproducibility of the numbers
 
 `characterize`, the certificate, the generators, the RNG and the linear algebra reproduce
-the C++ to the tolerances the tests state (bit-exact for RNG streams, generated meshes and
-the closed-form contact calculus at a given point). The optimiser outputs
+the committed numbers to the tolerances the tests state (bit-exact for RNG streams,
+generated meshes and the closed-form contact calculus at a given point). The optimiser outputs
 (`convex_embed`, `zero_plus_repair`, `range_embed`, `maximize_margin_range`) are
 reproduced to path level: same objective, gradient and start points to 1e-14, converged
 solves agree to solver tolerance, and the fixed-budget `range_embed` diverges by rounding
 amplification over its 6 x 120 iterations, so the K9 / K9c CSV rows are reproduced at CSV
-precision by the converged arms and NOT to 1e-9 through stage A (those C++ locks are kept
-as `@test_broken` in `test/test_design.jl`; call-by-call fixtures in
-`../data/corpus/method_fixtures/`).
+precision by the converged arms and NOT to 1e-9 through stage A (those locks are kept as
+`@test_broken` in `test/test_design.jl`, see `../docs/NUMERICS.md`; call-by-call fixtures
+in `../data/corpus/method_fixtures/`).
 
-## Deviations from the C++ API
+## Judgement calls and deviations from the published pipeline
 
-| C++ | Julia | where |
+The tech report, `results/kill/KILL_REPORT.md`, `baseline/parity.md` and `derivations/`
+cite the implementation's judgement calls by number ("judgement call 8", "deviation 2").
+The numbering is the original implementation-notes list of sixteen; the entries the
+documents actually cite are recorded here, in the numbering they use, with the source that
+states each in full. Numbers not listed were not cited anywhere.
+
+| # | decision | where it is stated and measured |
 |---|---|---|
-| mutating members `m.build_topology()`, `m.normalize_face_ccw()`, `std::shuffle`, `hs.finalize()`, `g.build_forest()` | Julia `!` suffix: `build_topology!(m)`, `normalize_face_ccw!(m)`, `shuffle!(v, rng)`, `finalize!(hs, c)`, `build_forest!(g)` | `mesh.jl`, `mt19937.jl`, `holes.jl`, `mobility.jl` |
-| out-pointers (`std::vector<int>* bad`, `std::string* diff`, `double* min_q`, ...) | extra return values, as tuples: `check_remark_A1(c) -> (ok, bad)`, `same_hole_sets -> (same, msg)`, `holes_partition_edges -> (ok, multiply_covered, uncovered)`, `split_subgraph_is_forest -> (ok, cycle_vertices)`, `zero_plus_margin -> (margin, min_q, min_mu)`, `build_solid -> (TriMesh, warnings)`, `subgraph -> (HingeGraph, sub_pins)`, `matrix_rank -> (rank, used_sparse)`, `face_potential -> (u, worst_closure)`, `periodic_cell_edges -> (keep, n_preimage)`, `fk_period_matrix -> (P, spread)`, `farkas_residual -> (resid, lambda_min, sum_err)`, `harmonic_fit -> (h, max_res, scale)`, `read_svg_segments -> (segments, n_path_ignored)`, `xml_well_formed -> (ok, err)`, `*_objective(...) -> (F, grad)` | throughout |
-| `enum class EdgeType { Border, Hinge, Split }`, `BoundaryMode::{None, Fixed, Periodic}`, `HingeType`, `HarmonicClass`, `ConeRowKind` | `@enum` with the same member names, unscoped: `Kirigami.Hinge`, `Kirigami.Fixed`, ... | `cut.jl`, `tutte_auxetic.jl`, `material.jl`, `deploy_basis.jl`, `expansive_cone.jl` |
-| 0-based indices; "-1 = none" sentinels (`parent`, `pedge`, `ContactWitness.pv`, `bad_pv`) | 1-based; "0 = none" for index-valued sentinels. Exceptions kept as the C++ wrote them: `OverlapRangeReport.i_star` and `Characterization.i_star` (C++ index into `candidates`, 0 => zero range, -1 => none), `DefectOrientationResult.restart_used`, `best_start` (0 = t = 0) | `contact.jl`, `mobility.jl`, `design.jl` |
-| member functions `cert.valid()`, `B.c(i)`, `B.s(i)`, `B.n_prime()`, `r.deployable(tol)`, `L.width()`, `mr.summary()` | free functions `valid(cert)`, `basis_c(B, i)`, `basis_s(B, i)`, `n_prime(B)`, `deployable(r, tol)`, `width(L)`, `summary(mr)` | `contact.jl`, `deploy_basis.jl`, `tutte_auxetic.jl`, `layout.jl`, `solid.jl` |
-| options structs with default member initialisers; `Eigen::VectorXd t_init` empty = t = 0 | `Base.@kwdef mutable struct` (`ConvexEmbedOptions(delta_rel = 1e-2)`); `t_init::Vector{Float64} = Float64[]`, empty = t = 0 | `method/*.jl` |
-| `std::optional<T>`, nullable pointers | `Union{T,Nothing}` | throughout |
-| `std::invalid_argument` / `std::runtime_error` | `ArgumentError` / `error(...)` | `design.jl` and elsewhere |
-| `Eigen::VectorXd t`, `MatrixXd X0` (N x 2) | `Vector{Float64}`; `SolveReport.X0` stays `Matrix{Float64}` N x 2, converted with `matrix_to_points` | `tutte_auxetic.jl` |
-| `CutStructure` holds `const Mesh*` | `CutStructure.mesh::Mesh` (a reference to the same object; the mesh must not be mutated after `make_cut`) | `cut.jl` |
-| `CollisionSweepResult : CollisionOptResult` (inheritance) | one flat struct with all fields | `collision.jl` |
-| app-side `kill::` helpers (`Shape` cache, `deployable_population`, `sci`/`fx`, `Timer`) | `apps/kill_common.jl` (an included file, not part of the module), reading `data/corpus/` by default | `apps/` |
+| 1 | Algorithm 1 line 10 of the 2026 paper is incomplete (it tests only the candidate hinge, never `e'`); the prose rule is implemented instead, and the hole preimages are the split-forest components plus the hinge edges pointing into them (`src/core/holes.jl`, `STATE.md` F11) | techreport Sec. "Holes", Prop. F11; `derivations/check.md` CE-a |
+| 2 | Hole preimages that touch the mesh boundary are notches open to the exterior and contribute no row of `L`; the authors' code adds a row for them (their extra boundary-component row, F23) | techreport "Judgement call 2"; `baseline/parity.md` (Deviation 2); KILL_REPORT §F23 |
+| 6/7 | Our Eq. (9) reimplementation (`optimize_collision_sweep`, `src/core/collision.jl`) uses a softplus barrier on a different argument than the authors' `trace_hole` sign and sweeps a `gamma` ladder; it is weaker than their `prevent` and is never quoted as a baseline | `baseline/parity.md` (Deviation 6/7); KILL_REPORT §K2b, §K1c |
+| 8 | The Eq. (1) orientation relaxation's rounding is unspecified in the paper; we run projected gradient descent on the unit circle with restarts, then take the best of 180 diameters ranked by the component count of `M'` and then by the split count, with two repairs per candidate (`src/core/orientation.jl`) | techreport "Judgement call 8" |
+| 9 | The deployment angle is searched over `theta in (0, pi]`; the bisection referee compares to the closed form at `1e-5` (`src/core/collision.jl`) | `derivations/core.md` (deviation 9), lemma hypothesis H6 |
+| 11 | Periodic patterns are handled on a finite patch with the identifications as linear constraints (`BoundaryMode.Periodic`), which by call 2 drops the wrap-around rows; K7 therefore builds the genuine quotient in `src/method/periodic_jacobian.jl` | techreport "Why a genuine quotient, not a finite patch"; KILL_REPORT §K7 |
+| 13 | `kiri_design` reports `feasible` and `Theta_max` as separate facts and ranks designs by `Theta_max`, never by margin feasibility (`src/method/design.jl`) | techreport §K9, "Feasibility is not necessary for deployment" |
+
+## API conventions
+
+| convention | Julia form | where |
+|---|---|---|
+| functions that mutate their argument | `!` suffix: `build_topology!(m)`, `normalize_face_ccw!(m)`, `shuffle!(v, rng)`, `finalize!(hs, c)`, `build_forest!(g)` | `mesh.jl`, `mt19937.jl`, `holes.jl`, `mobility.jl` |
+| secondary outputs | extra return values, as tuples: `check_remark_A1(c) -> (ok, bad)`, `same_hole_sets -> (same, msg)`, `holes_partition_edges -> (ok, multiply_covered, uncovered)`, `split_subgraph_is_forest -> (ok, cycle_vertices)`, `zero_plus_margin -> (margin, min_q, min_mu)`, `build_solid -> (TriMesh, warnings)`, `subgraph -> (HingeGraph, sub_pins)`, `matrix_rank -> (rank, used_sparse)`, `face_potential -> (u, worst_closure)`, `periodic_cell_edges -> (keep, n_preimage)`, `fk_period_matrix -> (P, spread)`, `farkas_residual -> (resid, lambda_min, sum_err)`, `harmonic_fit -> (h, max_res, scale)`, `read_svg_segments -> (segments, n_path_ignored)`, `xml_well_formed -> (ok, err)`, `*_objective(...) -> (F, grad)` | throughout |
+| enumerations `EdgeType { Border, Hinge, Split }`, `BoundaryMode { None, Fixed, Periodic }`, `HingeType`, `HarmonicClass`, `ConeRowKind` | `@enum`, unscoped members: `Kirigami.Hinge`, `Kirigami.Fixed`, ... (`ConeRowKind` members carry a `Cone` prefix) | `cut.jl`, `tutte_auxetic.jl`, `material.jl`, `deploy_basis.jl`, `expansive_cone.jl` |
+| indices and "none" sentinels (`parent`, `pedge`, `ContactWitness.pv`, `bad_pv`) | 1-based; "0 = none" for index-valued sentinels. Exceptions kept 0-based as the CSVs report them: `OverlapRangeReport.i_star` and `Characterization.i_star` (0-based index into `candidates`, 0 => zero range, -1 => none), `DefectOrientationResult.restart_used`, `best_start` (0 = t = 0) | `contact.jl`, `mobility.jl`, `design.jl` |
+| accessors of result structs | free functions `valid(cert)`, `basis_c(B, i)`, `basis_s(B, i)`, `n_prime(B)`, `deployable(r, tol)`, `width(L)`, `summary(mr)` | `contact.jl`, `deploy_basis.jl`, `tutte_auxetic.jl`, `layout.jl`, `solid.jl` |
+| options structs | `Base.@kwdef mutable struct` (`ConvexEmbedOptions(delta_rel = 1e-2)`); `t_init::Vector{Float64} = Float64[]`, empty = t = 0 | `method/*.jl` |
+| optional values | `Union{T,Nothing}` | throughout |
+| invalid arguments / runtime failures | `ArgumentError` / `error(...)` | `design.jl` and elsewhere |
+| shape-space coefficients `t`; the projection `X0` (N x 2) | `Vector{Float64}`; `SolveReport.X0` is `Matrix{Float64}` N x 2, converted with `matrix_to_points` | `tutte_auxetic.jl` |
+| `CutStructure` and its mesh | `CutStructure.mesh::Mesh` (a reference to the same object; the mesh must not be mutated after `make_cut`) | `cut.jl` |
+| `CollisionSweepResult` extends `CollisionOptResult` | one flat struct with all fields | `collision.jl` |
+| app-side helpers (`Shape` cache, `deployable_population`, `sci`/`fx`, `Timer`) | `apps/kill_common.jl` (an included file, not part of the module), reading `data/corpus/` by default | `apps/` |
