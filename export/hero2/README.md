@@ -7,7 +7,7 @@ with `k9c_eps = π` (fully open, `eps_max` capped at π). Selection rule: among 
 with `eps_max >= 2.5 rad`, pick the one with the largest minimum face-corner angle at the
 closed state (a geometric-cleanliness tiebreaker on top of the range).
 
-## Candidate comparison (closed state, `method::characterize`)
+## Candidate comparison (closed state, `characterize` (`Kirigami/src/method/design.jl`))
 
 | id | F | min corner angle | slivers (< 10°) | eps_max |
 |---|---|---|---|---|
@@ -31,7 +31,7 @@ objective, so `kiri_design` cannot be relied on to land in the same basin.
 This was checked empirically, not just argued: a throwaway program
 (`dump_k9c_graph.jl`, not committed) that replicates `kill_k9c.jl`'s exact per-graph
 pipeline line-for-line (same `convex_embed`/`range_embed`/`maximize_margin_range` calls,
-same seed formula `9300 + 7*id + which`) was compiled and run standalone on `delaunay_130
+same seed formula `9300 + 7*id + which`) was run standalone on `delaunay_130
 sigma_mc`. It did **not** reproduce the archived point: it found `theta_exact = 2.68985`
 via `k9c/k9+B`, versus the archived `theta_exact = π` via `k9c/x0+B` — a different local
 optimum of the same non-convex stage-A/stage-B search, most likely from non-associative
@@ -40,7 +40,11 @@ iterations. **Bit-identical re-optimisation is not reliable here, unlike hero's 
 constrained solve.**
 
 So, per the fallback instruction, the export uses the **archived winning embedding
-directly**, recovered from `results/kill/k9c/gallery/delaunay_130_sigma_mc_closed.json`.
+directly**, recovered from the gallery dump of the K9c pass this hero was picked from
+(the canonical `results/kill/k9c/k9c.csv`, a later pass of the same driver, ends at a
+different local optimum on this design, `theta_exact = 0.572` via the same `k9c/x0+B` route,
+and its gallery JSON is that point; the hero geometry survives as `hero2_graph.json` and
+the `hero2_130_sigma_mc_*.json` dumps here, and is re-characterised from them).
 That file is a `deployment_json` dump (`c.prime_faces` topology — one vertex per face
 corner, `theta=0`, `max_mismatch=0`), not the `vertices`/`faces`/`orientation` mesh
 contract `kiri_export` reads, so a second throwaway program
@@ -49,14 +53,14 @@ contract `kiri_export` reads, so a second throwaway program
 positions back onto the original N=71-vertex indexing: for every face `f`, corner `k`,
 `X_orig[faces[f][k]] := gallery.vertices[prime_faces[f][k]]`. All prime-copies of the
 same original vertex agreed to within `5e-15` (float noise), confirming the fold is exact.
-A third throwaway program (`characterize_k9c.jl`) then calls `method::characterize` — the
+A third throwaway program (`characterize_k9c.jl`) then calls `characterize` — the
 same pure, deterministic function `kiri_design` uses to fill its `characterization` field —
 directly on the reconstructed graph, independently reproducing `k9c.csv`'s archived
 `theta_exact = eps_max = π` to full precision. None of the three throwaway programs were
 added to the package; they are graph-topology/measurement plumbing, not new method
 code.
 
-## Numbers (`hero2_characterization.json`, `method::characterize`)
+## Numbers (`hero2_characterization.json`, `characterize`)
 
 | quantity | value |
 |---|---|
@@ -106,17 +110,15 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
    `apps/kill_k9c.jl` builds for `id=130`), same throwaway-utility pattern as hero's
    `dump_hero_graph.jl`:
    ```
-julia --project=Kirigami export/hero2/dump_hero2_input.jl
-   ./dump_hero2_input 130 800 export/hero2/hero2_input.json
+   julia --project=Kirigami export/hero2/dump_hero2_input.jl 130 800 export/hero2/hero2_input.json
    ```
-   (`dump_hero2_input.jl` calls `kiri::kill::make_graph(130, 100, 800, 1400)`, K9c's
+   (`dump_hero2_input.jl` calls `make_graph(130, 100, 800, 1400)`, K9c's
    population parameters, and `save_mesh_json`.) Output: V=71, F=130, kind=delaunay.
 
 2. **Recover the archived K9c winning embedding** from the gallery dump (kiri_design
    cannot reproduce it — see above):
    ```
-julia --project=Kirigami export/hero2/reconstruct_k9c_graph.jl
-   ./reconstruct_k9c_graph 130 800 \
+   julia --project=Kirigami export/hero2/reconstruct_k9c_graph.jl 130 800 \
      results/kill/k9c/gallery/delaunay_130_sigma_mc_closed.json export/hero2/hero2_graph.json
    ```
    Prints `gallery theta=0 max_mismatch=0` and `max spread across prime-copies ... 5.02e-15`
@@ -125,19 +127,18 @@ julia --project=Kirigami export/hero2/reconstruct_k9c_graph.jl
    `hero_graph.json` used — `kiri_export` reads it directly.
 
 3. **Independently verify the characterization** (does not depend on step 2's provenance,
-   only on the recovered X and `method::characterize`, the same function `kiri_design`
+   only on the recovered X and `characterize`, the same function `kiri_design`
    uses):
    ```
-julia --project=Kirigami export/hero2/characterize_k9c.jl
-   ./characterize_k9c export/hero2/hero2_graph.json export/hero2/hero2_characterization.json
+   julia --project=Kirigami export/hero2/characterize_k9c.jl export/hero2/hero2_graph.json export/hero2/hero2_characterization.json
    ```
    Prints `theta_max=3.14159 eps_max=3.14159 theta_bisect=3.14159 certified=1
-   n_inverted=0 min_corner_angle_deg=5.06853 n_sliver=3` — matches `k9c.csv` to the
-   printed precision.
+   n_inverted=0 min_corner_angle_deg=5.06853 n_sliver=3` — the archived winning point
+   (the canonical `k9c.csv` ends at 0.572 rad on this design, see above).
 
 4. **Export.**
    ```
-   EXP=code/build/src/export/kiri_export
+   EXP="julia --project=Kirigami Kirigami/apps/kiri_export.jl"
    $EXP export/hero2/hero2_graph.json --profile felt_laser --theta 0 \
      --svg export/hero2/hero2_130_sigma_mc_closed.svg \
      --stl export/hero2/hero2_130_sigma_mc_closed.stl \
@@ -162,7 +163,7 @@ julia --project=Kirigami export/hero2/characterize_k9c.jl
    Deployment sequence, 6 frames at `theta = k/5 * Theta_max`, `k = 0..5`:
    ```
    for k in 0 1 2 3 4 5; do
-     frac=$(python3 -c "print($k/5)")
+     frac=$(echo "scale=1; $k/5" | bc)
      $EXP export/hero2/hero2_graph.json --profile felt_laser --theta-frac $frac \
        --svg export/hero2/sequence/hero2_130_seq_k${k}.svg \
        --json export/hero2/sequence/hero2_130_seq_k${k}.json
@@ -171,7 +172,7 @@ julia --project=Kirigami export/hero2/characterize_k9c.jl
 
 5. **PNG previews:**
    ```
-   arch -arm64 /usr/local/bin/python3 export/render_svg.py <svg> -o <png>
+   python3 export/render_svg.py <svg> -o <png>
    ```
    run once per SVG above (closed, open_half, open_0.9tm, and the 6 sequence frames).
 
@@ -185,10 +186,10 @@ julia --project=Kirigami export/hero2/characterize_k9c.jl
   report `closed, consistently oriented, boundary edges 0, non-manifold edges 0, flipped
   edges 0`; 1 component at theta=0 (single living-hinge sheet), 130 components once open
   (per-face bodies separated, as documented for the living-hinge writer in
-  `code/README.md`'s Export section — a rendering/kinematics fact, not a solid-quality
+  `Kirigami/README.md`'s `src/export/` section — a rendering/kinematics fact, not a solid-quality
   defect, since each per-face body is individually closed and consistently oriented).
   `degenerate tris` (234-256 depending on theta) are the flat ears documented in
-  `code/README.md`'s "Deviations and known limits (export)" item 2; they carry no area or
+  `Kirigami/README.md`'s `src/export/` section (flat ears from `build_solid`); they carry no area or
   volume. Ear-clipping fell back to a fan on 3-4 faces per state (faces 6, 53, 56, 116) —
   these are the thinnest slivers (`min_corner_angle` 5.07°), consistent with the sliver
   count above; the fallback still closes the solid (confirmed by the manifold check).
@@ -206,7 +207,7 @@ julia --project=Kirigami export/hero2/characterize_k9c.jl
 export/hero2/
   hero2_input.json                        # step 1: topology + sigma_mc (make_graph(130,...))
   hero2_graph.json                        # step 2: reconstructed certified embedding, plain graph JSON
-  hero2_characterization.json             # step 3: method::characterize full report
+  hero2_characterization.json             # step 3: characterize full report
   hero2_130_sigma_mc_closed.{svg,stl,3mf,json,png}      # theta = 0
   hero2_130_sigma_mc_open_half.{svg,stl,3mf,json,png}   # theta = Theta_max / 2
   hero2_130_sigma_mc_open_0.9tm.{svg,stl,3mf,json,png}  # theta = 0.9 * Theta_max
@@ -215,8 +216,8 @@ export/hero2/
 ```
 
 `dump_hero2_input.jl`, `reconstruct_k9c_graph.jl`, `characterize_k9c.jl` (the
-throwaway utilities above) were compiled and run from the scratch directory, not added to
+throwaway utilities above) were run from the scratch directory, not added to
 the repository or the package — they are graph-topology dump / fold-back /
-measurement plumbing around existing library code (`kiri::kill::make_graph`,
-`kiri::make_cut`, `kiri::method::characterize`), not new method code or a deliverable.
+measurement plumbing around existing library code (`make_graph` (`Kirigami/src/core/kill_common.jl`),
+`make_cut`, `characterize`), not new method code or a deliverable.
 `export/hero/` is unmodified.
