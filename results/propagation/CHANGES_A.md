@@ -79,7 +79,7 @@ rerun is complete.
 >   Choi–Dudte–Mahadevan 2019. This supersedes the abstract-only screen in
 >   `notes/screen_k9.md`.
 
-### 4. `docs/techreport/techreport.tex`, objections list (was line 3724)
+### 4. `paper/techreport/techreport.tex`, objections list (was line 3724)
 
 **Old**
 
@@ -90,7 +90,7 @@ rerun is complete.
 **New** — cleared, with the C1–C10 screen cited, the Eq. (2) overlap named, C9 kept
 \textsc{partial}, and `\cite{Jiang2026}` / `\cite{Choi2019}` wired in.
 
-### 5. `docs/techreport/refs.bib`, entry `Jiang2026`
+### 5. `paper/techreport/refs.bib`, entry `Jiang2026`
 
 A placeholder entry existed (`author = {Jiang and Choi}`, no eprint fields). Replaced with the
 verified record from `notes/screen_jiang_choi.md` §2:
@@ -157,7 +157,7 @@ The reproduced cause is an empty-vertex-list access in `convert::to_eig_mat`, re
 **Not changed:** the `IDEA.md` §4 table row (line 140) prints "39 crashed" with **no** cause
 attribution, so it needed no edit and none was made. Its count is untouched.
 
-### 8. `docs/techreport/techreport.tex` §2, "Two upstream defects we observed"
+### 8. `paper/techreport/techreport.tex` §2, "Two upstream defects we observed"
 
 **Old** (first clause)
 
@@ -170,7 +170,7 @@ mechanism; the crash is then attributed to the empty-vertex-list access in
 `get_holes()` is kept as the **second, latent** defect fixed by the same patch. (The
 subsubsection title "Two upstream defects we observed" still holds: there are two.)
 
-### 9. `docs/techreport/techreport.tex` §9, Native200 caveat paragraph (was line 3401)
+### 9. `paper/techreport/techreport.tex` §9, Native200 caveat paragraph (was line 3401)
 
 **Old**
 
@@ -229,7 +229,7 @@ forward-looking fabrication promises were removed.
 >     scope. Every claim here is stated about the geometric model, and none is offered as
 >     evidence about a physical piece.
 
-### 12. `docs/techreport/techreport.tex` §11, open-items list (was line 3775)
+### 12. `paper/techreport/techreport.tex` §11, open-items list (was line 3775)
 
 **Old**
 
@@ -243,7 +243,7 @@ forward-looking fabrication promises were removed.
 > made here rests on a physical artifact. The \file{export/} SVG/3MF/STL output stays as
 > verified file-format generation, not as a fabrication result.
 
-### 13. `docs/techreport/techreport.tex`, "Review 3" demands paragraph
+### 13. `paper/techreport/techreport.tex`, "Review 3" demands paragraph
 
 **Old**
 
@@ -265,7 +265,7 @@ standing, per the spec.
 
 ## Rebuild check
 
-`docs/techreport/techreport.tex` was rebuilt (`pdflatex`, `bibtex`, `pdflatex` ×2): **63 pages,
+`paper/techreport/techreport.tex` was rebuilt (`pdflatex`, `bibtex`, `pdflatex` ×2): **63 pages,
 0 errors, 0 undefined citations**, with the new `Jiang2026` and existing `Choi2019` keys
 resolving. `techreport.pdf`, `.aux`, `.bbl`, `.blg`, `.log`, `.toc` are regenerated artefacts
 of that build.
