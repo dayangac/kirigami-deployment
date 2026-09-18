@@ -1,6 +1,6 @@
 # Rank claim on the sweep (Builder-Core)
 
-Source: `sweep.csv`, produced by `kiri_sweep --n 50 --seed 20260903`.
+Source: `sweep.csv`, produced by `julia --project=Kirigami Kirigami/apps/kiri_sweep.jl --n 50 --seed 20260903 --out results/core_validation/sweep.csv`.
 Random planar graphs (Voronoi cells of random points, Delaunay triangulations,
 quad-dominant edge-collapsed Delaunay), face orientations from the paper's own Eq. (1)
 relaxation, fixed-boundary system of Eq. (4).
@@ -163,7 +163,7 @@ reference cases. No counterexample to the factorization or to the out-harmonic
 characterization was found, but the out-harmonic characterization has been exercised on
 three patches only, and that is the honest strength of the evidence for it.
 
-Counterexamples saved (graph JSON, loadable by `kiri_analyze`):
+Counterexamples saved (graph JSON, loadable by `Kirigami/apps/kiri_analyze.jl`):
 
 | case | identity that failed | file |
 |---|---|---|

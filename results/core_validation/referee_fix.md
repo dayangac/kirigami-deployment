@@ -2,8 +2,8 @@
 
 Scope: `Kirigami/src/core/collision.jl` -- `polygons_overlap` / `has_collision`, the
 primitive under every `theta_bisect` column in the kill runs and under `theta_max()`.
-All numbers below come from a full re-run of K2a, K5, K6 and K9 against a matched baseline
-binary; nothing is quoted from the recorded runs.
+All numbers below come from a full re-run of K2a, K5, K6 and K9 against a matched
+reverted-predicate build of the same source tree; nothing is quoted from the recorded runs.
 
 ## 1. The defect (F34, checker round 6 R6-c; K9 post-hoc audit)
 
@@ -44,8 +44,8 @@ convention:
    with coincident boundaries, so a point constructed strictly inside each polygon (an ear
    construction, no offsets) is classified against the other.
 
-The orientation predicate is evaluated in `long double` and snapped to zero by a RELATIVE
-tolerance: `c` counts as ON the line `ab` when `|det| <= eps * |u| * S` with
+The orientation predicate is accumulated in Float64 in a fixed contraction form
+(`core/collision.jl`, `orient_raw`) and snapped to zero by a RELATIVE tolerance: `c` counts as ON the line `ab` when `|det| <= eps * |u| * S` with
 `S = max(|c - a|, |a|, |b|, |c|)`, i.e. when its distance from the line is at most `eps`
 times the scale of the configuration. It is exact -- `eps` plays no role at all -- whenever
 two of the three points coincide, which is exactly the shared-pin case, so the hinge
@@ -100,9 +100,9 @@ cases other agents added to the same working tree while this ran):
 
 ## 4. Re-referee: agreement before / after
 
-Every "before" number here was produced by a BASELINE BINARY built from the current source
-tree with only `Kirigami/src/core/collision.jl` reverted to `HEAD` (built out of tree in
-the scratchpad), so the comparison isolates this fix from the round-6 corrections other
+Every "before" number here was produced by a REVERTED-PREDICATE BUILD: the current source
+tree with only `Kirigami/src/core/collision.jl` reverted to `HEAD`, run from a copy in
+the scratchpad, so the comparison isolates this fix from the round-6 corrections other
 agents made to `contact.jl` / `zero_plus.jl` in the same working tree. The baseline K5 run
 reproduces `results/kill/k5/summary.txt` line for line (only the wall time differs), which
 checks that control.
@@ -173,7 +173,7 @@ first interval. Both are still uncertified (`cert_noroot = 0`), and 2 / 400 = 0.
 under K6's 20 % bar, so the verdict does not move -- but the sentence "`Theta_max = 0` on all
 400" is no longer true and is corrected in `KILL_REPORT.md`.
 
-Control: the baseline binary reproduces `results/kill/k6/k6_final.csv` on every column
+Control: the reverted-predicate build reproduces `results/kill/k6/k6_final.csv` on every column
 except `sec_eps_max` on 15 rows, which is another agent's round-6 change to
 `method/zero_plus.jl` in the same working tree, not this fix.
 
