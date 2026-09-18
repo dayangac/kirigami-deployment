@@ -11,20 +11,20 @@ design rows read: 213
 == arm table, set = pat2025 ==
 | arm | N | deployable (Theta_max>0) | refereed (bisect 1e-9 > 0) | certified (eps_max>0) | eps_max >= 0.1 rad | median eps_max | max eps_max |
 |---|---|---|---|---|---|---|---|
-| Eq. (6) baseline (design_baseline) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.046 |
+| Eq. (6) baseline (design_baseline) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.067 |
 | native pipeline (their colouring) | 0 (none dispatched) | -- | -- | -- | -- | -- | -- |
 | native pipeline (our sigma) | 0 (none dispatched) | -- | -- | -- | -- | -- | -- |
-| k9c range-max (design_range_max) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.046 |
-| best per design (max over the arms run) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.046 |
+| k9c range-max (design_range_max) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.067 |
+| best per design (max over the arms run) | 5 | 5 | 5 | 5 | 0 | 0.000 | 0.067 |
 
 == arm table, set = pop ==
 | arm | N | deployable (Theta_max>0) | refereed (bisect 1e-9 > 0) | certified (eps_max>0) | eps_max >= 0.1 rad | median eps_max | max eps_max |
 |---|---|---|---|---|---|---|---|
 | Eq. (6) baseline (design_baseline) | 200 | 1 | 1 | 1 | 1 | 0.560 | 0.560 |
-| native pipeline (their colouring) | 10 | 2 | 2 | 2 | 2 | 0.836 | 0.836 |
-| native pipeline (our sigma) | 4 | 1 | 1 | 1 | 1 | 0.109 | 0.109 |
-| k9c range-max (design_range_max) | 200 | 192 | 192 | 192 | 180 | 0.877 | 3.142 |
-| best per design (max over the arms run) | 200 | 192 | 192 | 192 | 180 | 0.877 | 3.142 |
+| native pipeline (their colouring) | 52 | 12 | 12 | 12 | 12 | 0.290 | 1.109 |
+| native pipeline (our sigma) | 45 | 5 | 5 | 4 | 4 | 0.213 | 0.646 |
+| k9c range-max (design_range_max) | 200 | 192 | 192 | 192 | 178 | 0.858 | 3.142 |
+| best per design (max over the arms run) | 200 | 192 | 192 | 192 | 178 | 0.858 | 3.142 |
 
 == arm table, set = ref ==
 | arm | N | deployable (Theta_max>0) | refereed (bisect 1e-9 > 0) | certified (eps_max>0) | eps_max >= 0.1 rad | median eps_max | max eps_max |
@@ -48,15 +48,15 @@ design rows read: 213
 | pat2025 | hyperbolic_waterbomb | sigma_mc | 0 | 0 | 0 | 0 | 1 | 
 | pat2025 | torus_waterbomb | native_col | 0 | 0 | 0 | 0 | 1 | 
 | pat2025 | torus_waterbomb | sigma_mc | 0 | 0 | 0 | 0 | 1 | 
-| pop | delaunay | native_col | 2 | 0 | 0 | 0 | 64 | 
-| pop | delaunay | sigma_def | 1 | 0 | 0 | 0 | 32 | 
-| pop | delaunay | sigma_mc | 1 | 0 | 0 | 0 | 32 | 
-| pop | quad_random | native_col | 6 | 0 | 0 | 0 | 62 | 
-| pop | quad_random | sigma_def | 0 | 0 | 0 | 0 | 34 | 
-| pop | quad_random | sigma_mc | 2 | 0 | 0 | 0 | 32 | 
-| pop | voronoi | native_col | 2 | 0 | 0 | 0 | 64 | 
-| pop | voronoi | sigma_def | 0 | 0 | 0 | 0 | 33 | 
-| pop | voronoi | sigma_mc | 0 | 0 | 0 | 0 | 33 | 
+| pop | delaunay | native_col | 16 | 0 | 0 | 0 | 50 | 
+| pop | delaunay | sigma_def | 6 | 1 | 0 | 0 | 26 | 
+| pop | delaunay | sigma_mc | 7 | 0 | 0 | 0 | 26 | 
+| pop | quad_random | native_col | 14 | 4 | 0 | 0 | 50 | 
+| pop | quad_random | sigma_def | 6 | 2 | 0 | 0 | 26 | 
+| pop | quad_random | sigma_mc | 7 | 2 | 0 | 0 | 25 | 
+| pop | voronoi | native_col | 18 | 0 | 0 | 0 | 48 | 
+| pop | voronoi | sigma_def | 6 | 1 | 0 | 0 | 26 | 
+| pop | voronoi | sigma_mc | 6 | 1 | 0 | 0 | 26 | 
 | ref | hexagons_auto | native_col | 0 | 0 | 0 | 0 | 1 | 
 | ref | hexagons_auto | sigma_given | 0 | 0 | 0 | 0 | 1 | 
 | ref | kagome_3636 | native_col | 0 | 0 | 0 | 0 | 1 | 
@@ -78,9 +78,10 @@ design rows read: 213
 | bin | arm | N | deployable | yield | Wilson 95 % |
 |---|---|---|---|---|---|
 | [20,50) | Eq. (6) baseline (design_baseline) | 98 | 1 | 1.0 % | [0.2, 5.6] % |
-| [20,50) | native pipeline (their colouring) | 8 | 2 | 25.0 % | [7.1, 59.1] % |
-| [20,50) | native pipeline (our sigma) | 4 | 1 | 25.0 % | [4.6, 69.9] % |
+| [20,50) | native pipeline (their colouring) | 30 | 12 | 40.0 % | [24.6, 57.7] % |
+| [20,50) | native pipeline (our sigma) | 27 | 5 | 18.5 % | [8.2, 36.7] % |
 | [20,50) | k9c range-max (design_range_max) | 98 | 96 | 98.0 % | [92.9, 99.4] % |
 | [50,100] | Eq. (6) baseline (design_baseline) | 102 | 0 | 0.0 % | [0.0, 3.6] % |
-| [50,100] | native pipeline (their colouring) | 2 | 0 | 0.0 % | [0.0, 65.8] % |
+| [50,100] | native pipeline (their colouring) | 22 | 0 | 0.0 % | [0.0, 14.9] % |
+| [50,100] | native pipeline (our sigma) | 18 | 0 | 0.0 % | [0.0, 17.6] % |
 | [50,100] | k9c range-max (design_range_max) | 102 | 96 | 94.1 % | [87.8, 97.3] % |
