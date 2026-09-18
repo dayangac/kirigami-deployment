@@ -19,7 +19,7 @@ from **two unrelated algorithms**:
   is in the simplex so every value is a rigorous upper bound;
 * the **primal** end by a separate log-sum-exp smoothing loop with projected gradient
   ascent on the unit ball, annealed `mu = 1 -> 1e-5` in 17 stages of 60 iterations
-  (`expansive_cone.jl` lines 208–243 of the original), started from `z = 0` with step
+  (`expansive_cone.jl`, lines 208–243 of the pre-fix file), started from `z = 0` with step
   `mu / smax^2`.
 
 That second loop is hopelessly under-converged on the real systems (about 1 000 steps of
@@ -52,13 +52,13 @@ the primal sat at `0`, leaving an *open* bracket `[0, 3e-2]` that the driver's
 * `w` is recomputed as `A^T lambda` every 256 steps against drift, and once more at exit;
 * the smoothing loop is kept only as an extra source of witnesses — the reported margin is
   the best of the two, so nothing that used to be found is lost;
-* new `ConeLPResult::gap = dual_bound - margin_l2`, the width of the rigorous bracket.
+* new `ConeLPResult.gap = dual_bound - margin_l2`, the width of the rigorous bracket.
 
 Default `dual_iters` raised 600 -> 20 000.
 
 Two new report fields make the solver testable without trusting it:
 
-* `ExpansiveConeReport::sigma_chart_margin` — the uniform ray `sigma`, projected into the
+* `ExpansiveConeReport.sigma_chart_margin` — the uniform ray `sigma`, projected into the
   flex basis and evaluated on the branch chart it itself selects, divided by its norm.
   **No solver touches this number.** It is a rigorous lower bound on that chart's LP
   value, so whenever `sigma_in_cone` holds it must be positive and the solver must return
@@ -86,17 +86,17 @@ designs K9 ran the cone on are reproduced.
 | ... of which LP margin `> 0` (a genuine non-uniform rescue) | **0 / 7** | **6 / 7** |
 | feasible overall | **0 / 30** | **29 / 30** |
 
-`margin / sigma_chart_margin`: median **8.73**, range 2.06 – 56.9. So the answer is not
+`margin / sigma_chart_margin`: median **8.73**, range 2.23 – 56.9. So the answer is not
 merely "the solver now recovers the uniform ray" — at every one of these embeddings the
 best non-uniform flex separates the cuts and corners by roughly an order of magnitude more
 than `sigma` does.
 
-Bracket width `dual - margin` over the 30: median `6.5e-4`, max `4.6e-3` at 20 000 steps
-(the LP value itself is `5e-3` … `4e-2`, so the bracket is 1–50 % wide; it is a genuine
+Bracket width `dual - margin` over the 30: median `6.3e-4`, max `4.5e-3` at 20 000 steps
+(the LP value itself is `9e-4` … `4.4e-2` on the 23 in-cone designs, so the bracket is 1–50 % wide; it is a genuine
 positive either way, and the ordering `margin >= sigma_chart` is what the test turns on).
 
 The one design that stays infeasible is `id 46 / sigma_def`, where `sigma` is outside
-`P(X)` (`min mu = -1.26`) and the dual reaches `5.6e-5`.
+`P(X)` (`min mu = -1.26`) and the dual reaches `3.6e-5`.
 
 ## 4. Step 2 — independent verification of the certificates
 
@@ -123,7 +123,7 @@ K1a population, 100 000 dual steps (`results/kill/k8a/recheck100k/`):
 Per family at `X_ini`, verified `< 1e-9` (and `< 1e-6` in brackets): Voronoi **34 / 34**
 (34), quad-random **31 / 33** (33), Delaunay **0 / 33** (29). The Delaunay shortfall is the same convergence residue
 the original report identified, not a different phenomenon: those are the graphs with
-`dim_flex` up to 156, and their residuals sit at `3e-9 … 4e-5`. Away-step Frank–Wolfe
+`dim_flex` up to 306, and their residuals sit at `2.5e-9 … 3.9e-5`. Away-step Frank–Wolfe
 improves them by two to three orders over the original vanilla Frank–Wolfe at the same
 budget (Delaunay `dual_max` median `9.3e-7 -> 5.7e-9`), but does not reach `1e-9`.
 
@@ -167,7 +167,7 @@ Euler step collision-free **72 / 72** — all unchanged.
 
 Covered by section 3: at all 23 constrained embeddings where the uniform ray is admissible,
 a non-uniform flex with a strictly larger margin exists, by a median factor of **8.7**
-(range 2.1 – 56.9). At **6 of the 7** where the uniform ray is *not* admissible
+(range 2.2 – 56.9). At **6 of the 7** where the uniform ray is *not* admissible
 (`min mu < 0`, so `Theta_max = 0` along `sigma`), a non-uniform flex nevertheless separates
 every cut and every corner at first order.
 

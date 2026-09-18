@@ -68,4 +68,4 @@ best variant: 0 refereed positives, 13 convex-feasible
 VERDICT: FAIL
 HARD FAIL (feasible >= 50 % and Theta_max > 0 < 2 %): no
 baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200; K6 0/400
-wall 399.8 s
+wall 1259.1 s

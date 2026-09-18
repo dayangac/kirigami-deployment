@@ -10,7 +10,7 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 1.6 s
+    wall : 3.1 s
 
 === fixed|sigma_def (17 designs) ===
     median dim_null / |E_split| : 97.0 / 97.0
@@ -20,7 +20,7 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 16.8 s
+    wall : 29.1 s
 
 === free|sigma_mc (17 designs) ===
     median dim_null / |E_split| : 46.0 / 35.0
@@ -30,7 +30,7 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 2.2 s
+    wall : 4.5 s
 
 === free|sigma_def (17 designs) ===
     median dim_null / |E_split| : 108.0 / 97.0
@@ -40,30 +40,30 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 11.5 s
+    wall : 17.8 s
 
 === split_free|sigma_mc (17 designs) ===
     median dim_null / |E_split| : 38.0 / 35.0
     median min q at t = 0       : -153.134,  median inward fraction 0.4912
-    0+-feasible primary / secondary : 0 / 3  of 17  (0.00 %)
+    0+-feasible primary / secondary : 0 / 2  of 17  (0.00 %)
     exact Theta_max > 0 (PRIMARY)   : 0 / 17  (0.00 %)
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 4.2 s
+    wall : 9.3 s
 
 === split_free|sigma_def (17 designs) ===
     median dim_null / |E_split| : 101.0 / 97.0
     median min q at t = 0       : -276.666,  median inward fraction 0.3918
-    0+-feasible primary / secondary : 0 / 14  of 17  (0.00 %)
+    0+-feasible primary / secondary : 0 / 13  of 17  (0.00 %)
     exact Theta_max > 0 (PRIMARY)   : 0 / 17  (0.00 %)
     certified eps_max > 0 (SECONDARY): 0 / 17, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 17
-    wall : 15.4 s
+    wall : 29.0 s
 
 --- PASS rule (B4): exact Theta_max > 0 on >= 10 % of the population under `free` ---
 free  : 0 / 34  (0.00 %)
 fixed : 0 / 34   (the K6 control)
 VERDICT: FAIL -- B4 is dead
-wall 58.2 s
+wall 94.1 s

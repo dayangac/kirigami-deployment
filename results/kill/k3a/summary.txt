@@ -1,23 +1,11 @@
 K3a: n=508 graphs, F in [10,4918]
-identity dim ker A == |F\core2| + dim ker A|core2 : 493/508
+identity dim ker A == |F\core2| + dim ker A|core2 : 505/508
 identity at theta = 0.3*theta_max            : 8/8
 sigma in ker A                               : 296/508
-delaunay patches: 167, m_core <= 5 on 0 (0.000000%)
+delaunay patches: 167, m_core <= 5 on 0 (0.0%)
 delaunay median m_full = 322, median m_core = 305
 delaunay m_full range = [39,1875], m_core range = [36,1675]
-VIOLATION: delaunay_40
-VIOLATION: delaunay_43
 VIOLATION: delaunay_88
 VIOLATION: delaunay_247
-VIOLATION: quad_random_257
 VIOLATION: quad_random_266
-VIOLATION: quad_random_299
-VIOLATION: quad_random_320
-VIOLATION: delaunay_343
-VIOLATION: quad_random_425
-VIOLATION: delaunay_445
-VIOLATION: quad_random_455
-VIOLATION: quad_random_467
-VIOLATION: quad_random_476
-VIOLATION: quad_random_494
-wall 1492.978000 s
+wall 44.5 s

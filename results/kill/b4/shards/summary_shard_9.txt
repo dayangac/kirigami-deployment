@@ -5,23 +5,24 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
 === fixed|sigma_mc (16 designs) ===
     median dim_null / |E_split| : 264.0 / 264.0
     median min q at t = 0       : -9.848,  median inward fraction 0.3922
-    0+-feasible primary / secondary : 0 / 12  of 16  (0.00 %)
+    0+-feasible primary / secondary : 0 / 11  of 16  (0.00 %)
     exact Theta_max > 0 (PRIMARY)   : 0 / 16  (0.00 %)
     certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 16
-    wall : 50.5 s
+    wall : 64.1 s
 
 === fixed|sigma_def (16 designs) ===
     median dim_null / |E_split| : 495.0 / 495.0
     median min q at t = 0       : -23.412,  median inward fraction 0.2539
     0+-feasible primary / secondary : 1 / 16  of 16  (6.25 %)
-    exact Theta_max > 0 (PRIMARY)   : 0 / 16  (0.00 %)
-    certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
+    exact Theta_max > 0 (PRIMARY)   : 1 / 16  (6.25 %)
+      Theta_max  min / q1 / median / q3 / max : 0.2389 / 0.2389 / 0.2389 / 0.2389 / 0.2389
+    certified eps_max > 0 (SECONDARY): 1 / 16, certificate at eps = 0.3 on 0
     min q at the feasible minimisers, median : 1.957e-01
-    referee |Theta_exact - bisection| <= 1e-5 on 1 / 1, worst 0.000e+00
-    binding contact at the Theta_max = 0 designs:  split-inward 13  vertex-edge 3
-    wall : 128.6 s
+    referee |Theta_exact - bisection| <= 1e-5 on 1 / 1, worst 3.358e-10
+    binding contact at the Theta_max = 0 designs:  n/a 1  split-inward 13  vertex-edge 2
+    wall : 173.8 s
 
 === free|sigma_mc (16 designs) ===
     median dim_null / |E_split| : 328.0 / 264.0
@@ -31,19 +32,17 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 16
-    wall : 52.3 s
+    wall : 65.3 s
 
 === free|sigma_def (16 designs) ===
     median dim_null / |E_split| : 559.0 / 495.0
     median min q at t = 0       : -23.412,  median inward fraction 0.2539
-    0+-feasible primary / secondary : 1 / 16  of 16  (6.25 %)
-    exact Theta_max > 0 (PRIMARY)   : 1 / 16  (6.25 %)
-      Theta_max  min / q1 / median / q3 / max : 0.2484 / 0.2484 / 0.2484 / 0.2484 / 0.2484
-    certified eps_max > 0 (SECONDARY): 1 / 16, certificate at eps = 0.3 on 0
-    min q at the feasible minimisers, median : 2.025e-01
-    referee |Theta_exact - bisection| <= 1e-5 on 0 / 1, worst 2.484e-01
-    binding contact at the Theta_max = 0 designs:  n/a 1  split-inward 12  vertex-edge 3
-    wall : 150.4 s
+    0+-feasible primary / secondary : 0 / 16  of 16  (0.00 %)
+    exact Theta_max > 0 (PRIMARY)   : 0 / 16  (0.00 %)
+    certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
+    referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
+    binding contact at the Theta_max = 0 designs:  split-inward 13  vertex-edge 3
+    wall : 201.1 s
 
 === split_free|sigma_mc (16 designs) ===
     median dim_null / |E_split| : 271.0 / 264.0
@@ -53,7 +52,7 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 16
-    wall : 52.3 s
+    wall : 70.0 s
 
 === split_free|sigma_def (16 designs) ===
     median dim_null / |E_split| : 526.0 / 495.0
@@ -63,10 +62,10 @@ PRIMARY label = exact Theta_max (T4.2") > 0. SECONDARY = certificate eps_max > 0
     certified eps_max > 0 (SECONDARY): 0 / 16, certificate at eps = 0.3 on 0
     referee |Theta_exact - bisection| <= 1e-5 on 0 / 0, worst 0.000e+00
     binding contact at the Theta_max = 0 designs:  split-inward 13  vertex-edge 3
-    wall : 158.2 s
+    wall : 201.4 s
 
 --- PASS rule (B4): exact Theta_max > 0 on >= 10 % of the population under `free` ---
-free  : 1 / 32  (3.12 %)
-fixed : 0 / 32   (the K6 control)
+free  : 0 / 32  (0.00 %)
+fixed : 1 / 32   (the K6 control)
 VERDICT: FAIL -- B4 is dead
-wall 598.3 s
+wall 776.9 s

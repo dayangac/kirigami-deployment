@@ -1,92 +1,20 @@
-kill_b3 -- B3 of ideas/round2_theorist_b.md, "tr K is the expansion budget"
-Run 2026-09-04.  App code/apps/kill_b3.cpp, library code/src/method/budget.{hpp,cpp}.
-Population: kill_k7.cpp's population() verbatim; the 25 designable periodic patterns
-(dim K >= 1) x 2 targets = the same 50 C3 rows as results/kill/k7/k7_c3_all_v2.csv.
+=== B3 stage 1 (retrodiction) ===
+rows with split cuts        50 of 50
+worst |W+R-detP0 trK|/scale 1.600e+00
+min q > 0                   21      certified 13
+AUC(gap = trK - tau*)  for min q > 0   0.9885
+AUC(gap = trK - tau*)  for certified   0.9064
+AUC(R / (detP0 n_split)) for min q > 0 0.9819
+AUC(R / (detP0 n_split)) for certified 0.9626
+rows with min q > 0 at tr K < tau*     0   (must be 0)
+--- restricted to the 46 rows where (B.5) is exact to 1e-9 ---
+AUC(gap) min q > 0 0.9867   certified 0.8951 | AUC(R/(detP0 n_split)) 0.9981 / 0.9674
+W spread / budget spread over K: median 0.7761, max 1.4012 (25 patterns)
 
-VERDICT.  Theorem PASS (after a repair to its derivation).  Algorithm FAIL.
-Hard-fail clause TRIGGERED: W varies over the achievable set by 0.73 x (median) the
-variation of det P_0 tr K, so tau* is not a threshold of the pattern, it is a function
-of the design, and "tr K >= tau*" is not a linear constraint on the achievable set.
-
---------------------------------------------------------------------------- B1 global
-b3_b1_global.csv, 10 fixed-boundary patches (the check_b1.cpp corpus), 4-33 notches each.
-  worst |W + R - 2 B(X)| / scale                          2.74e-16
-  worst |measured void area - (B_a sin th - B_b (1-cos th))|  3.41e-15   (6 angles each)
-  void area at theta = 0                                  < 1e-9
-Bar 1e-10: PASS.  The measured void is the shoelace of the deployed BORDER half-edges
-minus the (theta-independent) face-area sum, so it counts holes AND notches with no walk
-tracing.  Notches are not a correction term: sum_C a_C is 34-45 % BELOW the hole-only sum
-on every pattern (e.g. squares par 3.5: holes 25.000, total 15.500), i.e. notches close
-as holes open.
-
-------------------------------------------------------- the periodic identity, repaired
-B3 section 5 asserts  sum_split r_e = det(P_0) tr K - W  with W the per-cell hinge sum.
-That is FALSE as literally stated.  Both copies of an edge contribute
-<x_a - x_b, u_f1 - u_f0>; for a SPLIT edge sigma_f0 = sigma_f1 so the term is invariant
-under a lattice translation, but for a HINGE edge sigma_f0 = -sigma_f1 and
-u_{f1+t} - u_{f0+t} = u_f1 - u_f0 + sigma_f1 t, so the term depends on WHICH LIFT of the
-edge the preimage walk uses.  Summing one arbitrary representative per quotient edge
-misses a defect measured at 0.38 - 1.88 x det P_0 on the 33 K7 patterns -- comparable to
-the budget itself.  Summing instead over one representative PREIMAGE per translation
-class, each at its own lift (method::periodic_cell_edges), restores
-        W + R = det(P_0) tr K
-to 1e-15 on 30 of the 33 patterns and on 46 of the 50 C3 rows.  The 4 exceptions are
-squares_3x2 (the 3x3 super patch does not carry a full representative set: 8 of 10 hinge
-and 0 of 2 split classes covered) and snub_square_3x3 (M' has 9 components, so u has 9
-independent BFS roots and K is gauge dependent -- already recorded in STATE.md F33).
-Doctests: 5 new TEST_CASEs in code/tests/test_method.cpp cover the potential closure,
-q_e = 2 r_e exactly, the patch identity, the measured void harmonic and the periodic
-identity.  Full suite 80 cases / 16,785 assertions pass.
-
-CONSEQUENCE FOR B3.  With the identity repaired,  tr K - tau* = R / det(P_0)  EXACTLY.
-The "budget gap" is the total split budget rescaled.  So (i) the theorem's implication
-tr K < tau* => min_e q_e < 0 is true but is the averaging bound min_e r_e <= R/n_split
-rewritten, and (ii) tau* is a function of the design, not of the pattern, so the
-constrained problem is not a linear program on the achievable set.
-
---------------------------------------------------------- stage 1: retrodiction (bar 1)
-b3_retro.csv, 50 rows.  Baseline reproduces k7_c3_all_v2.csv EXACTLY: 0 mismatches on
-hit_err / cert / eps_cert / min_q / min_area / zp_feasible over all 50 rows; 12 certified,
-21 with min q > 0.
-  AUC(tr K - tau*) for min q > 0        0.9803      bar 0.80   PASS
-  AUC(tr K - tau*) for certified        0.9496      bar 0.80   PASS
-  rows with min q > 0 at tr K < tau*    0           must be 0  PASS
-  restricted to the 46 identity-exact rows: 0.9771 / 0.9436
-  AUC(R / (det P_0 n_split)) for min q > 0 / certified: 0.9803 / 0.9627
-W VARIATION OVER THE ACHIEVABLE SET (the hard-fail clause).  W(t) and det P_0 tr K(t)
-evaluated at 20 Gaussian points of the null space at the pattern-search scale
-(0.3 median edge), per pattern:
-  spread(W) / spread(det P_0 tr K):   median 0.7272,  max 1.4012   (25 patterns)
-This is the condition B3 section 8 names as fatal: W moves as much as the budget does.
-
------------------------------------------------- stage 2: constrained re-solve (bar 2)
-b3_constrained.csv, 50 rows x 3 margins.  Algorithm: minimise ||K - K*|| over the
-achievable set subject to tr K >= tau* + delta |tau*|.  Because g = A^T vec(I), the
-minimiser is K* + ((tau*(1+delta) - tr K*) / 2) I when dim K = 4 -- an isotropic
-expansion added to the target -- and the leftover freedom is the SAME null space the
-baseline searched, so it is spent on the 0+ margin exactly as C3 did.  tau* is refreshed
-by a 4-step fixed point because it depends on the design.
-  delta   certified            min q > 0        max ||K - K*||
-  0.0     12 -> 13  (+1, -0)   21 -> 37         10.4
-  0.1     12 -> 14  (+2, -0)   21 -> 37         19.8
-  0.5     12 ->  2  (+1, -11)  21 -> 26        588.9
-Bar 2 (beat 12/50 by a margin surviving the 50-row binomial error bar): FAIL.  +1 and +2
-of 50 are inside +-4.6 (1 sigma at p = 0.24, n = 50).  The constraint DOES do what the
-theorem says -- it nearly doubles the number of designs whose split cuts all open at 0+,
-21 -> 37 -- but the extra 0+ feasibility does not convert into certified deployment
-range, which is the K5/K6/F30 obstruction again and is not a budget phenomenon.  And the
-price is that the target is abandoned: the isotropic correction is 10 to 589 in Frobenius
-norm, so the "designed" Jacobian is not the requested one.
-
---------------------------------------------------------------------------- CONTRADICTIONS
-1. B3 section 5's identity, as written, is wrong (the lift defect above).  The repaired
-   identity holds, and B1's (B.5) coefficients are confirmed independently: on 33
-   patterns W + R equals det P_0 tr K, which K7 C4 had already matched to the measured
-   per-cell void harmonic.
-2. B3 section 2's "the design variable K enters the feasibility problem only through the
-   linear functional tr K" is not supported: tr K - tau* = R / det P_0, and R is a
-   quadratic function of the design at fixed tr K.  A pattern can move R without moving
-   tr K, which is exactly what the baseline free-subspace search already does.
-3. Nothing here contradicts STATE.md.  F33's C3 12/25 (= 12/50 rows) is reproduced bit
-   for bit with the repaired certificate, and F33's snub_square_3x3 gauge caveat is the
-   cause of one of the two identity exceptions.
+=== B3 stage 2 (constrained re-solve) ===
+delta=0.0  n= 50  certified 13 -> 15  (up 2, down 0)   min q > 0: 21 -> 37   max |K - K*| = 10.394
+           flips: +hexagons_3x3/diag_1_-0.5 +voronoi_torus_0_n20/diag_1_-0.5
+delta=0.1  n= 50  certified 13 -> 14  (up 2, down 1)   min q > 0: 21 -> 37   max |K - K*| = 19.825
+           flips: +hexagons_2x2/random_in_K +hexagons_3x3/diag_1_-0.5 -voronoi_torus_4_n55/random_in_K
+delta=0.5  n= 50  certified 13 ->  2  (up 1, down 12)   min q > 0: 21 -> 25   max |K - K*| = 588.931
+           flips: +hexagons_2x2/random_in_K -hexagons_3x2/random_in_K -snub_square_2x2/random_in_K -snub_square_3x2/random_in_K -trunc_square_488_2x2/random_in_K -trunc_square_488_3x3/random_in_K -t3_4_3_12_2x2/random_in_K -t3_4_3_12_3x2/random_in_K -t3_4_3_12_3x3/random_in_K -voronoi_torus_1_n28/random_in_K -voronoi_torus_2_n36/random_in_K -voronoi_torus_3_n45/random_in_K -voronoi_torus_4_n55/random_in_K

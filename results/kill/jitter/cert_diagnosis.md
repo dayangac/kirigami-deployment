@@ -35,9 +35,9 @@ lie on the **segment**:
         0  <=  <w - a, b - a>  <=  |b - a|^2 .
 ```
 
-`contact.jl::contact_angles()` (the exact scan) applies exactly that test, with
+`contact_angles` in `Kirigami/src/method/contact.jl` (the exact scan) applies exactly that test, with
 `s = D.eval(th)`, `l2 = L2.eval(th)`, `tol = 1e-12 * lscale`.
-`contact.jl::validity_certificate()`'s NOROOT scan did not: it called
+`validity_certificate`'s NOROOT scan (same file) did not: it called
 `harmonic_roots_deflated(det, 0, eps)` and set `noroot = false` on any root.
 
 This was not an implementation slip. `derivations/core.md` T5.2b.0 states it deliberately:
@@ -56,7 +56,7 @@ vertex is inside the segment, and whether the root is a graze (`|h'(theta)|` bel
 `1e-9 * scale`).
 
 ```
-./code/build/dbg_cert <tiling> <amp_idx> <seed> [eps]
+julia --project=Kirigami Kirigami/apps/dbg_cert.jl <tiling> <amp_idx> <seed> [eps]   # diagnostic of the pre-F32 pass; the app is not kept
 ```
 
 | row (tiling, amp_idx, seed, sigma_mc) | exact `Theta_max` | roots in `(0,eps)` | inside segment | outside | graze |
@@ -98,7 +98,7 @@ does, and keep only the roots that satisfy `-tol <= D.eval(th) <= L2.eval(th) + 
 `tol = 1e-12 * (|L2.p| + L2.amp())`. The test is **inclusive at the tolerance**, so a
 borderline root stays admissible and the certificate stays on the conservative side.
 Roots removed by the filter are counted in a new field
-`ValidityCertificate::n_roots_inadmissible` (reporting only, never a violation).
+`ValidityCertificate.n_roots_inadmissible` (reporting only, never a violation).
 
 Nine lines of substance; no other file's logic changes.
 
@@ -179,7 +179,7 @@ changes to the reference computation in the test, not weakenings of the assertio
 | `Pkg.test()` (whole suite) | 187 test sets / 176,692 assertions (23 marked broken), SUCCESS |
 | `derivation_tests.jl` | 38 test sets / 150,191 assertions, SUCCESS |
 
-## 6. Re-measurement of A3 (`kill_jitter`, 12 shards, ~2 s)
+## 6. Re-measurement of A3 (`Kirigami/apps/kill_jitter.jl`, 12 shards, ~2 s)
 
 Same 6416 solved rows, same geometry, only the certificate changed.
 
@@ -209,8 +209,8 @@ CSVs and summary are preserved under `results/kill/jitter/pre_f32fix/`.
 
 ## 7. Impact on earlier facts
 
-**K2a — the numbers change, the claims survive and get stronger.** Re-ran `kill_k2a`
-(6.5 s, 187 configurations):
+**K2a — the numbers change, the claims survive and get stronger.** Re-ran
+`julia --project=Kirigami Kirigami/apps/kill_k2a.jl` (6.5 s, 187 configurations):
 
 | K2a line | before (KILL_REPORT L408–418) | after |
 |---|---|---|
@@ -226,7 +226,7 @@ certified against 173 actually valid" must be **replaced**: on K2a's corpus the
 certificate is now *exactly* the valid set, 173 = 173. Any text saying NOROOT's dropped
 interval tests are what makes it inner is now wrong.
 
-**K5 and K6 — verdicts unaffected.** Both FAIL because the exact scan finds a `0+`
+**K5 and K6 — verdicts unaffected at the time of this fix.** Both FAIL because the exact scan finds a `0+`
 split-duplicate collision, i.e. exact `Theta_max = 0`; the binding certificate clause
 there is `NOOVERLAP(eps/2)` (and `POS`), not `NOROOT`. A weaker `NOROOT` cannot turn a
 `Theta_max = 0` design into a certified one. Re-run confirmation is recorded in §8.
@@ -238,7 +238,7 @@ is `NOOVERLAP` at the single angle `eps/2`, which on these corpora is exact.
 
 ## 8. K5 / K6 re-runs after the fix (measured, not argued)
 
-**K5** (`kill_k5`, full 200 graphs, both sigma rules, `eps = 0.3`) — identical to the
+**K5** (`julia --project=Kirigami Kirigami/apps/kill_k5.jl`, full 200 graphs, both sigma rules, `eps = 0.3`) — identical to the
 recorded numbers:
 
 | | `sigma_mc` | `sigma_def` |
@@ -256,7 +256,7 @@ the segment there, so the admissibility filter does not remove it. That is exact
 discrimination the fix buys — it removes off-segment collinearities and keeps real
 contacts.
 
-**K6** (`kill_k6 --n 20 --no-native`, a smoke re-run under the same code): every clause
+**K6** (`Kirigami/apps/kill_k6.jl --n 20 --no-native`, a smoke re-run under the same code): every clause
 still fails on every graph, `eps_max = 0` and exact `Theta_max = 0` throughout, so the
 "certified `Theta_max > 0` on 0/400" verdict is unaffected. Counts from the completed
 smoke run are in §8b.
@@ -269,7 +269,7 @@ smoke run are in §8b.
 | K2a "173/187 configurations actually have `Theta_max >= eps`" | **unchanged** (a property of the geometry) |
 | K2a "the certificate is a strict inner approximation — 65 certified against 173 valid" | **WRONG after the fix**: 173 certified against 173 valid, i.e. exact on this corpus |
 | K5 FAIL (0/200 both sigma) | **unchanged** |
-| K6 FAIL (0/400 certified `Theta_max > 0`) | **unchanged** |
+| K6 FAIL (0/400 certified `Theta_max > 0`) | **unchanged by this fix** (the count moved later for other reasons: 2/400 on the primary variant after the referee's collision predicate was corrected, `results/core_validation/referee_fix.md`; 17/400 deployable and 15 certified at `eps_max >= 0.1` rad under the K6 headline rule, best of the four repair variants, `results/kill/KILL_REPORT.md` §K6 — still a FAIL against the 20 % bar) |
 | A3 "certificate rejects 1622/1859 rows with `Theta_max >= 1`; the certificate, not the geometry, is knife-edge" | **WITHDRAWN**: 0 rejections after the fix; the transition is geometric |
 | F32's ban on quoting certified counts | **discharged for NOROOT**; certified counts must all be re-measured, and every one of them rises |
 

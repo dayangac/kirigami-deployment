@@ -39,7 +39,7 @@ X0 baseline (no solve): designs 34, convex-feasible 0 (0.0 %)
   certified (eps_max > 0): 1
   all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
   eps_max distribution: median 6.690e-01, max 6.690e-01
-  referee: agree 34 / 34, worst gap 4.888e-12; sound (eps_max <= bisection) 34 / 34
+  referee: agree 34 / 34, worst gap 1.141e-10; sound (eps_max <= bisection) 34 / 34
   binding at Theta_max = 0: n/a=1 split-inward=33
 
 (b) convexity + split [sigma_mc]: designs 17, convex-feasible 0 (0.0 %)
@@ -47,7 +47,7 @@ X0 baseline (no solve): designs 34, convex-feasible 0 (0.0 %)
   certified (eps_max > 0): 1
   all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
   eps_max distribution: median 6.690e-01, max 6.690e-01
-  referee: agree 17 / 17, worst gap 4.888e-12; sound (eps_max <= bisection) 17 / 17
+  referee: agree 17 / 17, worst gap 1.141e-10; sound (eps_max <= bisection) 17 / 17
   binding at Theta_max = 0: n/a=1 split-inward=16
 
 (b) convexity + split [sigma_def]: designs 17, convex-feasible 0 (0.0 %)
@@ -62,4 +62,4 @@ best variant: 1 refereed positives, 0 convex-feasible
 VERDICT: FAIL
 HARD FAIL (feasible >= 50 % and Theta_max > 0 < 2 %): no
 baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200; K6 0/400
-wall 1132.4 s
+wall 1730.3 s

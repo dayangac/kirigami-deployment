@@ -1,9 +1,9 @@
 K2c: 462 graphs
-log-log slope of max_f rho_f/r_f vs log F, all      : 0.0000 (R^2 0.4152, n=462)
-  on the X0 subset                                  : 0.0000 (R^2 0.4152, n=462)
+log-log slope of max_f rho_f/r_f vs log F, all      : 0.0000 (R^2 0.5165, n=462)
+  on the X0 subset                                  : 0.0000 (R^2 0.5165, n=462)
   on the X_ini subset                               : nan (R^2 0.0000, n=0)
 largest max_f rho_f/r_f seen                        : 1.000000000001
-worst | |Y_pv - m_f(theta)| - r_f |                  : 5.262e-13   (exactness of the moving disc)
+worst | |Y_pv - m_f(theta)| - r_f |                  : 6.729e-13   (exactness of the moving disc)
 theta_max tested (F <= 800)                      : 285
 pruned == unpruned to 1e-12 (sound prune)           : 285/285, worst diff 0.000e+00 ()
 pruned == unpruned to 1e-12 (spec's static prune)   : 285/285, worst diff 0.000e+00
@@ -36,4 +36,4 @@ regression on it is meaningless -- it is reported afterwards only for completene
 VERDICT (REPLACED rule: pruned == unpruned exact Theta_max, 1e-12): PASS
 VERDICT (old slope gate): WITHDRAWN -- vacuous, the statistic is identically 1
 No O(n) claim is made: H-LOC is refuted by the drift column above.
-wall 176.0 s
+wall 105.4 s

@@ -1,14 +1,14 @@
 K8a recheck -- the corrected cone LP at K9's variant (b) embeddings
-regenerated designs with a feasible (b) embedding, F <= 800 : 30
+designs with a feasible (b) embedding and F <= 800 : 30
 sigma in P(X) by direct zero_plus measurement       : 23
-  LP margin > 0 (was 0/23 with the old solver)      : 23/23
+  LP margin > 0 (was 0 with the old solver)         : 23/23
   LP margin >= the solver-free sigma chart bound    : 23/23
+  LP margin > 0 where min(q, mu)/2 > 0              : 23/23
   a NON-UNIFORM flex strictly beats the sigma ray   : 23/23
-  margin / sigma_chart: median 8.731, min 2.058, max 56.947
-  margin: median 1.3060e-02, max 4.4020e-02
+  margin / sigma_chart: median 8.733e+00, max 5.695e+01
+  margin: median 1.306e-02, max 4.402e-02
 sigma OUTSIDE P(X)                                  : 7
   LP margin > 0 anyway (a genuine non-uniform rescue): 6/7
-feasible overall (was 0/30)                         : 29/30
-bracket width dual - margin: median 6.499e-04, max 4.545e-03
-worst recomputed |A^T lambda| 4.402e-02 ; worst lambda_min 0.000e+00 ; worst |sum-1| 2.047e-13
-dual_iters 20000; driver code/apps/kill_k8a_recheck.cpp, 12 shards
+  every pass Farkas-certified < 1e-9 (verified)     : 0/7
+bracket width dual - margin: median 6.295e-04, max 4.482e-03
+wall 4130.7 s

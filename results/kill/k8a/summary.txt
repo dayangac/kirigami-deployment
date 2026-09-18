@@ -2,44 +2,44 @@ K8a -- expansive-cone LP
 configurations in k8a.csv: 277
 
 -- HARD SOUNDNESS CONTROL: the four split-bearing authored tilings
-   hexagons_auto          F= 10 split=  5 dim_ker_A=  3 dim_flex=  5  sigma_in_cone=1  min q=1.000e+00  min mu=1.000e+00  LP margin=5.399e-01  euler_eps=0.5
-   truncated_square_488   F= 21 split= 12 dim_ker_A=  2 dim_flex=  4  sigma_in_cone=1  min q=1.414e+00  min mu=1.414e+00  LP margin=7.348e-01  euler_eps=0.5
-   snub_square_33434      F= 53 split= 13 dim_ker_A= 29 dim_flex= 31  sigma_in_cone=1  min q=6.876e-01  min mu=5.087e-01  LP margin=3.526e-02  euler_eps=0.5
+   hexagons_auto          F= 10 split=  5 dim_ker_A=  3 dim_flex=  5  sigma_in_cone=1  min q=1.000e+00  min mu=1.000e+00  LP margin=6.212e-01  euler_eps=0.5
+   truncated_square_488   F= 21 split= 12 dim_ker_A=  2 dim_flex=  4  sigma_in_cone=1  min q=1.414e+00  min mu=1.414e+00  LP margin=9.253e-01  euler_eps=0.5
+   snub_square_33434      F= 53 split= 13 dim_ker_A= 29 dim_flex= 31  sigma_in_cone=1  min q=6.876e-01  min mu=5.087e-01  LP margin=6.578e-02  euler_eps=0.5
    tiling_3_4_3_12        F= 25 split=  4 dim_ker_A=  5 dim_flex=  7  sigma_in_cone=1  min q=1.742e+00  min mu=1.216e+00  LP margin=3.119e-01  euler_eps=0.5
    sigma in P(X): 4/4 ; LP margin > 0: 4/4
 
 -- DEPLOYABLE POPULATION (kill_common::deployable_population)
    configs 73 ; sigma in P(X) 71 ; LP margin > 0 72 ; Euler step tested 72, collision-free 72
-   euler_eps histogram (median-edge units): {'0.5': 64, '0.2': 5, '0.1': 2, '0.03': 1}
-   sigma OUTSIDE P(X): snub_square_R20_s1  min q=-6.047e-02  min mu=-6.047e-02  LP margin=4.308e-02
+   euler_eps histogram (median-edge units): {"0.03": 1, "0.1": 2, "0.2": 4, "0.5": 65}
+   sigma OUTSIDE P(X): snub_square_R20_s1  min q=-6.047e-02  min mu=-6.047e-02  LP margin=5.932e-02
    sigma OUTSIDE P(X): trunc_square_R40_s0  min q=-6.470e-02  min mu=-6.470e-02  LP margin=0.000e+00
 
 -- K1a POPULATION at X_ini  (n=100)
    LP margin > 0                                     : 0/100   (PASS bar: >= 20/100)
-   dual_max < 1e-06 (every branch chart tried certified) : 84/100
-   dual_max < 1e-05 (every branch chart tried certified) : 89/100
-   dual_max: median 9.94e-08  max 1.34e-03
+   dual_max < 1e-06 (every branch chart tried certified) : 95/100
+   dual_max < 1e-05 (every branch chart tried certified) : 99/100
+   dual_max: median 6.71e-10  max 1.25e-05
    sigma is a flex of the framework : 0/100
    sigma in P(X)                    : 0/100
    dim ker A median 17, dim flex median 19, c(Gamma) values [1]
    rows median 4911 (split 142, corner incidences 2338, all convex: True)
-     voronoi      n= 34 dim_ker_A med    3  margin>0   0  dual_max<1e-6  34  dual_max med 8.7e-08
-     delaunay     n= 33 dim_ker_A med   72  margin>0   0  dual_max<1e-6  17  dual_max med 9.3e-07
-     quad_random  n= 33 dim_ker_A med   17  margin>0   0  dual_max<1e-6  33  dual_max med 9.9e-08
+     voronoi      n= 34 dim_ker_A med    3  margin>0   0  dual_max<1e-6  34  dual_max med 1.1e-10
+     delaunay     n= 33 dim_ker_A med   72  margin>0   0  dual_max<1e-6  28  dual_max med 4.9e-09
+     quad_random  n= 33 dim_ker_A med   17  margin>0   0  dual_max<1e-6  33  dual_max med 6.7e-10
 
 -- K1a POPULATION at X0  (n=100)
    LP margin > 0                                     : 0/100   (PASS bar: >= 20/100)
-   dual_max < 1e-06 (every branch chart tried certified) : 68/100
-   dual_max < 1e-05 (every branch chart tried certified) : 68/100
-   dual_max: median 1.00e-07  max 1.45e-03
+   dual_max < 1e-06 (every branch chart tried certified) : 99/100
+   dual_max < 1e-05 (every branch chart tried certified) : 100/100
+   dual_max: median 6.72e-10  max 1.74e-06
    sigma is a flex of the framework : 100/100
    sigma in P(X)                    : 0/100
    dim ker A median 65, dim flex median 67, c(Gamma) values [1]
    rows median 4911 (split 142, corner incidences 2338, all convex: False)
-     voronoi      n= 34 dim_ker_A med    4  margin>0   0  dual_max<1e-6  22  dual_max med 8.5e-08
-     delaunay     n= 33 dim_ker_A med   83  margin>0   0  dual_max<1e-6  16  dual_max med 2.0e-05
-     quad_random  n= 33 dim_ker_A med  121  margin>0   0  dual_max<1e-6  30  dual_max med 1.0e-07
+     voronoi      n= 34 dim_ker_A med    4  margin>0   0  dual_max<1e-6  34  dual_max med 2.6e-10
+     delaunay     n= 33 dim_ker_A med   83  margin>0   0  dual_max<1e-6  32  dual_max med 3.0e-09
+     quad_random  n= 33 dim_ker_A med  121  margin>0   0  dual_max<1e-6  33  dual_max med 5.6e-10
 
 -- SELF-CHECKS
-   max |R N| / max|R| over every configuration : 7.80e-14
+   max |R N| / max|R| over every configuration : 1.22e-13
    passes solved per configuration            : {2: 76, 3: 201}

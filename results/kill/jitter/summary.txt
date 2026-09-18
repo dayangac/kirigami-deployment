@@ -1,4 +1,4 @@
-A3 -- jitter transition. 6416 (design, sigma) rows from /private/tmp/claude-501/-Users-emredayangac-Documents-kirigami-experiments/ff5735b4-e5aa-4374-8da7-df85b59880d6/scratchpad/jit_new.csv
+A3 -- jitter transition. 6416 (design, sigma) rows from results/kill/jitter/jitter.csv
 
 === the ladder: fraction with a POSITIVE exact Theta_max, and fraction CERTIFIED (eps = 0.006) ===
 (a = 0 is the unjittered authored tiling; amplitudes are in median edge lengths)
