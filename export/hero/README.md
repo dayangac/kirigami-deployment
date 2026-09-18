@@ -47,10 +47,9 @@ requested 1e-4 tolerance.
    mid-flight) does this:
 
    ```
-julia --project=Kirigami export/hero/dump_hero_graph.jl
-   ./dump_hero_graph 148 export/hero/hero_input.json
+   julia --project=Kirigami export/hero/dump_hero_graph.jl 148 export/hero/hero_input.json
    ```
-   `dump_hero_graph.jl` just calls `kiri::kill::make_graph(148, 100, 800, 1400)`
+   `dump_hero_graph.jl` just calls `make_graph(148, 100, 800, 1400)`
    (K9's population parameters) and `save_mesh_json`. Output: V=59, F=101,
    kind=delaunay.
 
@@ -59,7 +58,7 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
    K9 seed formula (`9000 + 7*id`, `which=0` for sigma_mc):
 
    ```
-   ./code/build/kiri_design export/hero/hero_input.json --sigma json --seed 10036 \
+   julia --project=Kirigami Kirigami/apps/kiri_design.jl export/hero/hero_input.json --sigma json --seed 10036 \
      --out export/hero/hero_design.json --referee --out-graph export/hero/hero_graph.json
    ```
    Output: `sigma_json constrained: Theta_max = 1.996778 rad, eps_max = 1.996778 rad,
@@ -72,7 +71,7 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
    `kiri_export` reads directly:
 
    ```
-   EXP=code/build/src/export/kiri_export
+   EXP="julia --project=Kirigami Kirigami/apps/kiri_export.jl"
    $EXP export/hero/hero_graph.json --profile felt_laser --theta 0 \
      --svg export/hero/hero_148_sigma_mc_closed.svg \
      --stl export/hero/hero_148_sigma_mc_closed.stl \
@@ -92,7 +91,7 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
      --json export/hero/hero_148_sigma_mc_open_0.9tm.json
    ```
    `--theta-frac` computes `theta_max` internally (`export/solid.jl`'s
-   geometric `theta_max`, a cross-check independent of `method::characterize`)
+   geometric `theta_max`, a cross-check independent of `characterize` (`Kirigami/src/method/design.jl`))
    and reports `theta_max=1.99678` at every fraction — agrees with the design's
    certified value.
 
@@ -100,7 +99,7 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
    `k = 0..5` (k=5 is exactly `Theta_max`, the first-contact configuration):
    ```
    for k in 0 1 2 3 4 5; do
-     frac=$(python3 -c "print($k/5)")
+     frac=$(echo "scale=1; $k/5" | bc)
      $EXP export/hero/hero_graph.json --profile felt_laser --theta-frac $frac \
        --svg export/hero/sequence/hero_148_seq_k${k}.svg \
        --json export/hero/sequence/hero_148_seq_k${k}.json
@@ -109,7 +108,7 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
 
 4. **PNG previews:**
    ```
-   arch -arm64 /usr/local/bin/python3 export/render_svg.py <svg> -o <png>
+   python3 export/render_svg.py <svg> -o <png>
    ```
    run once per SVG above (closed, open_half, open_0.9tm, and the 6 sequence
    frames).
@@ -124,12 +123,11 @@ julia --project=Kirigami export/hero/dump_hero_graph.jl
   solids report `closed, consistently oriented, boundary edges 0, non-manifold
   edges 0, flipped edges 0`, 1 component at theta=0 (single living-hinge
   sheet) and 101 components once open (necks visibly separated at theta>0, as
-  documented for the living-hinge writer in `code/README.md`'s Export
+  documented for the living-hinge writer in `Kirigami/README.md`'s `src/export/`
   section) — this is a rendering/kinematics fact, not a solid-quality defect,
   since each of the 101 per-face bodies is individually closed and
   consistently oriented. `degenerate tris` (174-197 depending on theta) are
-  the flat ears documented in `code/README.md`'s "Deviations and known limits
-  (export)" item 2; they carry no area or volume.
+  the flat ears documented in `Kirigami/README.md`'s `src/export/` section (flat ears from `build_solid`); they carry no area or volume.
 - **Visual check**: PNG previews of the closed state and both open states
   (`hero_148_sigma_mc_closed.png`, `_open_half.png`, `_open_0.9tm.png`) were
   viewed. Closed: 101 faces tile edge-to-edge with no gaps or overlaps. Open
@@ -152,6 +150,6 @@ export/hero/
 ```
 
 `dump_hero_graph.jl` (the throwaway graph-dump utility from step 1) was
-compiled and run from the scratch directory, not added to the repository or
+run from the scratch directory, not added to the repository or
 the package — it is a 20-line wrapper around
-`kiri::kill::make_graph` + `save_mesh_json`, not a deliverable.
+`make_graph` (`Kirigami/src/core/kill_common.jl`) + `save_mesh_json`, not a deliverable.
