@@ -5,7 +5,7 @@ Only the subset of SVG that kiri_export writes is understood: absolute
 "M x y L x y ... Z" paths, circular "A" arcs, text, and circles, grouped
 into the layers cut / score / engrave. Run under the arm64 interpreter:
 
-    arch -arm64 /usr/local/bin/python3 export/render_svg.py in.svg -o out.png
+    python3 export/render_svg.py in.svg -o out.png
 """
 import argparse
 import math
