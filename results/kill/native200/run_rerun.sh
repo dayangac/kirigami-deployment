@@ -10,10 +10,10 @@
 #   nohup bash results/kill/native200/run_rerun.sh > results/kill/native200/rerun3600/run_all.log 2>&1 &
 #
 set -u
-ROOT=/Users/emredayangac/Documents/kirigami-experiments
+ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT"
 OUT=results/kill/native200/rerun3600
-BIN=code/build/kill_native200
+BIN="julia --project=Kirigami Kirigami/apps/kill_native200.jl"
 NSHARD=12
 TAG=rerun3600
 TIMEOUT=3600
@@ -61,7 +61,7 @@ PROGRESS_PID=$!
 trap 'kill $PROGRESS_PID 2>/dev/null' EXIT
 
 for s in $(seq 0 $((NSHARD-1))); do
-  "$BIN" \
+  $BIN \
     --cells "$OUT/cells/shard_$s.txt" \
     --resume "$OUT/shard_$s.csv" \
     --resume "$OUT/done_6way/shard_0.csv" --resume "$OUT/done_6way/shard_1.csv" --resume "$OUT/done_6way/shard_2.csv" --resume "$OUT/done_6way/shard_3.csv" --resume "$OUT/done_6way/shard_4.csv" --resume "$OUT/done_6way/shard_5.csv" \

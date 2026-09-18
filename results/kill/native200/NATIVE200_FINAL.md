@@ -1,6 +1,6 @@
 # Native200 -- final status of the authors' full native pipeline on the K9 population
 
-**PARTIAL -- rerun in progress, 4 of 389 cells done** (3600 s rerun of the timed-out and never-dispatched cells), plus 26 of 39 crash-fixed cells. Regenerate with `code/build/native200_merge`.
+**PARTIAL -- rerun in progress, 4 of 389 cells done** (3600 s rerun of the timed-out and never-dispatched cells), plus 26 of 39 crash-fixed cells. Regenerate with `julia --project=Kirigami Kirigami/apps/native200_merge.jl`.
 
 Every number below is computed by `Kirigami/apps/native200_merge.jl` from `results/kill/native200/native200_final.csv`, which is itself merged from `native200.csv` (the 600 s run), `rerun3600/shard_*.csv` (the 3600 s rerun of the timed-out and never-dispatched cells) and `crashfix3600/shard_*.csv` (the 39 crashed cells against the F24-patched CLI). One row per (graph id, variant); the 600 s status of a superseded cell is kept in `first_status`.
 

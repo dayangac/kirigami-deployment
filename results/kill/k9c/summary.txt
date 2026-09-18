@@ -19,64 +19,64 @@ arm k9b (proximity, delta = 1e-2): designs 400, convex+split feasible 24 (6.0 %)
   0+ margin m (med^2) over feasible: median 3.937e-03, q90 1.052e-02
   referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
   binding at Theta_max = 0:
-arm k9c (range-maximising): designs 400, convex+split feasible 256 (64.0 %), of which 0+ margin m > 0: 244
-  exact Theta_max > 0: 307 (76.8 %), refereed 1e-12: 307, refereed 1e-9: 307
-  certified (eps_max > 0): 306, of which eps_max >= 0.1 rad: 207
+arm k9c (range-maximising): designs 400, convex+split feasible 258 (64.5 %), of which 0+ margin m > 0: 239
+  exact Theta_max > 0: 312 (78.0 %), refereed 1e-12: 312, refereed 1e-9: 312
+  certified (eps_max > 0): 310, of which eps_max >= 0.1 rad: 192
   positives whose WINNING point came from stage B (range_opt): 0
-  eps_max: median 2.539e-01, q90 1.228e+00, max 3.142e+00
-  0+ margin m (med^2) over feasible: median 4.397e-01, q90 1.092e+00
+  eps_max: median 1.616e-01, q90 9.581e-01, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 5.288e-01, q90 1.304e+00
   referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
   binding at Theta_max = 0:
-arm k9c (range-maximising):sigma_def: designs 200, convex+split feasible 183 (91.5 %), of which 0+ margin m > 0: 171
-  exact Theta_max > 0: 152 (76.0 %), refereed 1e-12: 152, refereed 1e-9: 152
-  certified (eps_max > 0): 152, of which eps_max >= 0.1 rad: 126
+arm k9c (range-maximising):sigma_def: designs 200, convex+split feasible 185 (92.5 %), of which 0+ margin m > 0: 166
+  exact Theta_max > 0: 156 (78.0 %), refereed 1e-12: 156, refereed 1e-9: 156
+  certified (eps_max > 0): 155, of which eps_max >= 0.1 rad: 117
   positives whose WINNING point came from stage B (range_opt): 0
-  eps_max: median 3.109e-01, q90 1.123e+00, max 1.960e+00
-  0+ margin m (med^2) over feasible: median 5.797e-01, q90 1.388e+00
+  eps_max: median 2.293e-01, q90 1.023e+00, max 2.044e+00
+  0+ margin m (med^2) over feasible: median 7.399e-01, q90 1.695e+00
   referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
   binding at Theta_max = 0:
 arm k9c (range-maximising):sigma_mc: designs 200, convex+split feasible 73 (36.5 %), of which 0+ margin m > 0: 73
-  exact Theta_max > 0: 155 (77.5 %), refereed 1e-12: 155, refereed 1e-9: 155
-  certified (eps_max > 0): 154, of which eps_max >= 0.1 rad: 81
+  exact Theta_max > 0: 156 (78.0 %), refereed 1e-12: 156, refereed 1e-9: 156
+  certified (eps_max > 0): 155, of which eps_max >= 0.1 rad: 75
   positives whose WINNING point came from stage B (range_opt): 0
-  eps_max: median 1.220e-01, q90 1.580e+00, max 3.142e+00
-  0+ margin m (med^2) over feasible: median 1.444e-01, q90 2.180e-01
+  eps_max: median 9.508e-02, q90 8.444e-01, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 1.415e-01, q90 2.657e-01
   referee: worst |exact - bisection(1e-9)| 0.000e+00; sound (eps_max <= bisection 1e-9) 0 / 0
   binding at Theta_max = 0:
-k9c:best-of-3: designs 400, convex+split feasible 211 (52.8 %), of which 0+ margin m > 0: 209
-  exact Theta_max > 0: 307 (76.8 %), refereed 1e-12: 307, refereed 1e-9: 307
-  certified (eps_max > 0): 306, of which eps_max >= 0.1 rad: 214
-  positives whose WINNING point came from stage B (range_opt): 157
-  eps_max: median 2.782e-01, q90 1.229e+00, max 3.142e+00
-  0+ margin m (med^2) over feasible: median 4.193e-01, q90 1.264e+00
-  |X - X_ini| per vertex, median edges: median 0.7343, q90 1.4267
-  provenance of the winning point: k9=106 k9b=2 k9c/k9+B=7 k9c/k9b+B=7 k9c/x0=135 k9c/x0+B=143
-  referee: worst |exact - bisection(1e-9)| 6.708e-01; sound (eps_max <= bisection 1e-9) 400 / 400
-  binding at Theta_max = 0: inverted=27 n/a=307 split-inward=57 vertex-edge=9
-k9c:best-of-3:sigma_def: designs 200, convex+split feasible 139 (69.5 %), of which 0+ margin m > 0: 137
-  exact Theta_max > 0: 152 (76.0 %), refereed 1e-12: 152, refereed 1e-9: 152
-  certified (eps_max > 0): 152, of which eps_max >= 0.1 rad: 128
-  positives whose WINNING point came from stage B (range_opt): 92
-  eps_max: median 3.109e-01, q90 1.123e+00, max 1.960e+00
-  0+ margin m (med^2) over feasible: median 6.040e-01, q90 1.474e+00
-  |X - X_ini| per vertex, median edges: median 0.6706, q90 1.7441
-  provenance of the winning point: k9=49 k9b=1 k9c/k9+B=6 k9c/k9b+B=3 k9c/x0=58 k9c/x0+B=83
-  referee: worst |exact - bisection(1e-9)| 6.708e-01; sound (eps_max <= bisection 1e-9) 200 / 200
-  binding at Theta_max = 0: inverted=26 n/a=152 split-inward=13 vertex-edge=9
+k9c:best-of-3: designs 400, convex+split feasible 212 (53.0 %), of which 0+ margin m > 0: 210
+  exact Theta_max > 0: 312 (78.0 %), refereed 1e-12: 311, refereed 1e-9: 312
+  certified (eps_max > 0): 310, of which eps_max >= 0.1 rad: 201
+  positives whose WINNING point came from stage B (range_opt): 140
+  eps_max: median 1.723e-01, q90 9.581e-01, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 5.028e-01, q90 1.509e+00
+  |X - X_ini| per vertex, median edges: median 0.9275, q90 1.4599
+  provenance of the winning point: k9=102 k9b=2 k9c/k9=1 k9c/k9+B=9 k9c/k9b=1 k9c/k9b+B=4 k9c/x0=154 k9c/x0+B=127
+  referee: worst |exact - bisection(1e-9)| 3.088e-02; sound (eps_max <= bisection 1e-9) 400 / 400
+  binding at Theta_max = 0: inverted=24 n/a=312 split-inward=58 vertex-edge=6
+k9c:best-of-3:sigma_def: designs 200, convex+split feasible 140 (70.0 %), of which 0+ margin m > 0: 138
+  exact Theta_max > 0: 156 (78.0 %), refereed 1e-12: 155, refereed 1e-9: 156
+  certified (eps_max > 0): 155, of which eps_max >= 0.1 rad: 121
+  positives whose WINNING point came from stage B (range_opt): 77
+  eps_max: median 2.293e-01, q90 1.023e+00, max 2.044e+00
+  0+ margin m (med^2) over feasible: median 7.584e-01, q90 1.956e+00
+  |X - X_ini| per vertex, median edges: median 0.9757, q90 1.7566
+  provenance of the winning point: k9=48 k9b=1 k9c/k9=1 k9c/k9+B=2 k9c/k9b=1 k9c/k9b+B=1 k9c/x0=72 k9c/x0+B=74
+  referee: worst |exact - bisection(1e-9)| 3.088e-02; sound (eps_max <= bisection 1e-9) 200 / 200
+  binding at Theta_max = 0: inverted=24 n/a=156 split-inward=14 vertex-edge=6
 k9c:best-of-3:sigma_mc: designs 200, convex+split feasible 72 (36.0 %), of which 0+ margin m > 0: 72
-  exact Theta_max > 0: 155 (77.5 %), refereed 1e-12: 155, refereed 1e-9: 155
-  certified (eps_max > 0): 154, of which eps_max >= 0.1 rad: 86
-  positives whose WINNING point came from stage B (range_opt): 65
-  eps_max: median 1.723e-01, q90 1.757e+00, max 3.142e+00
-  0+ margin m (med^2) over feasible: median 1.310e-01, q90 2.172e-01
-  |X - X_ini| per vertex, median edges: median 0.8205, q90 1.2926
-  provenance of the winning point: k9=57 k9b=1 k9c/k9+B=1 k9c/k9b+B=4 k9c/x0=77 k9c/x0+B=60
-  referee: worst |exact - bisection(1e-9)| 4.449e-05; sound (eps_max <= bisection 1e-9) 200 / 200
-  binding at Theta_max = 0: inverted=1 n/a=155 split-inward=44
+  exact Theta_max > 0: 156 (78.0 %), refereed 1e-12: 156, refereed 1e-9: 156
+  certified (eps_max > 0): 155, of which eps_max >= 0.1 rad: 80
+  positives whose WINNING point came from stage B (range_opt): 63
+  eps_max: median 1.152e-01, q90 8.444e-01, max 3.142e+00
+  0+ margin m (med^2) over feasible: median 1.390e-01, q90 2.657e-01
+  |X - X_ini| per vertex, median edges: median 0.8535, q90 1.3180
+  provenance of the winning point: k9=54 k9b=1 k9c/k9+B=7 k9c/k9b+B=3 k9c/x0=82 k9c/x0+B=53
+  referee: worst |exact - bisection(1e-9)| 4.366e-05; sound (eps_max <= bisection 1e-9) 200 / 200
+  binding at Theta_max = 0: n/a=156 split-inward=44
 
 best-of-2 sigma, per GRAPH (200 graphs):
-  graphs with exact Theta_max > 0 under at least one sigma: 185
-  graphs with certified eps_max >= 0.1 rad: 152
+  graphs with exact Theta_max > 0 under at least one sigma: 187
+  graphs with certified eps_max >= 0.1 rad: 147
 
 K9 / K9b cross-check (from results/kill/k9/k9.csv and k9b/k9b.csv):
   K9 positives 36, K9b positives 28

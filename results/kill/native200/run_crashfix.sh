@@ -1,7 +1,7 @@
 #!/bin/bash
 # Native200 WP5 -- the 3600 s rerun of the 39 cells that segfaulted the authors'
 # CLI, against the F24-patched binary baseline/native/build_fixed/tuttekiri_cli
-# (baseline/native/src_fixed/*.cpp = upstream + crashfix.patch; the original
+# (baseline/native/src_fixed/ = the authors' upstream sources + crashfix.patch; the original
 # build/tuttekiri_cli is untouched).
 #
 # 2-way parallel, so that with run_rerun.sh's 6 workers the total stays at 8.
@@ -9,10 +9,10 @@
 #   nohup bash results/kill/native200/run_crashfix.sh > results/kill/native200/crashfix3600/run_all.log 2>&1 &
 #
 set -u
-ROOT=/Users/emredayangac/Documents/kirigami-experiments
+ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT"
 OUT=results/kill/native200/crashfix3600
-BIN=code/build/kill_native200
+BIN="julia --project=Kirigami Kirigami/apps/kill_native200.jl"
 CLI=baseline/native/build_fixed/tuttekiri_cli
 NSHARD=2
 TAG=crashfix3600
@@ -59,7 +59,7 @@ PROGRESS_PID=$!
 trap 'kill $PROGRESS_PID 2>/dev/null' EXIT
 
 for s in $(seq 0 $((NSHARD-1))); do
-  "$BIN" \
+  $BIN \
     --cells "$OUT/cells/shard_$s.txt" \
     --resume "$OUT/shard_$s.csv" \
     --csv "$OUT/shard_$s.csv" \

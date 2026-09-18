@@ -4,16 +4,16 @@ graphs 200, designs 400 (missing sigma_def: 0)
 interior vertices with >=2 copies : 165788
   pure    (no incident split edge): 14886   on 250 / 400 designs, median pure fraction 0.0121
   touched (>=1 incident split edge): 150902
-N_bad  (pure, mu_v <= 0)          : 1968   on 142 / 400 designs
-        (touched, mu_v <= 0)      : 66520
+N_bad  (pure, mu_v <= 0)          : 1970   on 142 / 400 designs
+        (touched, mu_v <= 0)      : 66521
   restricted to k_v >= 3 (T-1's hypothesis): pure 4720, bad 1014
-  restricted to k_v == 2 (outside it)      : pure 10166, bad 954
-  binding incidence at a bad pure vertex: convex corner 2, reflex corner 1966
-  pure vertices with EVERY incidence at a convex corner: 12919, bad 1
-  faces non-convex at X0: 22103 / 156220 ; at the INPUT embedding: 0
-collapse RATE: pure 0.1322  vs touched 0.4408
-pure vertices with |delta_v| > tol : 0   (max |delta_v|/med = 1.999e-14; must be ~0, it is the F11 self-check)
-corr(|delta_v|, mu_v) on touched   : Spearman 0.0616, Pearson -0.1016, median per-design Spearman -0.0291  (n = 150902)
+  restricted to k_v == 2 (outside it)      : pure 10166, bad 956
+  binding incidence at a bad pure vertex: convex corner 1, reflex corner 1969
+  pure vertices with EVERY incidence at a convex corner: 12916, bad 0
+  faces non-convex at X0: 22107 / 156220 ; at the INPUT embedding: 0
+collapse RATE: pure 0.1323  vs touched 0.4408
+pure vertices with |delta_v| > tol : 0   (max |delta_v|/med = 3.425e-14; must be ~0, it is the F11 self-check)
+corr(|delta_v|, mu_v) on touched   : Spearman 0.0617, Pearson -0.1016, median per-design Spearman -0.0288  (n = 150902)
 culprit split edge incident to the argmax-|delta| vertex : 61 / 400 ; to a top-10% |delta| vertex : 254 / 400
 VERDICT: FAIL
-wall 6.8 s
+wall 1.5 s

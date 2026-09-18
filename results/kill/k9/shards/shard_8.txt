@@ -1,7 +1,7 @@
 K9 -- convexity-constrained embedding in the Tutte auxetic null space
 population: 16 graphs (K6's), 32 designs (2 sigma), missing sigma_def 0
 delta = 0.001 * med^2, split delta' = 0.001 * med^2, starts 3 + t=0, L-BFGS iters 600, barrier stages 6, eps = 0.3
-non-convex corners at X0: 2462 / 51194 (4.81 %)
+non-convex corners at X0: 2463 / 51194 (4.81 %)
 
 split-only repair (K6's secondary objective, the (b) fallback start) feasible on 0 / 32 designs
 designs whose X0 is ALREADY fully convex: 6 / 32, of which exact Theta_max > 0: 0
@@ -47,7 +47,7 @@ X0 baseline (no solve): designs 32, convex-feasible 6 (18.8 %)
   certified (eps_max > 0): 1
   all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
   eps_max distribution: median 1.155e-01, max 1.155e-01
-  referee: agree 32 / 32, worst gap 3.881e-13; sound (eps_max <= bisection) 32 / 32
+  referee: agree 32 / 32, worst gap 7.585e-12; sound (eps_max <= bisection) 32 / 32
   binding at Theta_max = 0: inverted=1 n/a=1 split-inward=18 vertex-edge=12
 
 (b) convexity + split [sigma_mc]: designs 16, convex-feasible 0 (0.0 %)
@@ -62,7 +62,7 @@ X0 baseline (no solve): designs 32, convex-feasible 6 (18.8 %)
   certified (eps_max > 0): 1
   all 0+ corner margins > 0 at the returned X: 0 / 0 feasible
   eps_max distribution: median 1.155e-01, max 1.155e-01
-  referee: agree 16 / 16, worst gap 3.881e-13; sound (eps_max <= bisection) 16 / 16
+  referee: agree 16 / 16, worst gap 7.585e-12; sound (eps_max <= bisection) 16 / 16
   binding at Theta_max = 0: inverted=1 n/a=1 split-inward=2 vertex-edge=12
 
 PASS bar: refereed Theta_max > 0 on >= 10 % of 32 designs (>= 4)
@@ -70,4 +70,4 @@ best variant: 1 refereed positives, 10 convex-feasible
 VERDICT: FAIL
 HARD FAIL (feasible >= 50 % and Theta_max > 0 < 2 %): no
 baselines: Eq. (6) alone 0/200 (K1a); K5 both sigma 0/200; K6 0/400
-wall 324.5 s
+wall 1003.5 s
