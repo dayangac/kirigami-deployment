@@ -35,7 +35,7 @@ end
 
 """The .UKP format: an .OBJ of the 2D unit pattern plus `px x y` / `py x y` (the unit
 parallelogram; [0 0] = not periodic), `fc 0|1` per face and a `rep2x2` hint. A plain .OBJ
-is the same parser with none of the extras. Port of web/bindings.cpp parse_pattern_text."""
+is the same parser with none of the extras."""
 mutable struct ParsedPattern
     V::Vector{Vec2}
     F::Vector{Vector{Int}}     # 1-based into V
