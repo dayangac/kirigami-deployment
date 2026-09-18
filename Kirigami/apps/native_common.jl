@@ -1,10 +1,10 @@
-# apps/native_common.jl -- the per-cell code path of apps/kill_native200.cpp, factored out
+# apps/native_common.jl -- the per-cell code path of apps/kill_native200.jl, factored out
 # so that a second driver (kill_regime, WP7) can run the authors' full native pipeline and
-# score it with EXACTLY the same instruments. Port of code/apps/native_common.hpp.
+# score it with EXACTLY the same instruments.
 #
 # The authors' CLI is an external program (`cli`), run through `/usr/bin/perl -e 'alarm ...'`
-# exactly as the C++ did, so the timeout semantics (and the "timed_out" classification at
-# 0.9 x timeout) are unchanged.
+# so the timeout semantics (and the "timed_out" classification at 0.9 x timeout) are
+# identical for every driver.
 
 include(joinpath(@__DIR__, "kill_common.jl"))
 
@@ -79,7 +79,7 @@ Base.@kwdef mutable struct NativeRun
     has_pattern::Bool = false
 end
 
-# `system(cmd)` of the C++: a shell line, exit status returned (non-zero on failure).
+# Runs a shell line; exit status returned (non-zero on failure).
 function _system(cmd::AbstractString)
     p = run(ignorestatus(`/bin/sh -c $cmd`))
     return p.exitcode
@@ -142,7 +142,7 @@ end
 # bisection referee and the eps = 0.3 validity certificate on the embedding they dumped.
 #
 # Returns `(row, X, sigma)`: `X` / `sigma` are the embedding the CLI produced and the sigma
-# it was scored under (the C++ optional out-parameters), `nothing` when the cell did not
+# it was scored under, `nothing` when the cell did not
 # complete or the dump could not be read.
 function process_cell(id::Int, kind::AbstractString, m0::K.Mesh,
                       sigma::Union{Vector{Int},Nothing}, variant::AbstractString,
@@ -254,17 +254,17 @@ end
 
 function write_row(csv::IO, r::Row, tag::AbstractString)
     print(csv, r.id, ",", r.kind, ",", r.variant, ",", r.N, ",", r.F, ",",
-          r.dim_null, ",", r.status, ",", cpp_g(r.native_theta_collisions), ",",
-          cpp_b(r.native_finite), ",", cpp_b(r.embedding_ok), ",",
-          cpp_g(r.our_theta_exact), ",", cpp_g(r.our_theta_bisect), ",", cpp_b(r.cert_pos),
-          ",", cpp_b(r.cert_noovl), ",", cpp_b(r.cert_noroot), ",",
-          cpp_b(r.cert_pos && r.cert_noovl && r.cert_noroot), ",", cpp_g(r.secs), ",",
+          r.dim_null, ",", r.status, ",", fmt_g(r.native_theta_collisions), ",",
+          fmt_b(r.native_finite), ",", fmt_b(r.embedding_ok), ",",
+          fmt_g(r.our_theta_exact), ",", fmt_g(r.our_theta_bisect), ",", fmt_b(r.cert_pos),
+          ",", fmt_b(r.cert_noovl), ",", fmt_b(r.cert_noroot), ",",
+          fmt_b(r.cert_pos && r.cert_noovl && r.cert_noroot), ",", fmt_g(r.secs), ",",
           tag, "\n")
     flush(csv)
     return nothing
 end
 
-# `std::getline(ss, tok, ',')`: a trailing empty field is dropped, as in the C++.
+# CSV split: a trailing empty field is dropped (deliberate, the CSV convention).
 function split_csv(line::AbstractString)
     f = String.(split(line, ','))
     (!isempty(f) && isempty(f[end]) && endswith(line, ',')) && pop!(f)

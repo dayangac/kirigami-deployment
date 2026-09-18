@@ -1,8 +1,7 @@
 # kiri_analyze <graph.json> [--orient auto|json|brute] [--boundary fixed|periodic|none]
 #              [--out <dir>] [--collision]
 #
-# Port of code/apps/kiri_analyze.cpp. Edge / vertex ids in the written JSON are 0-based,
-# as the C++ wrote them.
+# Edge / vertex ids in the written JSON are 0-based (the file format's numbering).
 include(joinpath(@__DIR__, "common_app.jl"))
 
 zero_based(v::Vector{Int}) = [i - 1 for i in v]   # internal 1-based -> 0-based in the file
@@ -145,8 +144,8 @@ function main(args::Vector{String})
         mc = K.Mesh(cr.X_opt, m.faces)
         mc.sigma = m.sigma
         write_json(mesh_json(mc), outdir * "/X_collision_opt.json")
-        println("collision opt: theta_max ", cpp_g(cr.theta_max_before), " -> ",
-                cpp_g(cr.theta_max_after))
+        println("collision opt: theta_max ", fmt_g(cr.theta_max_before), " -> ",
+                fmt_g(cr.theta_max_after))
     end
 
     open(outdir * "/summary.csv", "w") do csv
@@ -157,8 +156,8 @@ function main(args::Vector{String})
               K.n_interior_holes(hs_part), ",", length(geo), ",", rep.rank_full, ",",
               rep.rank_L, ",", rep.dim_null, ",",
               K.n_interior_vertices(m) - K.n_interior_holes(hs_part), ",",
-              cpp_b(K.deployable(res)), ",", cpp_g(res.max_norm), ",",
-              cpp_g(tm.theta_max_geometric), ",", cpp_g(tm.min_beta), "\n")
+              fmt_b(K.deployable(res)), ",", fmt_g(res.max_norm), ",",
+              fmt_g(tm.theta_max_geometric), ",", fmt_g(tm.min_beta), "\n")
     end
 
     println(JSON.json(_json_clean(j), 2))

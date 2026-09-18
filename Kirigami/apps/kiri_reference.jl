@@ -1,7 +1,7 @@
 # kiri_reference --out <dir> [--regenerate]
 # Runs every Phase-2 reference case and writes results/core_validation artifacts.
 #
-# Port of code/apps/kiri_reference.cpp. The eight cases are read from the frozen
+# The eight cases are read from the frozen
 # data/corpus/reference_cases_8.json by default; --regenerate rebuilds them through the
 # tiling generators and the bit-exact MT19937 (kill_common.jl `reference_cases`).
 include(joinpath(@__DIR__, "kill_common.jl"))
@@ -136,7 +136,7 @@ function main(args_in::Vector{String})
         push!(rows, r)
         println(cs.name, ": F=", r.F, " H=", r.H, " dim_null=", r.dim_null, " claim=", r.claim,
                 (!r.claim_applicable ? " (n/a: periodic)" : (r.claim_ok ? " ok" : " VIOLATION")),
-                " theta_max=", cpp_g(r.theta_max))
+                " theta_max=", fmt_g(r.theta_max))
     end
 
     md = IOBuffer()

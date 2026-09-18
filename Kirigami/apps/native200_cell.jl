@@ -1,7 +1,6 @@
 # native200_cell -- write the exact input JSON one Native200 cell feeds to the
 # authors' `tuttekiri_cli prevent`, so a crashing cell can be reproduced by hand
 # (under lldb, or against a patched binary) without running the whole driver.
-# Port of code/apps/native200_cell.cpp.
 #
 #   julia --project=Kirigami Kirigami/apps/native200_cell.jl --id 14 --variant sigma_def
 #         --out /tmp/cell14 [--maxf 800] [--sigma DIR] [--regenerate]

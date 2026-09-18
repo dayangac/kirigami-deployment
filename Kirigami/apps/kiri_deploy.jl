@@ -1,6 +1,5 @@
 # kiri_deploy <graph.json> --theta t --out y.json
 #
-# Port of code/apps/kiri_deploy.cpp.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 function main(args::Vector{String})
@@ -30,7 +29,7 @@ function main(args::Vector{String})
     c = K.make_cut(m)
     d = K.deploy(c, m.X, theta)
     write_json(deployment_json(c, m.X, theta), out)
-    println("theta=", cpp_g(theta), " max_mismatch=", cpp_g(d.max_mismatch), " -> ", out)
+    println("theta=", fmt_g(theta), " max_mismatch=", fmt_g(d.max_mismatch), " -> ", out)
     return 0
 end
 

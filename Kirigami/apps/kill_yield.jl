@@ -1,5 +1,5 @@
 # kill_yield -- INPUT-SIDE features of the K9c population, for WP2 (why the K9c yield is
-# not scale-free). Port of code/apps/kill_yield.cpp.
+# not scale-free).
 #
 # REPORT.md Sec. Results records that the K9c method reaches exact Theta_max > 0 on
 # 307/400 designs but that the rate falls with |F| (Delaunay ~1.0 -> ~0.8, quad-random
@@ -18,7 +18,7 @@
 #   --mode k9c    ids 0..199 of the K9 population (make_graph(id, 100, 800, 1400)), both
 #                 sigma rules, sigma_def read from the results/kill/k5/sigma cache and the
 #                 Eq. (6) projection read from the results/kill/k6/cache shape cache, i.e.
-#                 EXACTLY the objects kill_k9c.cpp used. No solver is run: the outcomes are
+#                 EXACTLY the objects kill_k9c.jl uses. No solver is run: the outcomes are
 #                 joined in from results/kill/k9c/k9c.csv on (id, kind, sigma).
 #   --mode fresh  ids 1000..1099, held out. sigma_mc from make_graph, sigma_def from
 #                 method::orientation_defect (the library promotion of K5's search, cap
@@ -37,9 +37,9 @@
 # is the archived results/yield/fresh_sigma orientation); `--regenerate` rebuilds the
 # graphs through make_graph and recomputes the fresh sigma_def with orientation_defect.
 # One deliberate deviation in --mode k9c: the Eq. (6) projection comes from the shape
-# cache when present (`--cache`, the C++ binary layout) and is otherwise SOLVED and cached,
-# where the C++ skipped the design (this repo carries no results/kill/k6/cache). Outputs
-# go to results/yield_julia/ by default (the C++ wrote results/yield/). `--limit K` stops
+# cache when present (`--cache`) and is otherwise SOLVED and cached, where the original
+# K9c run skipped the design (this repo carries no
+# results/kill/k6/cache). Outputs go to results/yield/ by default. `--limit K` stops
 # after K graphs of the shard.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
@@ -107,7 +107,7 @@ const kFeatHeader =
     "med_edge"
 
 function write_feat(o::IO, id::Int, kind::AbstractString, sig::AbstractString, f::Feat, med::Float64)
-    g = cpp_g
+    g = fmt_g
     print(o, id, ",", kind, ",", sig, ",", f.N, ",", f.F, ",", f.E, ",", f.E_int, ",", f.n_border,
           ",", f.n_split, ",", f.n_hinge, ",", f.dim_null, ",", g(f.split_density), ",",
           g(f.split_per_face), ",", g(f.dim_null_per_N), ",", f.n_corner, ",", f.n_incid, ",",
@@ -400,9 +400,9 @@ end
 const kOutHeader = ",theta_exact,eps_max,best_feas,best_margin,best_src,binding,dist,secs"
 
 function write_outcome(o::IO, u::Outcome)
-    print(o, ",", cpp_g(u.theta_exact), ",", cpp_g(u.eps_max), ",", u.best_feas, ",",
-          cpp_g(u.best_margin), ",", u.best_src, ",", u.binding, ",", cpp_g(u.dist), ",",
-          cpp_g(u.secs))
+    print(o, ",", fmt_g(u.theta_exact), ",", fmt_g(u.eps_max), ",", u.best_feas, ",",
+          fmt_g(u.best_margin), ",", u.best_src, ",", u.binding, ",", fmt_g(u.dist), ",",
+          fmt_g(u.secs))
     return nothing
 end
 
@@ -427,7 +427,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     mode = "k9c"
-    outdir = joinpath(REPO, "results", "yield_julia")
+    outdir = joinpath(REPO, "results", "yield")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     k9c_csv = joinpath(REPO, "results", "kill", "k9c", "k9c.csv")

@@ -1,8 +1,7 @@
 # kiri_sweep --n 100 --out sweep.csv [--seed s] [--violations <dir>] [--cases <dir>]
 #
-# Port of code/apps/kiri_sweep.cpp. The sweep draws its own random graphs from ONE
-# MT19937(seed) exactly as the C++ did (site count, generator and Eq. (1) relaxation on
-# the same stream); there is no frozen corpus for it because the C++ never froze one.
+# The sweep draws its own random graphs from ONE MT19937(seed) (site count, generator and
+# Eq. (1) relaxation on the same stream); there is no frozen corpus for it.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 # `std::chrono` millisecond timings, as doubles with microsecond resolution.
@@ -229,20 +228,20 @@ function main(args::Vector{String})
               K.n_edges(m), ",", K.n_interior_vertices(m), ",", K.n_hinge(c), ",",
               K.n_split(c), ",", K.n_interior_holes(hs), ",", length(hs.all), ",",
               n_geo, ",", rep.rank_full, ",", rep.rank_L, ",", rep.dim_null, ",",
-              claim, ",", cpp_b(holds), ",", cpp_b(K.deployable(res)), ",", cpp_g(res.max_norm), ",",
-              cpp_b(dense), ",", cpp_b(X0_valid), ",", flipped, ",", cpp_g(max_move), ",",
-              cpp_g(tm.theta_max_geometric), ",", cpp_g(tm.min_beta), ",",
-              cpp_b(a1), ",", cpp_b(agree), ",", cpp_b(part), ",", cpp_b(forest), ",",
-              cpp_b(geo_checked), ",", cpp_b(geo_agree), ",", cpp_b(rep.used_sparse),
-              ",", rs.n_hinge_in_L, ",", cpp_b(rs.degree_identity), ",",
-              cpp_b(rs.restricted_degree_identity), ",", cpp_b(rs.support_on_boundary), ",",
-              cpp_b(fz.L_equals_RD), ",", (fz.Z_computed ? fz.dim_Z : -1), ",",
-              cpp_b(fz.Z_computed ? fz.rank_identity : false), ",",
-              cpp_b(fz.Z_computed ? fz.out_harmonic : false), ",", cpp_g(fz.max_harmonic_residual), ",",
-              hg.c_gamma, ",", cpp_b(hg.c_gamma == 1), ",", hg.predicted, ",",
-              cpp_b(hg.identity_holds), ",", cpp_b(hg.identity_with_notches), ",", hg.n_notches,
-              ",", cpp_g(ms(t0, t1)), ",", cpp_g(ms(t1, t2)), ",", cpp_g(ms(t2, t3)), ",",
-              cpp_g(ms(tc0, tc1)), "\n")
+              claim, ",", fmt_b(holds), ",", fmt_b(K.deployable(res)), ",", fmt_g(res.max_norm), ",",
+              fmt_b(dense), ",", fmt_b(X0_valid), ",", flipped, ",", fmt_g(max_move), ",",
+              fmt_g(tm.theta_max_geometric), ",", fmt_g(tm.min_beta), ",",
+              fmt_b(a1), ",", fmt_b(agree), ",", fmt_b(part), ",", fmt_b(forest), ",",
+              fmt_b(geo_checked), ",", fmt_b(geo_agree), ",", fmt_b(rep.used_sparse),
+              ",", rs.n_hinge_in_L, ",", fmt_b(rs.degree_identity), ",",
+              fmt_b(rs.restricted_degree_identity), ",", fmt_b(rs.support_on_boundary), ",",
+              fmt_b(fz.L_equals_RD), ",", (fz.Z_computed ? fz.dim_Z : -1), ",",
+              fmt_b(fz.Z_computed ? fz.rank_identity : false), ",",
+              fmt_b(fz.Z_computed ? fz.out_harmonic : false), ",", fmt_g(fz.max_harmonic_residual), ",",
+              hg.c_gamma, ",", fmt_b(hg.c_gamma == 1), ",", hg.predicted, ",",
+              fmt_b(hg.identity_holds), ",", fmt_b(hg.identity_with_notches), ",", hg.n_notches,
+              ",", fmt_g(ms(t0, t1)), ",", fmt_g(ms(t1, t2)), ",", fmt_g(ms(t2, t3)), ",",
+              fmt_g(ms(tc0, tc1)), "\n")
         flush(csv)
         st.n += 1
         st.claim_ok += holds
@@ -360,14 +359,14 @@ function main(args::Vector{String})
         r, rs, fz, hg = ref_row(name, mesh)
         push!(torusrows, r)
         println("[torus] ", r.name, " H=", r.H, " rank(L)=", r.rank_L, " dimZ=", r.dim_Z,
-                " 1^T L=0:", cpp_b(r.r_zero), " out-harmonic:", cpp_b(r.harmonic), " (res ",
-                cpp_g(fz.max_harmonic_residual), ")")
+                " 1^T L=0:", fmt_b(r.r_zero), " out-harmonic:", fmt_b(r.harmonic), " (res ",
+                fmt_g(fz.max_harmonic_residual), ")")
     end
 
     # rank_claim.md, generated from the same run (no hand-copied numbers).
     md = IOBuffer()
     print(md, "# Rank claim on the sweep (Builder-Core)\n\n")
-    print(md, "Source: `sweep.csv`, produced by `kiri_sweep --n ", n, " --seed ", seed,
+    print(md, "Source: `sweep.csv`, produced by `julia --project=Kirigami Kirigami/apps/kiri_sweep.jl --n ", n, " --seed ", seed,
           "`.\nRandom planar graphs (Voronoi cells of random points, Delaunay triangulations,\n",
           "quad-dominant edge-collapsed Delaunay), face orientations from the paper's own Eq. (1)\n",
           "relaxation, fixed-boundary system of Eq. (4).\n\n")
@@ -410,7 +409,7 @@ function main(args::Vector{String})
     print(md, "This is the paper's own open problem (2026 Sec. 6): the shape space X contains\n",
           "embeddings with self-intersections and the paper offers no certificate for the valid\n",
           "subset. The combinatorial-vs-geometric agreement is instead verified on 60 valid\n",
-          "instances by `kiri_tests` (see `tests/test_holes.cpp`).\n\n")
+          "instances by the unit tests (see `test/test_holes.jl`).\n\n")
     print(md, "Worst dense solve time in the sweep: ", f3(st.worst_solve_ms), " ms.\n")
 
     # -------------------------------------------------------- added section ----
@@ -485,7 +484,7 @@ function main(args::Vector{String})
               st.z_done, " graphs where\nthe left null space was computed (i.e. `rank(L) == H`, ",
               "consistent with the sweep's own\n`rank(L) == H` row above), so there is no basis ",
               "vector to test. The check is exercised on\nthe torus patches in the table above and ",
-              "in `tests/test_rank_checks.cpp`, where `dim Z == 1`.\n")
+              "in `test/test_rank_checks.jl`, where `dim Z == 1`.\n")
     end
     print(md, "\n")
 
@@ -504,7 +503,7 @@ function main(args::Vector{String})
         print(md, "(All in-edges of `v` belong to `K(v)`, so the in-degree is all-or-nothing; the\n",
               "out-edges are distributed over the preimages of their targets.) This is exactly the\n",
               "`y = 1` instance of the out-harmonic characterization of check 2. When there are no\n",
-              "notches -- the torus patches in `tests/test_rank_checks.cpp` -- it collapses to the\n",
+              "notches -- the torus patches in `test/test_rank_checks.jl` -- it collapses to the\n",
               "naive form, `1^T L == 0` exactly, and `rank(L) == H - 1` (measured, not assumed).\n\n")
     end
     print(md, "**Check 3 (hinge-graph Euler count) holds exactly as stated**, on all ",
@@ -521,7 +520,7 @@ function main(args::Vector{String})
     print(md, "The one place the plane count needs a correction is a boundary-free patch, where\n",
           "`Gamma` lives on a surface of Euler characteristic 0 rather than 2 and the count\n",
           "overshoots by exactly one: `H == |E_hinge| - |F| + c(Gamma) - 1`, verified in\n",
-          "`tests/test_rank_checks.cpp` on the 4x4 and 6x4 square tori and the 4x4 triangle torus.\n\n")
+          "`test/test_rank_checks.jl` on the 4x4 and 6x4 square tori and the 4x4 triangle torus.\n\n")
     print(md, "Checks 2a, 2b and 2c held on every graph and every reference case measured; no\n",
           "counterexample to the factorization or to the out-harmonic characterization was found.\n\n")
     if !isempty(ref_violations)

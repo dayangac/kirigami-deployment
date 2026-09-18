@@ -2,7 +2,7 @@
 #
 #   kiri_design in.json --sigma mc|def|both|json --out design.json [--proximity] [--baseline]
 #
-# Port of code/apps/kiri_design.cpp. For each requested orientation the tool runs, BY
+# For each requested orientation the tool runs, BY
 # DEFAULT, design_range_max (K9c: stage A maximises the exact 0+ margin from each of the
 # starts {K9 point, K9b point, t = 0}, stage B pushes the exact Theta_max, and the answer
 # is the best of {K9, K9b, stage-A/B winner}; the winning arm is printed and stored as
@@ -48,7 +48,7 @@ function certificate_json(v::K.ValidityCertificate)
                             "first_root" => v.first_root)
 end
 
-# M'-vertex / face ids of the witness are 0-based in the file, as the C++ wrote them.
+# M'-vertex / face ids of the witness are 0-based in the file.
 _idx0(i::Int) = i < 1 ? -1 : i - 1
 
 function characterization_json(ch::K.Characterization)

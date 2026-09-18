@@ -1,6 +1,6 @@
 # kiri_gen <kind> [p0 p1 ...] --out g.json [--seed s] [--orient auto|checker|brute|none]
 #
-# Port of code/apps/kiri_gen.cpp. Run as
+# Run as
 #     julia --project=Kirigami Kirigami/apps/kiri_gen.jl <kind> [params...] --out g.json
 include(joinpath(@__DIR__, "common_app.jl"))
 

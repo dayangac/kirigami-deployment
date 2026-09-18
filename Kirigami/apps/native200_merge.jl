@@ -1,14 +1,14 @@
 # native200_merge -- merge the Native200 runs into one row per (id, variant) and
 # write the report.  Every number in NATIVE200_FINAL.md is computed here from
-# native200_final.csv; nothing is hand-entered. Port of code/apps/native200_merge.cpp.
+# native200_final.csv; nothing is hand-entered.
 #
 #   julia --project=Kirigami Kirigami/apps/native200_merge.jl
 #     [--orig results/kill/native200/native200.csv]
 #     [--rerun results/kill/native200/rerun3600]        (repeatable: any dir of shard_*.csv)
 #     [--rerun results/kill/native200/crashfix3600]
 #     [--grid results/kill/native200/grid.csv]
-#     [--out results/kill/native200_julia/native200_final.csv]
-#     [--md  results/kill/native200_julia/NATIVE200_FINAL.md]
+#     [--out results/kill/native200/native200_final.csv]
+#     [--md  results/kill/native200/NATIVE200_FINAL.md]
 #     [--expected 389]   cells the rerun pipeline has to get through
 #
 # Merge rule: a cell's row is the one from the LATEST run that touched it, where
@@ -17,7 +17,7 @@
 # out as status `missing`.
 #
 # Inputs default to this repo's migrated results/kill/native200/; the merged CSV and the
-# report go to results/kill/native200_julia/ (the C++ wrote them next to the inputs).
+# report go to results/kill/native200/.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -132,7 +132,7 @@ f3(v::Real) = fx(v, 3)
 
 function main(args::Vector{String})
     indir = joinpath(REPO, "results", "kill", "native200")
-    outdir = joinpath(REPO, "results", "kill", "native200_julia")
+    outdir = joinpath(REPO, "results", "kill", "native200")
     orig = joinpath(indir, "native200.csv")
     grid = joinpath(indir, "grid.csv")
     out = joinpath(outdir, "native200_final.csv")
@@ -260,12 +260,12 @@ function main(args::Vector{String})
         print(o, "**PARTIAL -- rerun in progress, ", done_rerun, " of ", expected,
               " cells done** (3600 s rerun of the timed-out and never-dispatched cells), plus ",
               done_crashfix, " of 39 crash-fixed cells. Regenerate with ",
-              "`code/build/native200_merge`.\n\n")
+              "`julia --project=Kirigami Kirigami/apps/native200_merge.jl`.\n\n")
     else
         print(o, "**COMPLETE -- all ", expected, " rerun cells and all 39 crash-fixed cells ",
               "finished.**\n\n")
     end
-    print(o, "Every number below is computed by `code/apps/native200_merge.cpp` from ",
+    print(o, "Every number below is computed by `Kirigami/apps/native200_merge.jl` from ",
           "`results/kill/native200/native200_final.csv`, which is itself merged from ",
           "`native200.csv` (the 600 s run), `rerun3600/shard_*.csv` (the 3600 s rerun of the ",
           "timed-out and never-dispatched cells) and `crashfix3600/shard_*.csv` (the 39 ",

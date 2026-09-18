@@ -4,7 +4,6 @@
 #
 # Writes fabricable geometry for an oriented planar graph: a laser SVG in mm with
 # cut / score / engrave layers, and a 3D solid as binary STL and 3MF.
-# Port of code/apps/kiri_export.cpp.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 function usage()
@@ -101,10 +100,10 @@ function main(args::Vector{String})
             println(stderr, "warning: ", w)
         end
 
-        print("profile=", profile.name, " hinge=", K.to_string(profile.hinge), " theta=", cpp_g(theta))
-        theta_frac >= 0 && print(" (", cpp_g(theta_frac), " x theta_max=", cpp_g(theta_max_used), ")")
-        println(" faces=", K.n_faces(L), " hinges=", length(L.hinges), " bbox=", cpp_g(K.width(L)),
-                "x", cpp_g(K.height(L)), " mm")
+        print("profile=", profile.name, " hinge=", K.to_string(profile.hinge), " theta=", fmt_g(theta))
+        theta_frac >= 0 && print(" (", fmt_g(theta_frac), " x theta_max=", fmt_g(theta_max_used), ")")
+        println(" faces=", K.n_faces(L), " hinges=", length(L.hinges), " bbox=", fmt_g(K.width(L)),
+                "x", fmt_g(K.height(L)), " mm")
 
         rep = Dict{String,Any}()
         rep["input"] = in_
