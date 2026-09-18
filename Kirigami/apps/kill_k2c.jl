@@ -1,6 +1,5 @@
 # K2c -- the locality gate for the active set (ideas/ranking.md Sec. 4, K2c).
-# Port of code/apps/kill_k2c.cpp; the withdrawn/replaced PASS rule and every recorded
-# deviation there apply verbatim:
+# The withdrawn/replaced PASS rule and every recorded deviation apply verbatim:
 #   (1) PASS iff pruned and unpruned exact Theta_max agree to 1e-12 on EVERY graph;
 #   (2) the candidate-set growth with n is reported, and H-LOC is refuted by the
 #       centroid-drift column (linear in the patch diameter).
@@ -11,7 +10,7 @@ include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
-# least-squares slope of ly on lx (and R^2); NaN below 3 points, as the C++
+# least-squares slope of ly on lx (and R^2); NaN below 3 points
 function slope(pts::Vector{Tuple{Float64,Float64}})
     length(pts) < 3 && return NaN, 0.0
     sx = sum(p[1] for p in pts) / length(pts)
@@ -52,7 +51,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 500; theta_limit = 800; limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k2c_julia")
+    outdir = joinpath(REPO, "results", "kill", "k2c")
     cache = joinpath(REPO, "results", "kill", "cache")
     i = 1
     while i <= length(args)
@@ -157,15 +156,15 @@ function main(args::Vector{String})
         end
         push!(drift_rows, (diameter(X), F, max_drift(sd, F)))
         print(csv, id, ",", kind, ",", K.n_vertices(m), ",", F, ",", src, ",",
-              cpp_g(mx), ",", cpp_g(sum_ / cnt), ",", cpp_g(maxrho), ",", cpp_g(minr), ",", npa, ",", npp,
-              ",", nps, ",", cpp_g(F > 0 ? npp / F : 0.0), ",", cpp_g(ta), ",",
-              cpp_g(tp), ",", cpp_g(ts), ",", cpp_g(dp), ",", cpp_g(ds), ",", ca, ",", cp, ",", cpp_g(sa), ",",
-              cpp_g(sp), "\n")
+              fmt_g(mx), ",", fmt_g(sum_ / cnt), ",", fmt_g(maxrho), ",", fmt_g(minr), ",", npa, ",", npp,
+              ",", nps, ",", fmt_g(F > 0 ? npp / F : 0.0), ",", fmt_g(ta), ",",
+              fmt_g(tp), ",", fmt_g(ts), ",", fmt_g(dp), ",", fmt_g(ds), ",", ca, ",", cp, ",", fmt_g(sa), ",",
+              fmt_g(sp), "\n")
         flush(csv)
         graphs += 1
         if graphs % 25 == 0
             println("  ", graphs, " graphs, theta tested ", theta_tested, ", agree ", theta_agree, ", ",
-                    cpp_g(s(wall)), " s")
+                    fmt_g(s(wall)), " s")
         end
     end
 
@@ -188,7 +187,7 @@ function main(args::Vector{String})
     open(joinpath(outdir, "k2c_drift.csv"), "w") do dcsv
         print(dcsv, "diameter,F,max_drift_over_r\n")
         for d in drift_rows
-            print(dcsv, cpp_g(d[1]), ",", d[2], ",", cpp_g(d[3]), "\n")
+            print(dcsv, fmt_g(d[1]), ",", d[2], ",", fmt_g(d[3]), "\n")
         end
     end
 

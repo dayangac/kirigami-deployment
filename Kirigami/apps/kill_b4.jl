@@ -1,5 +1,4 @@
 # B4 -- is the FIXED BOUNDARY what empties the shape space, or is it the graph?
-# Port of code/apps/kill_b4.cpp.
 #
 # Background. K6 (results/kill/KILL_REPORT.md) repaired the 0+ jam inside the Tutte
 # auxetic null space on 400 designs (200 random graphs x 2 sigma) and certified
@@ -51,9 +50,9 @@
 #         [--lambda 1e-6] [--no-fixed] [--no-free] [--no-splitfree] [--limit K]
 #         [--regenerate]
 #
-# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def). The shape caches use the
-# C++ layout: `--k6cache` for the fixed control, `--cache` for the two variants. Outputs go
-# to results/kill/b4_julia/ (the C++ wrote results/kill/b4/).
+# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def). The shape caches:
+# `--k6cache` for the fixed control, `--cache` for the two variants.
+# Outputs go to results/kill/b4/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -232,9 +231,9 @@ function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; max_iter = 1200; n_random = 3
     eps = 0.3
-    outdir = joinpath(REPO, "results", "kill", "b4_julia")
+    outdir = joinpath(REPO, "results", "kill", "b4")
     sigmadir = ""
-    cache = joinpath(REPO, "results", "kill", "b4_julia", "cache")
+    cache = joinpath(REPO, "results", "kill", "b4", "cache")
     k6cache = joinpath(REPO, "results", "kill", "k6", "cache")
     shard = 0; nshards = 1
     w_corner = 0.05; w_prox = 1e3; lambda = 1e-6
@@ -422,7 +421,7 @@ function main(args::Vector{String})
                 tnorm = isempty(rr.t) ? 0.0 : norm(rr.t) / med
                 secs = s(t)
                 C.secs += secs
-                g_ = cpp_g
+                g_ = fmt_g
                 print(csv, id, ",", row.kind, ",", fname, ",", variant_name(var), ",",
                       K.n_vertices(m), ",", K.n_faces(m), ",", g_(med), ",", n_bdry, ",",
                       n_pin, ",", K.n_split(c), ",", sh.k, ",", 2 * sh.k, ",",

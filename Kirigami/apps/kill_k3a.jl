@@ -1,5 +1,4 @@
-# K3a -- the 2-core mobility identity (ideas/ranking.md Sec. 4, K3a). Port of
-# code/apps/kill_k3a.cpp.
+# K3a -- the 2-core mobility identity (ideas/ranking.md Sec. 4, K3a).
 #
 #   dim ker A == |F \ core2(Gamma)| + dim ker A|core2       on every graph
 #   m_core = dim ker A|core2 - c(core2) <= 5                on >= 90% of the
@@ -12,9 +11,9 @@
 #         [--max-faces 5000] [--limit K] [--regenerate]
 #
 # Population: `make_graph(id, 100, max_faces, 1 << 30)` for id < n, i.e. the frozen
-# data/corpus/k3a_500.json when max_faces == 5000 (the C++ run), regenerated through the
-# bit-exact generators otherwise or with --regenerate. Outputs go to results/kill/k3a_julia/
-# by default (the C++ wrote results/kill/k3a/).
+# data/corpus/k3a_500.json when max_faces == 5000 (the K3a run), regenerated through
+# the bit-exact generators otherwise or with --regenerate. Outputs go to
+# results/kill/k3a/ by default.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -22,7 +21,7 @@ const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 500
-    outdir = joinpath(REPO, "results", "kill", "k3a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k3a")
     max_faces = 5000
     limit = typemax(Int)
     i = 1
@@ -92,11 +91,11 @@ function main(args::Vector{String})
         print(csv, id, ",", kind, ",", K.n_vertices(m), ",", K.n_faces(m), ",",
               K.n_hinge(c), ",", K.n_split(c), ",", r0.components, ",", r0.n_cycles, ",",
               r0.dim_ker_A, ",", r0.n_dangling, ",", r0.core_faces, ",", r0.c_core, ",",
-              r0.dim_ker_A_core, ",", cpp_b(r0.identity_holds), ",", r0.m_full, ",", r0.m_core,
-              ",", cpp_b(r0.sigma_in_ker), ",", cpp_g(r0.sigma_residual), ",", src, ",", cpp_g(tmax), ",",
-              cpp_g(tprobe), ",", (did_th ? rth.dim_ker_A : -1), ",", (did_th ? rth.m_full : -1),
+              r0.dim_ker_A_core, ",", fmt_b(r0.identity_holds), ",", r0.m_full, ",", r0.m_core,
+              ",", fmt_b(r0.sigma_in_ker), ",", fmt_g(r0.sigma_residual), ",", src, ",", fmt_g(tmax), ",",
+              fmt_g(tprobe), ",", (did_th ? rth.dim_ker_A : -1), ",", (did_th ? rth.m_full : -1),
               ",", (did_th ? rth.m_core : -1), ",", (did_th ? Int(rth.identity_holds) : -1),
-              ",", cpp_g(s(t)), "\n")
+              ",", fmt_g(s(t)), "\n")
         flush(csv)
         acc.n[] += 1
         acc.ident[] += r0.identity_holds
@@ -116,7 +115,7 @@ function main(args::Vector{String})
             push!(del_mfull, r0.m_full)
         end
         if acc.n[] % 25 == 0
-            println("  ", acc.n[], " graphs, identity ", acc.ident[], "/", acc.n[], ", ", cpp_g(s(wall)), " s")
+            println("  ", acc.n[], " graphs, identity ", acc.ident[], "/", acc.n[], ", ", fmt_g(s(wall)), " s")
         end
     end
 

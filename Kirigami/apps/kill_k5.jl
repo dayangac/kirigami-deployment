@@ -1,6 +1,6 @@
 # K5 -- is the ORIENTATION the reason the shape space is empty? (ideas/ranking.md R5,
 # the Critic's "the orientation objective is wrong: deployability defect beats max-cut".)
-# Port of code/apps/kill_k5.cpp, including its app-local `defect_search` (the corpus only
+# Includes the app-local `defect_search` (the corpus only
 # carries that search's ARCHIVED output as `sigma_def`; the search is reproduced here with
 # the bit-exact MT19937 so the archive can be regenerated and checked).
 #
@@ -25,8 +25,8 @@
 #         [--out DIR] [--eps 0.3] [--no-range] [--limit K] [--regenerate]
 #
 # Population: make_graph(id, 100, maxf, 1400) for id in 0..399 until n graphs = the frozen
-# k1a_200 / e1_900 files when maxf == 800. Outputs go to results/kill/k5_julia/ (the C++
-# wrote results/kill/k5/); sigma_def is saved to <out>/sigma/<kind>_<id>.json for K6.
+# k1a_200 / e1_900 files when maxf == 800. Outputs go to results/kill/k5/;
+# sigma_def is saved to <out>/sigma/<kind>_<id>.json for K6.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -80,7 +80,7 @@ end
 
 improves(e::Eval, cur::Eval) = e.ok && e.D < cur.D - 1e-12 * max(1.0, cur.D)
 
-"""The greedy flip search of kill_k5.cpp: `cap` flip attempts per start, 4 starts
+"""The greedy flip search of K5: `cap` flip attempts per start, 4 starts
 (sigma_mc + 3 random), MT19937(seed) for the random sigma and the visiting orders."""
 function defect_search(m0::K.Mesh, sigma_mc::Vector{Int}, cap::Int, seed::Integer)
     best = SearchResult()
@@ -243,7 +243,7 @@ function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; cap_mult = 20
     eps = 0.3
-    outdir = joinpath(REPO, "results", "kill", "k5_julia")
+    outdir = joinpath(REPO, "results", "kill", "k5")
     do_range = true
     limit = typemax(Int)
     i = 1
@@ -330,14 +330,14 @@ function main(args::Vector{String})
             rdb > 1e-9 && push!(gain_def, (rda - rdb) / rdb)
         end
 
-        outcome_cols(o) = join([o.c_gamma, o.n_split, cpp_g(o.D), o.dim_null, cpp_g(o.proj_rel), o.n_inv,
-                                cpp_b(o.overlap_free0), cpp_b(o.cert), cpp_b(o.cert_pos), cpp_b(o.cert_noovl),
-                                cpp_b(o.cert_noroot), cpp_g(o.theta), cpp_g(o.first_overlap)], ",")
-        print(csv, id, ",", g.kind, ",", K.n_vertices(m), ",", K.n_faces(m), ",", cpp_g(med), ",",
+        outcome_cols(o) = join([o.c_gamma, o.n_split, fmt_g(o.D), o.dim_null, fmt_g(o.proj_rel), o.n_inv,
+                                fmt_b(o.overlap_free0), fmt_b(o.cert), fmt_b(o.cert_pos), fmt_b(o.cert_noovl),
+                                fmt_b(o.cert_noroot), fmt_g(o.theta), fmt_g(o.first_overlap)], ",")
+        print(csv, id, ",", g.kind, ",", K.n_vertices(m), ",", K.n_faces(m), ",", fmt_g(med), ",",
               outcome_cols(omc), ",", outcome_cols(odef), ",",
               sr.attempts, ",", sr.accepted, ",", sr.restarts_used, ",",
-              cpp_g(omc.D > 0 ? odef.D / omc.D : 0.0), ",",
-              cpp_g(rmb), ",", cpp_g(rma), ",", cpp_g(rdb), ",", cpp_g(rda), ",", cpp_g(s(t)), "\n")
+              fmt_g(omc.D > 0 ? odef.D / omc.D : 0.0), ",",
+              fmt_g(rmb), ",", fmt_g(rma), ",", fmt_g(rdb), ",", fmt_g(rda), ",", fmt_g(s(t)), "\n")
         flush(csv)
 
         push!(Dmc, omc.D); push!(Ddef, odef.D)

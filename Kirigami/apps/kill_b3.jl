@@ -1,13 +1,12 @@
 # kill_b3 -- B3 of ideas/round2_theorist_b.md: "tr K is the expansion budget".
-# Port of code/apps/kill_b3.cpp.
 #
 # STAGE b1     the GLOBAL half of B1 that derivations/scratch/check_b1 could not
 #              close: on a fixed-boundary patch the total void area (holes AND notches)
 #              must equal the border functional's first harmonic, and the edge-wise
 #              budget W + R must equal 2 B(X).  Bar 1e-10.
 # STAGE retro  retrodiction.  For every K7 C3 row (reproduced BIT FOR BIT -- the state
-#              machinery is kill_k7.jl's, included below exactly as the C++ copied it
-#              verbatim from kill_k7.cpp, and the CSV is diffed against
+#              machinery is kill_k7.jl's, included below verbatim, and the CSV is diffed
+#              against
 #              results/kill/k7/k7_c3_all_v2.csv) record tr K of the realised design,
 #              tau* = W / det P_0, the 0+ margin min_e q_e and the certificate, plus the
 #              VARIATION of W over the achievable set, which is the hard-fail clause: if
@@ -22,8 +21,8 @@
 #         [--out DIR] [--shard S] [--nshard M] [--limit K]
 #
 # Population: kill_k7.jl's periodic patterns (21 tilings + 12 torus Voronoi), rebuilt from
-# the bit-exact generators. Outputs go to results/kill/b3_julia/ (the C++ wrote
-# results/kill/b3/). `--limit K` stops after K patterns (or K graphs of stage b1).
+# the bit-exact generators. Outputs go to results/kill/b3/.
+# `--limit K` stops after K patterns (or K graphs of stage b1).
 include(joinpath(@__DIR__, "kill_k7.jl"))   # population, PState, achievable set, certificate, 0+ objective
 
 # ===========================================================================
@@ -396,7 +395,7 @@ end
 
 function main(args::Vector{String})
     stage = "run"
-    outdir = joinpath(REPO, "results", "kill", "b3_julia")
+    outdir = joinpath(REPO, "results", "kill", "b3")
     shard = 0; nshard = 1
     limit = typemax(Int)
     i = 1
@@ -427,7 +426,7 @@ function main(args::Vector{String})
     deltas = (0.0, 0.1, 0.5)
     nrun = 0
     for (pi_, P) in enumerate(pats)
-        pi0 = pi_ - 1   # the C++ 0-based population index (seeds)
+        pi0 = pi_ - 1   # 0-based population index (part of the seeds)
         pi0 % nshard != shard && continue
         P.ok || continue
         nrun >= limit && break
@@ -441,7 +440,7 @@ function main(args::Vector{String})
         keep, npre = K.periodic_cell_edges(S.cut, S.sp)
 
         rng = K.MT19937(UInt32(31337) + UInt32(613) * UInt32(pi0))
-        G = K.NormalDist(0.0, 1.0)   # ONE distribution object for rng and r2, as the C++
+        G = K.NormalDist(0.0, 1.0)   # ONE distribution object for rng and r2 (its cached second draw is shared)
         nfree = 2 * S.k - AS.dimK
         Vf = free_subspace(AS.A, nfree)
         vecI = [1.0, 0.0, 0.0, 1.0]

@@ -1,5 +1,5 @@
 # K3a recheck -- are the 15 identity violations combinatorial, or a rank-threshold
-# artifact of the SparseQR path? Port of code/apps/kill_k3a_recheck.cpp.
+# artifact of the sparse-QR path?
 #
 # Every violation has |dim ker A - (|F\core2| + dim ker A|core2)| == 1 and F >= 879,
 # i.e. above mobility's `dense_limit = 700` where matrix_rank switches from the dense
@@ -10,14 +10,14 @@
 #   julia --project=Kirigami Kirigami/apps/kill_k3a_recheck.jl [--out DIR] [--maxf 1500]
 #         [--limit K] [--regenerate]
 #
-# Outputs go to results/kill/k3a_julia/ by default (the C++ wrote results/kill/k3a/).
+# Outputs go to results/kill/k3a/ by default.
 include(joinpath(@__DIR__, "kill_common.jl"))
 using SparseArrays
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
-# Rank by dense column-pivoted QR at a given relative threshold (Eigen's
-# ColPivHouseholderQR::rank with setThreshold(rel): |R_ii| > rel * max_i |R_ii|).
+# Rank by dense column-pivoted QR at a given relative threshold
+# (|R_ii| > rel * max_i |R_ii|).
 function rank_dense(A::SparseMatrixCSC{Float64,Int}, rel::Float64)
     D = Matrix(A)
     (size(D, 1) == 0 || size(D, 2) == 0) && return 0
@@ -37,7 +37,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     ids = [40, 43, 88, 247, 257, 266, 299, 320, 343, 425, 445, 455, 467, 476, 494]
-    outdir = joinpath(REPO, "results", "kill", "k3a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k3a")
     maxf = 1500
     limit = typemax(Int)
     i = 1
@@ -111,7 +111,7 @@ function main(args::Vector{String})
 
         print(csv, id, ",", g.kind, "/", src, ",", K.n_faces(m), ",", nf, ",", tc.n_dangling, ",",
               sk, ",", skc, ",", sd, ",", dk, ",", dkc, ",", dd, ",",
-              cpp_b(dd == 0), ",", cpp_g(gf), ",", cpp_g(gc), ",", cpp_g(s(t)), "\n")
+              fmt_b(dd == 0), ",", fmt_g(gf), ",", fmt_g(gc), ",", fmt_g(s(t)), "\n")
         flush(csv)
         n_tried += 1
         dd == 0 ? (n_dense_ok += 1) : (n_still_bad += 1)

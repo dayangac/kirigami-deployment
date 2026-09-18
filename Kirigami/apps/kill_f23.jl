@@ -1,5 +1,5 @@
 # F23 -- is the authors' extra constraint row for boundary-touching split-forest
-# components an over-constraint? Port of code/apps/kill_f23.cpp.
+# components an over-constraint?
 #
 # STATE.md F23: "the authors' code adds a constraint row for split-forest components
 # that TOUCH THE BOUNDARY (we drop them: notches). Their X0 satisfies our system 8/8;
@@ -20,14 +20,14 @@
 #
 # Population: the two split-bearing reference cases hexagons_auto / snub_square_33434
 # (frozen reference_cases_8; `--regenerate` rebuilds). `--limit K` keeps only the first K
-# of them. Outputs go to results/kill/f23_julia/ (the C++ wrote results/kill/f23/).
+# of them. Outputs go to results/kill/f23/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
-    outdir = joinpath(REPO, "results", "kill", "f23_julia")
+    outdir = joinpath(REPO, "results", "kill", "f23")
     limit = typemax(Int)
     i = 1
     while i <= length(args)
@@ -131,9 +131,9 @@ function main(args::Vector{String})
             end
 
             print(csv, rc.name, ",", K.n_faces(m), ",", K.n_split(c), ",", K.n_hinge(c), ",",
-                  sr.dim_null, ",", sr.H, ",", sr.rank_L, ",", cpp_g(theta), ",", n_seeds,
-                  ",", n_orders, ",", cpp_g(worst_seed), ",", cpp_g(worst_order), ",", cpp_g(worst_angle),
-                  ",", cpp_g(worst_bfs), ",", cpp_g(worst_par), "\n")
+                  sr.dim_null, ",", sr.H, ",", sr.rank_L, ",", fmt_g(theta), ",", n_seeds,
+                  ",", n_orders, ",", fmt_g(worst_seed), ",", fmt_g(worst_order), ",", fmt_g(worst_angle),
+                  ",", fmt_g(worst_bfs), ",", fmt_g(worst_par), "\n")
             flush(csv)
             both("  theta=" * fx(theta, 2) * ": seeds=" * string(n_seeds) * " orders=" *
                  string(n_orders) * "  worst |Y(seed s) - Y(seed 0)| after rigid align = " *

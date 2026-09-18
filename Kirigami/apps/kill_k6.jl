@@ -1,4 +1,4 @@
-# K6 -- 0+ repair in the null space. Port of code/apps/kill_k6.cpp.
+# K6 -- 0+ repair in the null space.
 #
 # Background (K5 / STATE.md F30). On the 200 random graphs of K1a, every projected
 # design -- with sigma from Eq. (1) (sigma_mc) and with the defect-minimising sigma of
@@ -23,10 +23,9 @@
 #         [--limit K] [--regenerate]
 #
 # sigma_def comes from K5's saved orientations: `--sigma DIR` reads <DIR>/<kind>_<id>.json
-# as the C++ did; without it the archived K5 sigma_def of the frozen population
+# (K5's layout); without it the archived K5 sigma_def of the frozen population
 # (data/corpus/k1a_200.json, verified bit-identical to results/kill/k5/sigma) is used.
-# Outputs go to results/kill/k6_julia/ (the C++ wrote results/kill/k6/); the shape cache
-# under <out>/cache shares the C++ binary layout.
+# Outputs go to results/kill/k6/; the shape cache lives under <out>/cache.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -139,7 +138,7 @@ median_of(v::Vector{Float64}) = isempty(v) ? NaN : sort(v)[length(v) ÷ 2 + 1]
 function quantile_of(v::Vector{Float64}, p::Float64)
     isempty(v) && return NaN
     w = sort(v)
-    i = min(length(w) - 1, trunc(Int, p * (length(w) - 1) + 0.5))   # C++ 0-based index
+    i = min(length(w) - 1, trunc(Int, p * (length(w) - 1) + 0.5))   # 0-based rank
     return w[i + 1]
 end
 max_or(v::Vector{Float64}, d::Float64) = isempty(v) ? d : maximum(v)
@@ -189,7 +188,7 @@ function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; max_iter = 1200; n_random = 3
     eps = 0.3
-    outdir = joinpath(REPO, "results", "kill", "k6_julia")
+    outdir = joinpath(REPO, "results", "kill", "k6")
     sigmadir = ""
     cache = ""
     cli = joinpath(REPO, "baseline", "native", "build", "tuttekiri_cli")
@@ -464,21 +463,21 @@ function main(args::Vector{String})
             secs = s(t)
             F.secs += secs
             print(csv, id, ",", g.kind, ",", fname, ",", K.n_vertices(m), ",", K.n_faces(m), ",",
-                  cpp_g(med), ",", K.n_split(c), ",", sh.k, ",", 2 * sh.k, ",", inward0, ",",
-                  cpp_g(isempty(q0) ? 0.0 : inward0 / length(q0)), ",", cpp_g(min_q0), ",",
-                  n_inv0, ",", length(mu0), ",", inward_c0, ",", cpp_g(min_mu0), ",",
-                  cpp_b(rr.feasible), ",", rr.best_start, ",",
-                  rr.iterations, ",", cpp_g(rr.min_q), ",", cpp_g(rr.min_area), ",", cpp_g(rr.min_margin),
+                  fmt_g(med), ",", K.n_split(c), ",", sh.k, ",", 2 * sh.k, ",", inward0, ",",
+                  fmt_g(isempty(q0) ? 0.0 : inward0 / length(q0)), ",", fmt_g(min_q0), ",",
+                  n_inv0, ",", length(mu0), ",", inward_c0, ",", fmt_g(min_mu0), ",",
+                  fmt_b(rr.feasible), ",", rr.best_start, ",",
+                  rr.iterations, ",", fmt_g(rr.min_q), ",", fmt_g(rr.min_area), ",", fmt_g(rr.min_margin),
                   ",", rr.n_bad_q, ",", rr.n_bad_area, ",", rr.n_bad_margin, ",",
-                  cpp_g(tnorm), ",", cpp_b(cr.valid_at_eps), ",",
-                  cpp_b(cr.pos), ",", cpp_b(cr.noovl), ",", cpp_b(cr.noroot), ",",
-                  cpp_g(cr.eps_max), ",", cpp_g(cr.theta_exact), ",", cpp_g(cr.theta_bisect), ",",
-                  bind, ",", cpp_b(sr.feasible), ",", cpp_g(sc.eps_max), ",",
-                  cpp_g(sc.theta_bisect), ",", sec_bind, ",",
-                  cpp_b(lad_feasible), ",", cpp_g(lad_eps), ",", cpp_g(lad_lambda), ",",
-                  cpp_g(lad_tnorm), ",", cpp_g(lad_theta), ",", s2_feasible, ",",
-                  cpp_g(s2_eps), ",", cpp_g(s2_theta), ",", cpp_g(nat_theta), ",", nat_ok, ",",
-                  cpp_g(secs), ",", cpp_g(nat_secs), "\n")
+                  fmt_g(tnorm), ",", fmt_b(cr.valid_at_eps), ",",
+                  fmt_b(cr.pos), ",", fmt_b(cr.noovl), ",", fmt_b(cr.noroot), ",",
+                  fmt_g(cr.eps_max), ",", fmt_g(cr.theta_exact), ",", fmt_g(cr.theta_bisect), ",",
+                  bind, ",", fmt_b(sr.feasible), ",", fmt_g(sc.eps_max), ",",
+                  fmt_g(sc.theta_bisect), ",", sec_bind, ",",
+                  fmt_b(lad_feasible), ",", fmt_g(lad_eps), ",", fmt_g(lad_lambda), ",",
+                  fmt_g(lad_tnorm), ",", fmt_g(lad_theta), ",", s2_feasible, ",",
+                  fmt_g(s2_eps), ",", fmt_g(s2_theta), ",", fmt_g(nat_theta), ",", nat_ok, ",",
+                  fmt_g(secs), ",", fmt_g(nat_secs), "\n")
             flush(csv)
         end
         if graphs % 10 == 0 && counted

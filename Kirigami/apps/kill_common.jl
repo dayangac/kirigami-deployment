@@ -1,12 +1,12 @@
 # apps/kill_common.jl -- the graph populations shared by every Phase-5 kill experiment and
-# the app-side helpers around them. Port of code/apps/kill_common.hpp.
+# the app-side helpers around them.
 #
 # The population DEFINITIONS (`Graph`, `checkerboard`, `make_graph`, `RefCase`,
 # `reference_cases`) live in the package (src/core/kill_common.jl) because the tests need
 # them; this file adds what only the apps use: the frozen-corpus loaders, the shape-space
 # cache, the deployable population, formatting and a timer.
 #
-# FROZEN CORPUS FIRST. Every population the C++ built procedurally was written once to
+# FROZEN CORPUS FIRST. Every population was generated once and written to
 # data/corpus/<name>.json (see data/corpus/README.md). `population(name)` loads that file;
 # `population(name; regenerate = true)` rebuilds it through the bit-exact generators
 # instead (`make_graph` reproduces all 200 K1a graphs vertex-for-vertex, verified
@@ -167,8 +167,7 @@ median_edge_length(m::K.Mesh) = K.median_edge_length(m)
 
 # ---- shape-space cache -----------------------------------------------------------------
 # The dense SVD of [L;B] costs seconds at N ~ 1400 and four kill experiments need the same
-# X0 and Phi, so it is cached to disk (raw doubles, column-major; the C++ layout, so files
-# written by either implementation are read by the other).
+# X0 and Phi, so it is cached to disk (raw doubles, column-major).
 mutable struct Shape
     N::Int
     k::Int
@@ -229,7 +228,7 @@ end
 # state: the authored tilings at several clip radii, each with the Eq. (6) projection plus
 # a few shape-space samples that are still embedded. `deployable_population()` reads the
 # frozen file (solver OUTPUT `X`, matched to ~1e-9 rather than bit-exactly);
-# `deployable_population(regenerate = true)` rebuilds it as kill_common.hpp does.
+# `deployable_population(regenerate = true)` rebuilds it (`build_deployable_population`).
 mutable struct DeployableConfig
     name::String
     family::String
@@ -242,9 +241,9 @@ end
 function deployable_population(; regenerate::Bool = false, samples_per_base::Int = 8,
                                radius_frac::Float64 = 0.2)
     regenerate && return build_deployable_population(samples_per_base, radius_frac)
-    # the (8, 0.2) default is deployable_population.json; the other variants the C++ apps
-    # used are frozen as deployable_population_<samples>_<radius>.json (k8a: (2, 0.2);
-    # e1: (20, 0.2) and (20, 0.35)), with the C++ Eigen-basis samples
+    # the (8, 0.2) default is deployable_population.json; the other variants the drivers
+    # use are frozen as deployable_population_<samples>_<radius>.json (k8a: (2, 0.2);
+    # e1: (20, 0.2) and (20, 0.35)), with the samples drawn on the frozen null-space basis
     path = (samples_per_base == 8 && radius_frac == 0.2) ?
            joinpath(CORPUS_DIR, "deployable_population.json") :
            joinpath(CORPUS_DIR, "deployable_population_$(samples_per_base)_$(radius_frac).json")
@@ -264,7 +263,7 @@ function build_deployable_population(samples_per_base::Int, radius_frac::Float64
     radii = [2.0, 2.5, 3.0, 3.5, 4.0]
     rng0 = K.MT19937(20260903)
     for (ri, R) in enumerate(radii)
-        ri0 = ri - 1   # the C++ index
+        ri0 = ri - 1   # 0-based radius index (part of the seed)
         fams = [
             ("squares", K.tiling_squares(K.rect(Vec2(0.5 * R, 0.5 * R), R / 2 + 0.01, R / 2 + 0.01)), true),
             ("triangles", K.tiling_triangles(K.disk(Vec2(0.13, 0.07), R)), true),
@@ -307,12 +306,12 @@ function build_deployable_population(samples_per_base::Int, radius_frac::Float64
             push!(out, DeployableConfig(base, fname, m, X, k, -1))
             k <= 0 && continue
             med = median_edge_length(m)
-            G = K.NormalDist(0.0, 1.0)   # fresh per base, as the C++ declares it (cached second draw)
+            G = K.NormalDist(0.0, 1.0)   # fresh per base (the cached second draw restarts)
             kept = 0
             for _ in 1:60
                 kept >= samples_per_base && break
                 T = Matrix{Float64}(undef, k, 2)
-                for i in eachindex(T)   # column-major, as Eigen's data() order
+                for i in eachindex(T)   # column-major draw order
                     T[i] = K.normal(G, rng0)
                 end
                 D = Phi * T
@@ -335,5 +334,5 @@ struct Timer
     t0::UInt64
 end
 Timer() = Timer(time_ns())
-"""Elapsed seconds, at millisecond resolution like the C++."""
+"""Elapsed seconds, at millisecond resolution."""
 s(t::Timer) = floor((time_ns() - t.t0) / 1e6) / 1000.0

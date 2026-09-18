@@ -1,5 +1,4 @@
-# A3 -- the JITTER TRANSITION (ideas/round2_adversary.md, Idea 4). Port of
-# code/apps/kill_jitter.cpp.
+# A3 -- the JITTER TRANSITION (ideas/round2_adversary.md, Idea 4).
 #
 # The hole in F25/F30 that the adversary names (rejection R-1): the emptiness result is
 # "0/200 random graphs, 8/8 authored tilings". A referee cannot tell "the design space is
@@ -66,7 +65,7 @@
 #         [--limit K] [--regenerate]
 #
 # Population: the 8 reference cases (frozen reference_cases_8; `--regenerate` rebuilds
-# them). Outputs go to results/kill/jitter_julia/ (the C++ wrote results/kill/jitter/).
+# them). Outputs go to results/kill/jitter/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -219,7 +218,7 @@ Base.@kwdef mutable struct Eval
     n_split::Int = 0
 end
 
-# the C++ `Mesh m = m0; m.X = X; m.sigma = sigma; m.build_topology()`
+# a fresh mesh with the faces of m0, positions X and orientation sigma, topology rebuilt
 function mesh_with(m0::K.Mesh, X::Vector{Vec2}, sigma::Vector{Int})
     m = K.Mesh(X, m0.faces)
     m.sigma = sigma
@@ -532,8 +531,8 @@ function run_analysis(csv_path::String, outdir::String)
             end
             n == 0 && continue
             f_c = nc / n; f_t = nt / n
-            print(lad, tl, ",", rule, ",", ai, ",", cpp_g(amplitude(ai)), ",", n, ",",
-                  cpp_g(f_c), ",", cpp_g(f_t), ",", cpp_g(median_of(ths)), ",", nsplit0, "\n")
+            print(lad, tl, ",", rule, ",", ai, ",", fmt_g(amplitude(ai)), ",", n, ",",
+                  fmt_g(f_c), ",", fmt_g(f_t), ",", fmt_g(median_of(ths)), ",", nsplit0, "\n")
             if ai >= 0
                 push!(amps, amplitude(ai)); push!(fc, f_c); push!(ft, f_t)
             end
@@ -604,7 +603,7 @@ end
 
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
-    outdir = joinpath(REPO, "results", "kill", "jitter_julia")
+    outdir = joinpath(REPO, "results", "kill", "jitter")
     shard = 0; nshards = 1; cap = 0; only_tiling = -1
     analyze = ""
     eps_small = 0.006; eps_large = 0.3
@@ -636,7 +635,7 @@ function main(args::Vector{String})
     idx = 0
     done = 0
 
-    g_ = cpp_g
+    g_ = fmt_g
     function emit(tiling::String, ai::Int, a::Float64, seed::Int, m::K.Mesh, med::Float64,
                   rule::String, r::Row, secs::Float64)
         print(csv, tiling, ",", ai, ",", g_(a), ",", seed, ",", K.n_vertices(m), ",",
@@ -653,7 +652,7 @@ function main(args::Vector{String})
     end
 
     for (ti, rc) in enumerate(cases)
-        t = ti - 1   # the C++ tiling index (0-based, also in the seed)
+        t = ti - 1   # 0-based tiling index (also in the seed)
         (only_tiling >= 0 && t != only_tiling) && continue
         base = rc.mesh
         K.build_topology!(base)

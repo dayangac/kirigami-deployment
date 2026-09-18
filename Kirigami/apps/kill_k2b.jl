@@ -1,6 +1,6 @@
 # K2b -- the range-optimisation margin (ideas/ranking.md Sec. 4, K2b).
-# Port of code/apps/kill_k2b.cpp; the amended PASS rule, the three corrections and the
-# two recorded deviations there apply verbatim:
+# The amended PASS rule, the three corrections and the two recorded deviations apply
+# verbatim:
 #   baseline = the authors' native tuttekiri_cli `prevent` (their Eq. 9) with the
 #   parameter ladder, best kept, every point refereed by OUR bisection (grid 4000,
 #   shrink 1e-12) and required to be a valid flat embedding; ours = maximize_range;
@@ -14,7 +14,6 @@
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
-const CPP_REPO = expanduser("~/Documents/kirigami-experiments")   # PORTING.md: the reference repo
 
 # The referee. Bisection on the true polygon overlap, shrink 1e-12, fine grid.
 function referee_theta(c::K.CutStructure, X::Vector{Vec2}, grid::Int = 4000, iters::Int = 50)
@@ -68,10 +67,10 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n_random = 8; n_deployable = 26; rounds = 20; maxf = 160; limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k2b_julia")
+    outdir = joinpath(REPO, "results", "kill", "k2b")
     cache = joinpath(REPO, "results", "kill", "cache")
-    cli = joinpath(CPP_REPO, "baseline", "native", "build", "tuttekiri_cli")
-    work = "/tmp/kiri_k2b_julia"
+    cli = joinpath(REPO, "baseline", "native", "build", "tuttekiri_cli")   # built per baseline/README.md
+    work = "/tmp/kiri_k2b"
     i = 1
     while i <= length(args)
         a = args[i]
@@ -128,9 +127,8 @@ function main(args::Vector{String})
         best_idx = -1; n_points = 0; n_valid = 0
         valid_theirX0 = false
         if rc && isdir(joinpath(gdir, "sw"))
-            # std::filesystem::directory_iterator order is unspecified; on APFS it is the
-            # directory's hash order. Ties in theta are resolved by that order in the C++
-            # (first best wins), so the winner index may differ on exact ties.
+            # Ties in theta are resolved in directory iteration order (APFS hash order,
+            # first best wins), so the winner index may differ on exact ties.
             for fn in readdir(joinpath(gdir, "sw"))
                 Xb = read_vertices(joinpath(gdir, "sw", fn), K.n_vertices(m))
                 isempty(Xb) && continue
@@ -174,10 +172,10 @@ function main(args::Vector{String})
 
         print(csv, name, ",", kind, ",", K.n_vertices(m), ",", K.n_faces(m), ",",
               K.n_split(c), ",", sh.k, ",", n_points, ",", n_valid, ",",
-              cpp_g(theta_ourX0), ",", cpp_b(valid_flat(c, X0)), ",", cpp_g(theta_theirX0), ",",
-              cpp_b(valid_theirX0), ",", cpp_g(theta_native), ",", best_idx, ",", cpp_g(theta_eq9), ",",
-              cpp_g(theta_ours), ",", cpp_b(vo), ",", cpp_g(theta_closed), ",", cpp_g(rel), ",", cpp_g(gap), ",",
-              cpp_g(mb), ",", ro.n_active, ",", cpp_g(sn), ",", cpp_g(so), "\n")
+              fmt_g(theta_ourX0), ",", fmt_b(valid_flat(c, X0)), ",", fmt_g(theta_theirX0), ",",
+              fmt_b(valid_theirX0), ",", fmt_g(theta_native), ",", best_idx, ",", fmt_g(theta_eq9), ",",
+              fmt_g(theta_ours), ",", fmt_b(vo), ",", fmt_g(theta_closed), ",", fmt_g(rel), ",", fmt_g(gap), ",",
+              fmt_g(mb), ",", ro.n_active, ",", fmt_g(sn), ",", fmt_g(so), "\n")
         flush(csv)
         graphs += 1
         (vo && theta_ours > 1e-9) && (certified += 1)

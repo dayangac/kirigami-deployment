@@ -1,5 +1,4 @@
 # K1b -- the harmonic identity (ideas/ranking.md Sec. 4, K1b). Gates R1 and R2.
-# Port of code/apps/kill_k1b.cpp.
 #
 # PASS rule, copied from ranking.md:
 #   "200 graphs from K1a's set, 20 random X in X each. For 50 random ordered
@@ -24,13 +23,13 @@ include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
-# C++ std::to_string(double): fixed, 6 decimals
+# fixed, 6 decimals (the CSV number format)
 to_string_d(v::Real) = fx(v, 6)
 
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; n_shapes = 20; n_triples = 50; n_angles = 200; limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k1b_julia")
+    outdir = joinpath(REPO, "results", "kill", "k1b")
     cache = joinpath(REPO, "results", "kill", "cache")
     i = 1
     while i <= length(args)
@@ -82,7 +81,7 @@ function main(args::Vector{String})
 
         for _ in 1:n_shapes
             T = Matrix{Float64}(undef, sh.k, 2)
-            for i in 1:sh.k   # row by row: T(i,0) then T(i,1), as the C++ draws them
+            for i in 1:sh.k   # row by row: T(i,0) then T(i,1) (draw order fixed by the corpus)
                 T[i, 1] = K.normal(G, rng); T[i, 2] = K.normal(G, rng)
             end
             Xm = copy(sh.X0)
@@ -168,9 +167,9 @@ function main(args::Vector{String})
             end
         end
         print(csv, id, ",", kind, ",", K.n_vertices(m), ",", F, ",", sh.k, ",",
-              g_tr, ",", cpp_g(g_res), ",", cpp_g(g_res_geo), ",", cpp_g(g_cf), ",", cpp_g(g_coef), ",",
-              cpp_g(g_basis), ",", cpp_g(g_scale), ",", cpp_g(g_area), ",", cpp_g(g_ascale), ",", cpp_g(g_deg), ",",
-              g_degen, ",", cpp_g(s(t)), "\n")
+              g_tr, ",", fmt_g(g_res), ",", fmt_g(g_res_geo), ",", fmt_g(g_cf), ",", fmt_g(g_coef), ",",
+              fmt_g(g_basis), ",", fmt_g(g_scale), ",", fmt_g(g_area), ",", fmt_g(g_ascale), ",", fmt_g(g_deg), ",",
+              g_degen, ",", fmt_g(s(t)), "\n")
         flush(csv)
         graphs += 1
         n_triples_total += g_tr
@@ -192,7 +191,7 @@ function main(args::Vector{String})
         worst_coef = max(worst_coef, g_coef)
         worst_basis = max(worst_basis, g_basis / max(1e-300, g_scale))
         if graphs % 20 == 0
-            println("  ", graphs, " graphs, worst rel res ", cpp_g(worst_res), ", ", cpp_g(s(wall)), " s")
+            println("  ", graphs, " graphs, worst rel res ", fmt_g(worst_res), ", ", fmt_g(s(wall)), " s")
         end
     end
 

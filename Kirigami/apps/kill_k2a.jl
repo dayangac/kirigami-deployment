@@ -1,6 +1,5 @@
 # K2a -- exact theta_max agrees with bisection (ideas/ranking.md Sec. 4, K2a).
-# Port of code/apps/kill_k2a.cpp; the corrections and deviations recorded there apply
-# verbatim (T4.2" interval scan, tau = 0 deflation, exact moving-centroid broad phase,
+# The recorded corrections and deviations apply verbatim (T4.2" interval scan, tau = 0 deflation, exact moving-centroid broad phase,
 # split-free cap Theta_max = min(min beta, pi), population = deployable_population(),
 # shrinks 1e-6 / 1e-9 / 1e-12 with the last as the reference).
 #
@@ -35,7 +34,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 292; limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k2a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k2a")
     cache = ""
     i = 1
     while i <= length(args)
@@ -109,7 +108,7 @@ function main(args::Vector{String})
 
         etype = "none"; adj = "none"
         if ex.first.found
-            # corner_e is 0-based in the witness (C++ index within prime_faces[face_e])
+            # corner_e is 0-based in the witness (offset within prime_faces[face_e])
             he = c.face_corner_base[ex.first.face_e] + ex.first.corner_e
             e = m.half_edges[he].edge
             etype = c.edge_type[e] == K.Split ? "split" : c.edge_type[e] == K.Hinge ? "hinge" : "border"
@@ -165,17 +164,17 @@ function main(args::Vector{String})
         end
         b12 >= 0.006 - 1e-9 && (n_range_ge_eps += 1)
         print(csv, name, ",", kind, ",", K.n_vertices(m), ",", K.n_faces(m), ",",
-              K.n_split(c), ",", src, ",", cpp_g(ex.theta_max), ",", cpp_g(ov.theta_max), ",",
-              length(ov.candidates), ",", ov.i_star, ",", cpp_b(ov.zero_range), ",",
-              cpp_b(split_free), ",", cpp_g(mb_cap), ",", cpp_g(d_beta), ",",
-              cpp_b(cv), ",", cpp_b(cert.pos), ",", cpp_b(cert.nooverlap), ",",
-              cpp_b(cert.noroot), ",", cert.n_class1, ",", cert.n_class2, ",",
+              K.n_split(c), ",", src, ",", fmt_g(ex.theta_max), ",", fmt_g(ov.theta_max), ",",
+              length(ov.candidates), ",", ov.i_star, ",", fmt_b(ov.zero_range), ",",
+              fmt_b(split_free), ",", fmt_g(mb_cap), ",", fmt_g(d_beta), ",",
+              fmt_b(cv), ",", fmt_b(cert.pos), ",", fmt_b(cert.nooverlap), ",",
+              fmt_b(cert.noroot), ",", cert.n_class1, ",", cert.n_class2, ",",
               cert.n_class3, ",", cert.n_identically_zero, ",", cert.n_roots_undeflated,
-              ",", cpp_g(b6), ",", cpp_g(b9), ",",
-              cpp_g(b12), ",", cpp_g(theta_hybrid), ",", cpp_b(immediate), ",", cpp_g(d6), ",", cpp_g(d9), ",", cpp_g(d12),
-              ",", cpp_g(dT9), ",", cpp_g(dT12), ",", cpp_g(d12_pure), ",", cpp_b(tight_flat), ",",
-              cpp_b(overlap_after), ",", etype, ",", adj, ",", cpp_g(mb),
-              ",", cpp_g(s(t)), "\n")
+              ",", fmt_g(b6), ",", fmt_g(b9), ",",
+              fmt_g(b12), ",", fmt_g(theta_hybrid), ",", fmt_b(immediate), ",", fmt_g(d6), ",", fmt_g(d9), ",", fmt_g(d12),
+              ",", fmt_g(dT9), ",", fmt_g(dT12), ",", fmt_g(d12_pure), ",", fmt_b(tight_flat), ",",
+              fmt_b(overlap_after), ",", etype, ",", adj, ",", fmt_g(mb),
+              ",", fmt_g(s(t)), "\n")
         flush(csv)
         graphs += 1
         ok6 += (d6 <= 1e-5)
@@ -205,7 +204,7 @@ function main(args::Vector{String})
         end
         adj == "not_adjacent" && (nonadj_bind += 1)
         if graphs % 20 == 0
-            println("  ", graphs, " graphs, T4.2\" agree(1e-12) ", okT12, ", ", cpp_g(s(wall)), " s")
+            println("  ", graphs, " graphs, T4.2\" agree(1e-12) ", okT12, ", ", fmt_g(s(wall)), " s")
         end
     end
 

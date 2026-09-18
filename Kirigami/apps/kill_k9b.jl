@@ -1,4 +1,4 @@
-# K9b -- pushing the convexity-constrained embedding of K9. Port of code/apps/kill_k9b.cpp.
+# K9b -- pushing the convexity-constrained embedding of K9.
 #
 # K9 reached exact Theta_max > 0 on 36 / 400 designs (9.0 %) against a 10 % bar, with every
 # comparable baseline at exactly 0. K9b keeps the population, the shape space and the
@@ -22,7 +22,7 @@
 #         exact rejection, not inside the stage-2 objective; that is weaker than the task's
 #         wording and is reported as such.
 #
-# REFEREE. K9's post-hoc audit (dbg_k9.cpp) showed the bisection's early-exit
+# REFEREE. K9's post-hoc audit showed the bisection's early-exit
 # has_collision(1e-7) firing NON-MONOTONELY at the historical shrink 1e-12 on hinge-adjacent
 # faces that touch by construction. Every design here is refereed at BOTH shrinks and both
 # counts are reported; the headline count is the 1e-9 one the task names.
@@ -36,10 +36,11 @@
 #         [--starts 8] [--barrier 10] [--budget 150] [--shard S] [--nshards M]
 #         [--no-stage2] [--no-gallery] [--aggregate] [--limit K] [--regenerate]
 #
-# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def, C++ shape-cache layout).
+# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def, shared shape-cache
+# layout).
 # NOTE the per-design wall budget (`--budget`) cuts the delta sweep on elapsed time, so a
 # slower or faster machine can legitimately stop the sweep at a different delta. Outputs go
-# to results/kill/k9b_julia/ (the C++ wrote results/kill/k9b/).
+# to results/kill/k9b/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -336,7 +337,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; shard = 0; nshards = 1
-    outdir = joinpath(REPO, "results", "kill", "k9b_julia")
+    outdir = joinpath(REPO, "results", "kill", "k9b")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     eps = 0.3; eps_target = 0.1
@@ -559,7 +560,7 @@ function main(args::Vector{String})
             end
 
             secs = s(t)
-            g_ = cpp_g
+            g_ = fmt_g
             print(csv, id, ",", row.kind, ",", fname, ",", K.n_vertices(m), ",",
                   K.n_faces(m), ",", g_(med), ",", K.n_split(c), ",", sh.k, ",",
                   length(K.corner_crosses(m, X0)), ",", nonconvex0, ",",
@@ -573,7 +574,7 @@ function main(args::Vector{String})
             flush(csv)
             println("id ", id, " ", fname, " F=", K.n_faces(m),
                     " k=", sh.k, " delta=", g_(best.delta_rel),
-                    " feas=", cpp_b(best.feasible), " s2=", best.stage2,
+                    " feas=", fmt_b(best.feasible), " s2=", best.stage2,
                     " theta=", g_(best.cert.theta_exact),
                     " eps=", g_(best.cert.eps_max), " (", fx(secs, 1), " s)")
         end

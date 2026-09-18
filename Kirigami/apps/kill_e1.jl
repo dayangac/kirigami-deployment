@@ -1,5 +1,5 @@
 # E1 -- exact Theta_max (T4.2") vs the bisection referee, extended to >= 500 designs
-# (specs/experimenter_final.md E1). Port of code/apps/kill_e1.cpp. Extends K2a
+# (specs/experimenter_final.md E1). Extends K2a
 # (results/kill/KILL_REPORT.md, section K2a; 187 tightly embedded designs, all
 # authored-tiling-derived) with three more populations, so the >=500 designs actually span
 # random Voronoi/Delaunay/quad graphs and both orientation rules, not only the authored
@@ -51,7 +51,7 @@
 # with make_graph); (C) reads the frozen reference cases. E1's own sigma_def (cap 20*F,
 # seed 5000000 + id) is recomputed here -- it is NOT the archived K5 sigma_def of
 # e1_900.json (4 starts, K5's seed). `--limit K` stops after K tasks owned by this shard.
-# Outputs go to results/final/e1_julia/ (the C++ wrote results/final/e1/).
+# Outputs go to results/final/e1/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -66,7 +66,7 @@ Base.@kwdef mutable struct SigmaEval
     D::Float64 = 0.0
 end
 
-# the C++ `Mesh m = m0; m.X = X; m.sigma = sigma; m.build_topology()`
+# a fresh mesh with the faces of m0, positions X and orientation sigma, topology rebuilt
 function mesh_with(m0::K.Mesh, X::Vector{Vec2}, sigma::Vector{Int})
     m = K.Mesh(X, m0.faces)
     m.sigma = sigma
@@ -172,10 +172,10 @@ end
 
 function write_row(csv::IO, r::Row)
     print(csv, r.name, ",", r.family, ",", r.source, ",", r.sigma_rule, ",", r.N,
-          ",", r.F, ",", r.n_split, ",", cpp_g(r.theta_exact), ",", cpp_g(r.theta_bisect),
-          ",", cpp_g(r.gap), ",", Int(r.cert_valid), ",", Int(r.cert_pos), ",",
+          ",", r.F, ",", r.n_split, ",", fmt_g(r.theta_exact), ",", fmt_g(r.theta_bisect),
+          ",", fmt_g(r.gap), ",", Int(r.cert_valid), ",", Int(r.cert_pos), ",",
           Int(r.cert_nooverlap), ",", Int(r.cert_noroot), ",", Int(r.actually_ge_eps),
-          ",", cpp_g(r.secs), "\n")
+          ",", fmt_g(r.secs), "\n")
     flush(csv)
 end
 
@@ -266,7 +266,7 @@ function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     shard = 0; nshards = 1
     n_random_ids = 900      # ids fed to make_graph, id % 3 selects the kind
-    outdir = joinpath(REPO, "results", "final", "e1_julia")
+    outdir = joinpath(REPO, "results", "final", "e1")
     limit = typemax(Int)
     i = 1
     while i <= length(args)
@@ -348,13 +348,13 @@ function main(args::Vector{String})
             kept += emit_def(csv, m, m.X, sigma_def, name, g.kind, "random")
         end
         (seen % 200 == 0 && seen > 0) && println(stderr, "shard ", shard, ": ", seen,
-                                                 " tasks seen, ", kept, " kept, ", cpp_g(s(wall)), " s")
+                                                 " tasks seen, ", kept, " kept, ", fmt_g(s(wall)), " s")
     end
 
     # (C) jitter ladder on the 4 split-bearing authored tilings (reference_cases indices
     # 3,4,5,6), amplitudes log-spaced below/around the known a* (STATE.md F30/A3).
     let cases = reference_cases(regenerate = regenerate)
-        split_bearing = (3, 4, 5, 6)   # C++ 0-based indices
+        split_bearing = (3, 4, 5, 6)   # 0-based case indices
         kNAmp = 12; kNSeed = 15
         kAmpLo = 0.01; kAmpHi = 0.6
         amp(i) = kAmpLo * K.libm_pow(kAmpHi / kAmpLo, i / (kNAmp - 1))
@@ -399,7 +399,7 @@ function main(args::Vector{String})
     end
     close(csv)
 
-    println(stderr, "shard ", shard, " done: ", seen, " tasks seen, ", kept, " kept, ", cpp_g(s(wall)), " s")
+    println(stderr, "shard ", shard, " done: ", seen, " tasks seen, ", kept, " kept, ", fmt_g(s(wall)), " s")
     return 0
 end
 

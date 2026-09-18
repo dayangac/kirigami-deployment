@@ -1,5 +1,5 @@
-# apps/common_app.jl -- shared helpers of the kiri_* command-line apps. Port of
-# code/apps/common_app.hpp. A plain included file (not a module): every app does
+# apps/common_app.jl -- shared helpers of the kiri_* command-line apps. A plain included
+# file (not a module): every app does
 #     include(joinpath(@__DIR__, "common_app.jl"))
 # and then talks to the package through `K.<name>` (`Kirigami` exports nothing).
 
@@ -10,15 +10,15 @@ import JSON
 const K = Kirigami
 const Vec2 = K.Vec2
 
-# One BLAS thread per process, as the C++ (Eigen without OpenMP, STATE.md U10). The
+# One BLAS thread per process (STATE.md U10, docs/NUMERICS.md "BLAS threads"). The
 # optimiser objectives are hundreds of small gemvs per iteration; with OpenBLAS's default
 # thread count, 12 concurrent shards oversubscribe the machine and each gemv stalls on
 # thread synchronisation (measured 330 s vs 3 s per B4 row). The thread count also fixes
 # the gemv reduction order, so it is part of the results' reproducibility.
 BLAS.set_num_threads(1)
 
-# nlohmann-json dumps NaN / +-Inf as `null`; JSON.jl refuses them, so they are mapped
-# here. Dict keys come out sorted, as nlohmann's std::map-backed objects were.
+# NaN / +-Inf are written as `null` (JSON.jl refuses to write them), and Dict keys come
+# out sorted, so files are byte-stable across runs.
 _json_clean(x::AbstractFloat) = isfinite(x) ? x : nothing
 _json_clean(x::AbstractDict) = Dict{String,Any}(string(k) => _json_clean(v) for (k, v) in x)
 _json_clean(x::AbstractVector) = Any[_json_clean(v) for v in x]
@@ -36,8 +36,8 @@ function write_json(j, path::AbstractString)
     return nothing
 end
 
-"""Dump of a deployed kirigami structure for code/scripts/plot_embedding.py (0-based M'
-faces and 0-based edge ids in `holes`, as the C++ wrote them)."""
+"""Dump of a deployed kirigami structure for scripts/plot_embedding.jl (0-based M' faces
+and 0-based edge ids in `holes`, the file format's numbering)."""
 function deployment_json(c::K.CutStructure, X::Vector{Vec2}, theta::Real)
     d = K.deploy(c, X, theta)
     j = Dict{String,Any}()
@@ -61,22 +61,22 @@ function mesh_json(m::K.Mesh)
 end
 
 # ---- argument parsing shared by the apps ------------------------------------------
-# The C++ apps parse `argv` by hand with `std::stod` / `std::stoi` / `std::stoul`; these
-# are the same conversions (a leading-prefix parse is not replicated: junk is an error).
+# Numeric `argv` conversions; junk is an error.
 arg_f(s::AbstractString) = parse(Float64, s)
 arg_i(s::AbstractString) = parse(Int, s)
 arg_u(s::AbstractString) = UInt32(parse(UInt, s) % UInt32)
 
-# `checkerboard` of kill_common.hpp, which kiri_gen / kiri_reference / kiri_sweep each
-# reimplemented locally: the 2-colouring of the dual graph by DFS.
+# `checkerboard`, shared by kiri_gen / kiri_reference / kiri_sweep: the 2-colouring of
+# the dual graph by DFS.
 checkerboard(m::K.Mesh) = K.checkerboard(m)
 
-# C++ stream formatting. Non-finite values print as libc++ does: "inf", "-inf", "nan".
-_cpp_nonfinite(v::Float64) = isnan(v) ? "nan" : (v > 0 ? "inf" : "-inf")
-# `std::cout << double` at the default precision (6 significant digits, %g).
-cpp_g(v::Real) = isfinite(v) ? @sprintf("%g", Float64(v)) : _cpp_nonfinite(Float64(v))
-# `std::scientific` / `std::fixed` << setprecision(prec) (kill_common.hpp `sci` / `fx`).
-sci(v::Real, prec::Int = 3) = isfinite(v) ? Printf.format(Printf.Format("%.$(prec)e"), Float64(v)) : _cpp_nonfinite(Float64(v))
-fx(v::Real, prec::Int = 4) = isfinite(v) ? Printf.format(Printf.Format("%.$(prec)f"), Float64(v)) : _cpp_nonfinite(Float64(v))
-# C++ `std::cout << bool` (0 / 1).
-cpp_b(b::Bool) = b ? "1" : "0"
+# Number formatting of the CSV / text outputs.
+# Non-finite values print as "inf", "-inf", "nan".
+_fmt_nonfinite(v::Float64) = isnan(v) ? "nan" : (v > 0 ? "inf" : "-inf")
+# 6 significant digits (%g).
+fmt_g(v::Real) = isfinite(v) ? @sprintf("%g", Float64(v)) : _fmt_nonfinite(Float64(v))
+# scientific / fixed with `prec` digits after the point.
+sci(v::Real, prec::Int = 3) = isfinite(v) ? Printf.format(Printf.Format("%.$(prec)e"), Float64(v)) : _fmt_nonfinite(Float64(v))
+fx(v::Real, prec::Int = 4) = isfinite(v) ? Printf.format(Printf.Format("%.$(prec)f"), Float64(v)) : _fmt_nonfinite(Float64(v))
+# booleans as 0 / 1.
+fmt_b(b::Bool) = b ? "1" : "0"

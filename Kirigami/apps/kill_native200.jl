@@ -1,12 +1,11 @@
 # Native200 -- the authors' FULL native pipeline on ALL 200 K6/K9 graphs.
-# Port of code/apps/kill_native200.cpp.
 #
 # A referee baseline requested by the team lead: not just Eq.(9) (K2b) but the
 # authors' whole chain -- THEIR coloring (coloring::initialized_two_face_coloring),
 # THEIR make_deployable (Eq. 6), THEIR opt::prevent_intersections (Eq. 9) at the
 # web UI's published defaults, and THEIR forward-kinematics collision test for
 # theta_max -- run natively via baseline/native/build/tuttekiri_cli on every one
-# of the 200 random graphs of kill_common.hpp's population (make_graph(id, 100,
+# of the 200 random graphs of the kill population (make_graph(id, 100,
 # maxf, 1400), same ids as K1a/K5/K6/K9/K9b).
 #
 # Three variants per graph, each a separate native run:
@@ -29,7 +28,7 @@
 # NOROOT) at eps = 0.3, method/contact.jl's validity_certificate.
 #
 # A per-(graph,variant) wall-clock cap of 600 s is enforced with `perl -e alarm`
-# (no GNU coreutils `timeout` on this machine, same trick as kill_k6.cpp). Runs are
+# (no GNU coreutils `timeout` on this machine, same trick as kill_k6.jl). Runs are
 # classified completed / timed_out / crashed (nonzero exit, not a timeout) --
 # crashes are candidate F24-class upstream bugs and are logged verbatim.
 #
@@ -45,14 +44,12 @@
 # The grid comes from the frozen data/corpus/native200.json (the population index walk
 # of make_graph with the archived K5 sigma_def); `--sigma DIR` reads the archived files
 # instead of the frozen sigma_def, `--regenerate` rebuilds the graphs through make_graph.
-# The CLI defaults to the reference repo's F24-patched build
-# (~/Documents/kirigami-experiments/baseline/native/build_fixed/tuttekiri_cli). Outputs
-# go to results/kill/native200_julia/ (the C++ wrote results/kill/native200/). `--limit K`
+# The CLI defaults to the F24-patched build baseline/native/build_fixed/tuttekiri_cli
+# (baseline/README.md). Outputs go to results/kill/native200/. `--limit K`
 # stops after K cells.
 include(joinpath(@__DIR__, "native_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
-const CPP_REPO = expanduser("~/Documents/kirigami-experiments")   # PORTING.md: the reference repo
 
 # ---- cell model ------------------------------------------------------------
 # A "cell" is one (graph id, variant) pair of the 200 x {sigma_mc, sigma_def,
@@ -72,7 +69,7 @@ function sigma_def_of(row::PopRow, sigmadir::AbstractString, m0::K.Mesh)
 end
 
 # The frozen population as (row, m0 with topology, sigma_mc, sigma_def), walked in the
-# order of the C++ `for (id = 0; id < 400 && gidx + 1 < n; ++id)` loop.
+# order `for id in 0:399 while gidx + 1 < n`.
 function walk_population(n::Int, maxf::Int, sigmadir::AbstractString, regenerate::Bool)
     (maxf == 800 || regenerate) || @warn "frozen native200 was built with --maxf 800; use --regenerate for maxf = $maxf"
     out = Tuple{PopRow,K.Mesh,Vector{Int},Vector{Int}}[]
@@ -110,10 +107,9 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; timeout_s = 600; shard = 0; nshards = 1
-    outdir = joinpath(REPO, "results", "kill", "native200_julia")
+    outdir = joinpath(REPO, "results", "kill", "native200")
     sigmadir = ""
-    cli = joinpath(CPP_REPO, "baseline", "native", "build_fixed", "tuttekiri_cli")
-    isfile(cli) || (cli = joinpath(REPO, "baseline", "native", "build_fixed", "tuttekiri_cli"))
+    cli = joinpath(REPO, "baseline", "native", "build_fixed", "tuttekiri_cli")   # F24-patched build, baseline/README.md
     work = "/tmp/kiri_native200"
     logdir = ""
     cells_file = ""; csv_override = ""; tag = "orig"; listcells = ""
@@ -243,12 +239,12 @@ function main(args::Vector{String})
             r, _, _ = process_cell(id, kind_of[id], m0, sp, variant, cli, work, timeout_s, logdir)
             write_row(csv, r, tag)
             println(stderr, "[native200] ", tag, " cell ", ncell, "/", length(want), " id ", id, " ",
-                    variant, " F=", r.F, " -> ", r.status, " (", cpp_g(r.secs), " s), wall ",
-                    cpp_g(s(wall)), " s")
+                    variant, " F=", r.F, " -> ", r.status, " (", fmt_g(r.secs), " s), wall ",
+                    fmt_g(s(wall)), " s")
         end
         close(csv)
         open(csv_path * ".done", "w") do sm
-            print(sm, "wall ", cpp_g(s(wall)), " s, cells ", length(want), "\n")
+            print(sm, "wall ", fmt_g(s(wall)), " s, cells ", length(want), "\n")
         end
         return 0
     end
@@ -270,11 +266,11 @@ function main(args::Vector{String})
         r, _, _ = process_cell(c.id, c.kind, m0, sp, c.variant, cli, work, timeout_s, logdir)
         write_row(csv, r, tag)
         println(stderr, "[native200] shard ", shard, " id ", c.id, " ", c.variant, " -> ", r.status,
-                ", wall ", cpp_g(s(wall)), " s")
+                ", wall ", fmt_g(s(wall)), " s")
     end
     close(csv)
     open(joinpath(outdir, "shard_" * string(shard) * "_done.txt"), "w") do sm
-        print(sm, "wall ", cpp_g(s(wall)), " s\n")
+        print(sm, "wall ", fmt_g(s(wall)), " s\n")
     end
     return 0
 end

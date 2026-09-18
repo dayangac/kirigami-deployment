@@ -1,5 +1,4 @@
 # WP2b -- is the K9c failure set a solver basin or a geometric obstruction?
-# Port of code/apps/kill_basin.cpp.
 #
 # results/yield/YIELD.md (WP2) could not predict the 93 K9c failures from input-side
 # features (best held-out AUC 0.739) and left open the referee's question: "did you just
@@ -13,9 +12,9 @@
 #
 # Per design, method::design_range_max is run at the K9c run defaults with EIGHT new
 # seeds, seed = 9300 + 7*id + which + 1000*k for k = 1..8. The graph, sigma_mc, sigma_def
-# and X_ini are regenerated exactly as apps/kill_k9c.cpp and apps/kill_yield.cpp produce
+# and X_ini are regenerated exactly as apps/kill_k9c.jl and apps/kill_yield.jl produce
 # them: make_graph(id, 100, 800, 1400), sigma_mc = mesh.sigma, sigma_def read from
-# results/kill/k5/sigma, X_ini = mesh.X. The archived run's own answer is copied straight
+# results/kill/k5/sigma, X_ini = mesh.X. The K9c run's own answer is copied straight
 # out of k9c.csv and emitted as k = 0, so the nine seeds sit in one file and the k = 0 row
 # is never a recomputation.
 #
@@ -30,13 +29,12 @@
 # The graph and sigma_def come from the frozen data/corpus/native200.json (the archived
 # K5 sigma_def; `--sigma DIR` reads the archived files instead), `--regenerate` rebuilds
 # the graph through make_graph. The design list is read from this repo's migrated
-# results/kill/k9c/k9c.csv. Outputs go to results/yield_julia/ (the C++ wrote
-# results/yield/).
+# results/kill/k9c/k9c.csv. Outputs go to results/yield/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
-# K9c's referee at a caller-chosen shrink (apps/kill_k9c.cpp `referee_theta`, verbatim).
+# K9c's referee at a caller-chosen shrink (apps/kill_k9c.jl `referee_theta`, verbatim).
 function referee_theta_shrink(c::K.CutStructure, X::Vector{Vec2}, shrink::Float64,
                               grid::Int = 4000, iters::Int = 50)
     col(th) = K.has_collision(c, K.deploy(c, X, th).Y, shrink)
@@ -59,7 +57,7 @@ function referee_theta_shrink(c::K.CutStructure, X::Vector{Vec2}, shrink::Float6
 end
 
 # `std::setprecision(12) << v`.
-num(v::Real) = isfinite(v) ? @sprintf("%.12g", Float64(v)) : _cpp_nonfinite(Float64(v))
+num(v::Real) = isfinite(v) ? @sprintf("%.12g", Float64(v)) : _fmt_nonfinite(Float64(v))
 
 # `std::getline(ss, x, ',')` over a line: a trailing empty field is dropped.
 function split_csv(line::AbstractString)
@@ -100,7 +98,7 @@ function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     k9c_csv = joinpath(REPO, "results", "kill", "k9c", "k9c.csv")
     sigmadir = ""
-    outdir = joinpath(REPO, "results", "yield_julia")
+    outdir = joinpath(REPO, "results", "yield")
     shard = 0; nshards = 1; nseeds = 8; limit = -1
     i = 1
     while i <= length(args)
@@ -197,7 +195,7 @@ function main(args::Vector{String})
     pop = load_population("native200")
 
     for (di, d) in enumerate(designs)
-        di0 = di - 1   # the C++ 0-based design index the shards are dealt by
+        di0 = di - 1   # 0-based design index the shards are dealt by
         (nshards > 1 && di0 % nshards != shard) && continue
         (limit >= 0 && done >= limit) && break
 
@@ -279,13 +277,13 @@ function main(args::Vector{String})
                     num(r12), num(r9), num(s(t)))
 
             println("id ", d.id, " ", d.sigma_name, " (", d.cls, ") k=", k, " F=", K.n_faces(m),
-                    " theta=", cpp_g(ch.theta_max), " eps=", cpp_g(ch.eps_max), " src=", r.provenance,
-                    " [", cpp_g(s(t)), " s, wall ", cpp_g(s(wall)), "]")
+                    " theta=", fmt_g(ch.theta_max), " eps=", fmt_g(ch.eps_max), " src=", r.provenance,
+                    " [", fmt_g(s(t)), " s, wall ", fmt_g(s(wall)), "]")
             flush(stdout)
         end
     end
     close(csv)
-    println("wrote ", csv_path, ": ", rows, " rows from ", done, " designs in ", cpp_g(s(wall)), " s")
+    println("wrote ", csv_path, ": ", rows, " rows from ", done, " designs in ", fmt_g(s(wall)), " s")
     return 0
 end
 

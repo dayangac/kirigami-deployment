@@ -1,7 +1,6 @@
 # K8a -- the expansive-cone LP (ideas/ranking_r2.md Sec. 4, `kill_k8a`; A1 of
 # ideas/round2_adversary.md; screened PARTIAL in notes/screen_r2.md against
 # Rote-Santos-Streinu 2003, whose expansion cone is the classical antecedent).
-# Port of code/apps/kill_k8a.cpp.
 #
 # QUESTION. F25/F30 measured that on 200 random planar graphs the UNIFORM deployment
 # has Theta_max = 0, because split-cut duplicates and vertex copies move inward at
@@ -43,7 +42,7 @@
 # Population: the K1a graphs (frozen k1a_200, ids < n; `--regenerate` rebuilds them with
 # make_graph). The deployable population here is the frozen (2, 0.2) variant
 # (data/corpus/deployable_population_2_0.2.json; `--regenerate` rebuilds it). Outputs go to
-# results/kill/k8a_julia/ (the C++ wrote results/kill/k8a/).
+# results/kill/k8a/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -90,7 +89,7 @@ function write_row(o::IO, r::Row)
           r.n_active, ",",
           r.n_dual_support, ",", sci(r.sigma_resid), ",", r.sigma_is_flex, ",",
           sci(r.sigma_min_q), ",", sci(r.sigma_min_mu), ",", r.sigma_bad_q, ",",
-          r.sigma_bad_mu, ",", r.sigma_in_cone, ",", cpp_g(r.euler_eps), ",",
+          r.sigma_bad_mu, ",", r.sigma_in_cone, ",", fmt_g(r.euler_eps), ",",
           r.euler_tested, ",", sci(r.sigma_chart), ",", r.sigma_span, ",",
           sci(r.farkas_resid), ",", sci(r.farkas_lmin), ",", sci(r.farkas_sumerr),
           ",", r.cert_1e9, ",", r.cert_1e6, ",", sci(r.lp_gap), ",",
@@ -161,7 +160,7 @@ function main(args::Vector{String})
     do_x0 = false; refs_only = false; do_deployable = true
     dual_iters = 600
     limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k8a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k8a")
     cache = joinpath(REPO, "results", "kill", "cache")
     i = 1
     while i <= length(args)
@@ -216,7 +215,7 @@ function main(args::Vector{String})
             println("  ref ", rc.name, ": F=", r.F, " split=", r.n_split,
                     " dim_flex=", r.dim_flex, " sigma_in_cone=", r.sigma_in_cone,
                     " (min q ", sci(r.sigma_min_q), ", min mu ", sci(r.sigma_min_mu),
-                    ") LP margin ", sci(r.margin_l2), " [", cpp_g(r.secs), " s]")
+                    ") LP margin ", sci(r.margin_l2), " [", fmt_g(r.secs), " s]")
         end
     end
 
@@ -294,7 +293,7 @@ function main(args::Vector{String})
             end
             println("  ", r.id, " F=", r.F, " rows=", r.n_rows,
                     " dim_flex=", r.dim_flex, " margin=", sci(r.margin_l2),
-                    " dual=", sci(r.dual_bound), " eps=", cpp_g(r.euler_eps), " [",
+                    " dual=", sci(r.dual_bound), " eps=", fmt_g(r.euler_eps), " [",
                     fx(r.secs, 1), " s]")
         end
     end

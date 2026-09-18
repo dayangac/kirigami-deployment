@@ -1,4 +1,4 @@
-# WP7a -- the PAPER-REGIME population. Port of code/apps/kill_regime.cpp.
+# WP7a -- the PAPER-REGIME population.
 #
 # REPORT.md's objection 2: every worked example in the 2026 paper has F in [4, 97], while
 # the population K1a/K5/K6/K9/K9b/K9c/Native200 all share has median |F| = 332.5 and
@@ -11,7 +11,7 @@
 #
 # Two orientation rules per graph -- sigma_mc = Eq. (1) max-cut (what make_graph already
 # puts in mesh.sigma) and sigma_def = K5's defect-minimising search (method::
-# orientation_defect at kill_k5.cpp's cap of 20 |F| attempts, seed 7000 + id) -- so 200
+# orientation_defect at kill_k5.jl's cap of 20 |F| attempts, seed 7000 + id) -- so 200
 # designs, and FOUR arms per design:
 #
 #   baseline    method::design_baseline           -- Eq. (6) alone, t = 0
@@ -25,7 +25,7 @@
 # eps the repaired POS /\ NOOVERLAP(eps/2) /\ NOROOT(eps) certificate admits), plus the
 # independent bisection referee at shrink 1e-12 (characterize's own) and at 1e-9 (the
 # shrink K9c's headline "refereed" counts use). The native arms are RUN exactly as
-# apps/kill_native200.cpp runs them -- the shared code path is native_common.jl, which
+# apps/kill_native200.jl runs them -- the shared code path is native_common.jl, which
 # that driver also uses -- and Native200's own eps = 0.3 certificate and
 # theta_max_with_collisions columns are kept alongside so the two runs compare cell for
 # cell.
@@ -45,17 +45,17 @@
 #         [--id-lo 2000] [--id-hi 2099] [--minf 20] [--maxf 100] [--limit K] [--regenerate]
 #
 # Population from the frozen data/corpus/regime_100.json, whose sigma_def IS the
-# orientation_defect(m0, sigma_mc, 20 F, 7000 + id) result this driver recomputed in C++
-# (README: "recomputed exactly as kill_regime.cpp does"); `--regenerate` rebuilds both the
-# graph (make_graph) and sigma_def (orientation_defect) instead. Outputs go to
-# results/regime_julia/ by default (the C++ wrote results/regime/). `--limit K` stops
+# orientation_defect(m0, sigma_mc, 20 F, 7000 + id) result this driver recomputes
+# (data/corpus/README.md: "recomputed exactly as kill_regime.jl does"); `--regenerate`
+# rebuilds both the graph (make_graph) and sigma_def (orientation_defect) instead. Outputs
+# go to results/regime/ by default. `--limit K`
+# stops
 # after K graphs of the shard (pop / native modes).
 include(joinpath(@__DIR__, "native_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
-const CPP_REPO = expanduser("~/Documents/kirigami-experiments")   # PORTING.md: the reference repo
 
-# K9c's referee at a caller-chosen shrink (apps/kill_k9c.cpp, verbatim). 1e-9 is the
+# K9c's referee at a caller-chosen shrink (apps/kill_k9c.jl, verbatim). 1e-9 is the
 # shrink K9c's headline "refereed" counts use; characterize's own referee runs at 1e-12.
 function referee_theta_shrink(c::K.CutStructure, X::Vector{Vec2}, shrink::Float64,
                               grid::Int = 4000, iters::Int = 50)
@@ -79,7 +79,7 @@ function referee_theta_shrink(c::K.CutStructure, X::Vector{Vec2}, shrink::Float6
 end
 
 # `std::setprecision(12) << v`.
-num(v::Real) = isfinite(v) ? @sprintf("%.12g", Float64(v)) : _cpp_nonfinite(Float64(v))
+num(v::Real) = isfinite(v) ? @sprintf("%.12g", Float64(v)) : _fmt_nonfinite(Float64(v))
 
 # One arm's answer, as it goes into the CSV.
 Base.@kwdef mutable struct Arm
@@ -97,8 +97,8 @@ end
 core(a::Arm) = a.status * "," * num(a.theta) * "," * num(a.eps) * "," * (a.certified ? "1" : "0") *
                "," * num(a.ref12) * "," * num(a.ref9) * "," * a.binding * "," * num(a.secs)
 
-# A fresh mesh with `sigma` and its topology (the C++ `Mesh m = m0; m.sigma = sigma;
-# m.build_topology();` -- a fresh object so m0's topology arrays are never rebuilt in place).
+# A fresh mesh with `sigma` and its topology (a fresh object so m0's topology arrays are
+# never rebuilt in place).
 function with_sigma(m0::K.Mesh, sigma::Vector{Int})
     m = K.Mesh(m0.X, m0.faces)
     m.sigma = copy(sigma)
@@ -176,10 +176,10 @@ function run_design(csv::IO, set_name::AbstractString, id::Int, kind::AbstractSt
           ",", core(nat_col), ",", nat_col.cert03, ",", num(nat_col.native_theta), "\n")
     flush(csv)
     println(set_name, " ", id, " ", kind, " ", sigma_name, " F=", K.n_faces(m), " k=", dim_null,
-            " | base th=", cpp_g(base.theta), " | k9c th=", cpp_g(k9c.theta), " eps=",
-            cpp_g(k9c.eps), " (", k9c.extra, ")", " | natour ", nat_our.status, " th=",
-            cpp_g(nat_our.theta), " | natcol ", nat_col.status, " th=", cpp_g(nat_col.theta),
-            " [", cpp_g(base.secs + k9c.secs), " s]")
+            " | base th=", fmt_g(base.theta), " | k9c th=", fmt_g(k9c.theta), " eps=",
+            fmt_g(k9c.eps), " (", k9c.extra, ")", " | natour ", nat_our.status, " th=",
+            fmt_g(nat_our.theta), " | natcol ", nat_col.status, " th=", fmt_g(nat_col.theta),
+            " [", fmt_g(base.secs + k9c.secs), " s]")
     flush(stdout)
     return nothing
 end
@@ -386,8 +386,8 @@ function regime_sigma_def(id::Int, m0::K.Mesh, sigma_mc::Vector{Int},
                           frozen::Union{Vector{Int},Nothing})
     (frozen !== nothing && length(frozen) == K.n_faces(m0)) && return frozen
     # K5's defect-minimising sigma, recomputed here (this population has no archived
-    # results/kill/k5/sigma directory): kill_k5.cpp's cap of 20 |F| attempts, seed
-    # 7000 + id, exactly the promotion documented in method/design.hpp.
+    # results/kill/k5/sigma directory): kill_k5.jl's cap of 20 |F| attempts, seed
+    # 7000 + id, exactly the promotion documented in method/design.jl.
     dor = K.orientation_defect(m0, sigma_mc, 20 * K.n_faces(m0), 7000 + id)
     def_ok = dor.ok && length(dor.sigma) == K.n_faces(m0)
     return def_ok ? dor.sigma : sigma_mc
@@ -396,9 +396,8 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     mode = "pop"
-    outdir = joinpath(REPO, "results", "regime_julia")
-    cli = joinpath(CPP_REPO, "baseline", "native", "build_fixed", "tuttekiri_cli")
-    isfile(cli) || (cli = joinpath(REPO, "baseline", "native", "build_fixed", "tuttekiri_cli"))
+    outdir = joinpath(REPO, "results", "regime")
+    cli = joinpath(REPO, "baseline", "native", "build_fixed", "tuttekiri_cli")   # F24-patched build, baseline/README.md
     work = "/tmp/kiri_regime"
     logdir = ""
     patdir = joinpath(REPO, "baseline", "kirigami_tessellations")
@@ -481,12 +480,12 @@ function main(args::Vector{String})
                 base = fl[1] * "|" * fl[2] * "|"
                 io_ = get(ncell, base * fl[4], nothing)
                 if io_ !== nothing
-                    fl[26:35] = io_   # the C++ fl[25 + k], k = 0..9
+                    fl[26:35] = io_   # 0-based columns 25 + k, k = 0..9
                     patched_our += 1
                 end
                 ic = get(ncell, base * "native_col", nothing)
                 if ic !== nothing
-                    fl[36:45] = ic    # the C++ fl[35 + k]
+                    fl[36:45] = ic    # 0-based columns 35 + k
                     patched_col += 1
                 end
                 print(out, join(fl, ","), "\n")
@@ -508,7 +507,7 @@ function main(args::Vector{String})
               num(a.native_theta), "\n")
         flush(o)
         println("[native] ", set_name, " ", id, " ", cellname, " -> ", a.status, " theta=",
-                cpp_g(a.theta), " (", cpp_g(a.secs), " s)")
+                fmt_g(a.theta), " (", fmt_g(a.secs), " s)")
         flush(stdout)
     end
 
@@ -520,7 +519,7 @@ function main(args::Vector{String})
         print(csv, nat_pass ? kNativeHeader : kHeader, "\n")
         flush(csv)
         cs = reference_cases(; regenerate = regenerate)
-        idx = 0   # 0-based, as the C++ counts the cases
+        idx = 0   # 0-based case index (the CSV numbering)
         for rc in cs
             m0 = K.Mesh(rc.mesh.X, rc.mesh.faces)
             m0.sigma = copy(rc.mesh.sigma)
@@ -543,14 +542,14 @@ function main(args::Vector{String})
         end
         close(csv)
         open(joinpath(outdir, mode * "_done.txt"), "w") do o
-            print(o, mode, " done, wall ", cpp_g(s(wall)), " s\n")
+            print(o, mode, " done, wall ", fmt_g(s(wall)), " s\n")
         end
         return 0
     end
 
     # ---- the 2025 paper's own patterns -----------------------------------------
     # baseline/kirigami_tessellations ships two kinds of "pattern file". The 16 JSONs under
-    # code/data/patterns are NOT geometry: each is a list of parallel-line GROUPS plus a
+    # its code/data/patterns are NOT geometry: each is a list of parallel-line GROUPS plus a
     # gridType/gridSize, i.e. the input to the 2025 web demo's "cut tiling into kirigami"
     # step, and turning one into a planar graph means reimplementing that step, not
     # importing a file. The five SVGs under fabrication_patterns ARE polygon soup -- every
@@ -626,7 +625,7 @@ function main(args::Vector{String})
         end
         close(csv); close(ld)
         open(joinpath(outdir, mode * "_done.txt"), "w") do o
-            print(o, mode, " done, wall ", cpp_g(s(wall)), " s\n")
+            print(o, mode, " done, wall ", fmt_g(s(wall)), " s\n")
         end
         return 0
     end
@@ -695,9 +694,9 @@ function main(args::Vector{String})
     close(csv)
     fdist === nothing || close(fdist)
     open(joinpath(outdir, (nat_pass ? "native_shard_" : "shard_") * string(shard) * "_done.txt"), "w") do o
-        print(o, "wall ", cpp_g(s(wall)), " s\n")
+        print(o, "wall ", fmt_g(s(wall)), " s\n")
     end
-    println(stderr, mode, " shard ", shard, " done in ", cpp_g(s(wall)), " s -> ", csv_path)
+    println(stderr, mode, " shard ", shard, " done in ", fmt_g(s(wall)), " s -> ", csv_path)
     return 0
 end
 

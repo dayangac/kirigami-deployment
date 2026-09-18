@@ -1,6 +1,5 @@
 # K1c -- the false-negative rate of 2026 Eq. (9) (ideas/ranking.md Sec. 4, K1c).
-# Port of code/apps/kill_k1c.cpp; the CORRECTION recorded there (derivations/core.md T5.3)
-# applies verbatim: a root of the separation harmonic is a re-closure only if r > 0,
+# The CORRECTION of derivations/core.md T5.3 applies verbatim: a root of the separation harmonic is a re-closure only if r > 0,
 # p < 0, theta* = 2 arctan(-r/p) is in range, the INTERVAL clause E2 holds at theta*
 # and the CROSSING clause holds (the faces' interiors overlap just after theta*).
 # The closed forms of T5.2 (p = -sigma_f det(d, du), q = -p, r = <d, du>) are
@@ -14,7 +13,6 @@
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
-const CPP_REPO = expanduser("~/Documents/kirigami-experiments")   # PORTING.md: the reference repo
 
 function referee_theta(c::K.CutStructure, X::Vector{Vec2}, grid::Int = 4000, iters::Int = 50)
     col(th) = K.has_collision(c, K.deploy(c, X, th).Y, 1e-12)
@@ -148,9 +146,9 @@ Tally() = Tally(0, 0, 0, 0, 0)
 
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
-    outdir = joinpath(REPO, "results", "kill", "k1c_julia")
-    cli = joinpath(CPP_REPO, "baseline", "native", "build", "tuttekiri_cli")
-    work = "/tmp/kiri_k1c_julia"
+    outdir = joinpath(REPO, "results", "kill", "k1c")
+    cli = joinpath(REPO, "baseline", "native", "build", "tuttekiri_cli")   # built per baseline/README.md
+    work = "/tmp/kiri_k1c"
     use_native = true; limit = typemax(Int)
     i = 1
     while i <= length(args)
@@ -181,10 +179,10 @@ function main(args::Vector{String})
         mb = isempty(beta) ? 0.0 : minimum(beta)
         s = scan_split_edges(m, c, Y9, th9, mb)
         print(csv, name, ",", fam, ",", K.n_vertices(m), ",", K.n_faces(m), ",",
-              K.n_split(c), ",", k, ",", src, ",", cpp_b(ok), ",", cpp_g(th9), ",", cpp_g(mb),
+              K.n_split(c), ",", k, ",", src, ",", fmt_b(ok), ",", fmt_g(th9), ",", fmt_g(mb),
               ",", s.n_degenerate, ",", s.n_r_pos, ",", s.n_root, ",", s.n_interval, ",", s.n_crossing,
               ",", s.n_corr_tmax, ",", s.n_below_beta, ",", s.n_binding, ",", s.n_naive, ",",
-              cpp_g(s.first_theta), ",", cpp_g(s.worst_pq), ",", cpp_g(s.worst_closed), ",", cpp_g(s.worst_bisect), "\n")
+              fmt_g(s.first_theta), ",", fmt_g(s.worst_pq), ",", fmt_g(s.worst_closed), ",", fmt_g(s.worst_bisect), "\n")
         flush(csv)
         worst_pq = max(worst_pq, s.worst_pq)
         worst_closed = max(worst_closed, s.worst_closed)

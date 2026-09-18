@@ -1,5 +1,5 @@
 # K1a -- is the baseline really invalid, and is the shape space really usable?
-# (ideas/ranking.md Sec. 4, K1a.)  Port of code/apps/kill_k1a.cpp.
+# (ideas/ranking.md Sec. 4, K1a.)
 #
 # PASS rule, copied from ranking.md:
 #   "PASS-algorithm if n_inv(X0) > 0 on >= 150/200 graphs and p_valid > 0 on >= 20
@@ -17,9 +17,8 @@
 #   julia --project=Kirigami Kirigami/apps/kill_k1a.jl [--n 200] [--samples 10000]
 #         [--out DIR] [--cache DIR] [--limit K] [--regenerate]
 #
-# Outputs go to results/kill/k1a_julia/ by default (the C++ wrote results/kill/k1a/), and
-# the shape cache is shared with the C++ layout, so `--cache <C++ cache>` reproduces the
-# C++ samples exactly (same X0, same Phi).
+# Outputs go to results/kill/k1a/ by default; `--cache <dir>` reuses a shape cache (same
+# X0, same Phi, hence the same samples).
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -42,7 +41,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; n_samples = 10000; batch = 250; n_theta = 25; limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k1a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k1a")
     cache = joinpath(REPO, "results", "kill", "cache")
     i = 1
     while i <= length(args)
@@ -62,7 +61,7 @@ function main(args::Vector{String})
           "xini_injective,sigma_cal,n_samples,n_valid,p_valid,min_n_inv,x0_injective,n_inj_tested,n_injective,",
           "theta_max_X0,theta_max_best,n_theta_tried")
     for r in radii
-        print(csv, ",p_valid_r", cpp_g(r))
+        print(csv, ",p_valid_r", fmt_g(r))
     end
     print(csv, ",secs\n")
     wall = Timer()
@@ -105,7 +104,7 @@ function main(args::Vector{String})
         if k > 0
             pilot = 120
             T = Matrix{Float64}(undef, k, 2 * pilot)
-            for i in eachindex(T)   # column-major, as Eigen's data() order
+            for i in eachindex(T)   # column-major draw order
                 T[i] = K.normal(G, rng)
             end
             D = sh.Phi * T
@@ -183,14 +182,14 @@ function main(args::Vector{String})
         end
         print(csv, id, ",", kind, ",", N, ",", F, ",", K.n_interior_vertices(m), ",",
               K.n_split(c), ",", K.n_interior_holes(hs), ",", k, ",", n_inv_ini, ",",
-              n_inv_X0, ",", cpp_g(n_inv_X0 / F), ",", cpp_g(max_move), ",", cpp_b(xini_inj), ",", cpp_g(s_cal), ",",
-              n_samples, ",", n_valid, ",", cpp_g(p_valid), ",",
-              (min_inv == (1 << 30) ? -1 : min_inv), ",", cpp_b(x0_inj), ",", n_inj_tested,
-              ",", n_injective, ",", cpp_g(tm0), ",", cpp_g(tmb), ",", length(valid_samples))
+              n_inv_X0, ",", fmt_g(n_inv_X0 / F), ",", fmt_g(max_move), ",", fmt_b(xini_inj), ",", fmt_g(s_cal), ",",
+              n_samples, ",", n_valid, ",", fmt_g(p_valid), ",",
+              (min_inv == (1 << 30) ? -1 : min_inv), ",", fmt_b(x0_inj), ",", n_inj_tested,
+              ",", n_injective, ",", fmt_g(tm0), ",", fmt_g(tmb), ",", length(valid_samples))
         for v in pr
-            print(csv, ",", cpp_g(v))
+            print(csv, ",", fmt_g(v))
         end
-        print(csv, ",", cpp_g(s(t)), "\n")
+        print(csv, ",", fmt_g(s(t)), "\n")
         flush(csv)
         acc.graphs[] += 1
         acc.xini_invalid[] += (n_inv_ini > 0)
@@ -210,7 +209,7 @@ function main(args::Vector{String})
         (tm0 > 0 && tmb > 0) && push!(gains, tmb / tm0)
         if acc.graphs[] % 10 == 0
             println("  ", acc.graphs[], " graphs, X0 invalid ", acc.x0_invalid[], ", p_valid>0 ",
-                    acc.pvalid_pos[], ", ", cpp_g(s(wall)), " s")
+                    acc.pvalid_pos[], ", ", fmt_g(s(wall)), " s")
         end
     end
 

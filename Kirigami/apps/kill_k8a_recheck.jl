@@ -1,6 +1,5 @@
 # K8a RECHECK -- is the expansive-cone LP's negative answer a property of the cone, or
 # of the solver?  (results/kill/k8a/recheck.md; KILL_REPORT section K8a, "Recheck".)
-# Port of code/apps/kill_k8a_recheck.cpp.
 #
 # THE CONTRADICTION THIS RESOLVES. K9 (F36) ran K8a's `cone_lp` at its 30 convexity +
 # split-inward constrained embeddings and got 0 feasible, with dual bounds 2e-2 to 5e-2 --
@@ -35,9 +34,8 @@
 #
 # Population: the K1a graphs (frozen k1a_200 with its archived K5 `sigma_def`; `--sigma DIR`
 # reads results/kill/k5/sigma/<kind>_<id>.json instead, `--regenerate` rebuilds the graphs
-# with make_graph). The shape cache is the C++ layout (results/kill/k6/cache/<sigma>/),
-# so `--cache <C++ cache>` reuses the C++ X0 / Phi. Outputs go to results/kill/k8a_julia/
-# (the C++ wrote results/kill/k8a/).
+# with make_graph). The shape cache is results/kill/k6/cache/<sigma>/, so `--cache`
+# reuses K6's X0 / Phi. Outputs go to results/kill/k8a/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -130,7 +128,7 @@ function main(args::Vector{String})
     dual_iters = 20000; cone_maxf = 800
     shard = 0; nshards = 1
     limit = typemax(Int)
-    outdir = joinpath(REPO, "results", "kill", "k8a_julia")
+    outdir = joinpath(REPO, "results", "kill", "k8a")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     i = 1

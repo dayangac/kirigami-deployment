@@ -1,4 +1,4 @@
-# K9c -- the RANGE-MAXIMISING constrained embedding. Port of code/apps/kill_k9c.cpp.
+# K9c -- the RANGE-MAXIMISING constrained embedding.
 #
 # K9 and K9b both solve the same feasibility problem inside the Eq. (6) null space (every
 # face corner convex, every split cut opening outward) and then pick the point inside that
@@ -39,9 +39,8 @@
 #         [--budget 120] [--shard S] [--nshards M] [--no-stage-b] [--deterministic]
 #         [--no-gallery] [--aggregate] [--limit K] [--regenerate]
 #
-# Population as kill_k9.jl. Outputs go to results/kill/k9c_julia/ (the C++ wrote
-# results/kill/k9c/); `--aggregate` also reads results/kill/k9/k9.csv and
-# results/kill/k9b/k9b.csv of this repo for the cross-check, like the C++.
+# Population as kill_k9.jl. Outputs go to results/kill/k9c/; `--aggregate` also reads
+# results/kill/k9/k9.csv and results/kill/k9b/k9b.csv for the cross-check.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -385,7 +384,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800; shard = 0; nshards = 1
-    outdir = joinpath(REPO, "results", "kill", "k9c_julia")
+    outdir = joinpath(REPO, "results", "kill", "k9c")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     max_iter = 600; stages = 8; iter_per_stage = 200
@@ -606,7 +605,7 @@ function main(args::Vector{String})
             end
 
             secs = s(t)
-            g_ = cpp_g
+            g_ = fmt_g
             print(csv, id, ",", row.kind, ",", fname, ",", K.n_vertices(m), ",",
                   K.n_faces(m), ",", g_(med), ",", K.n_split(c), ",", sh.k, ",",
                   n_corner, ",", nonconvex0, ",",

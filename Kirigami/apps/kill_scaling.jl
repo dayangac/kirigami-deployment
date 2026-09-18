@@ -1,4 +1,4 @@
-# WP7b -- the SCALING BENCHMARK. Port of code/apps/kill_scaling.cpp.
+# WP7b -- the SCALING BENCHMARK.
 #
 # MISSION.md Sec. 3 asked for 100-5,000 faces; nothing in this project above |F| = 800 has
 # ever been run, so REPORT.md's objection 4 ("how does the exact range, the certificate
@@ -38,7 +38,7 @@
 #
 # The graph comes from the frozen data/corpus/scaling_42.json (the (kind, sites, seed)
 # cell, sigma_mc included); `--regenerate` rebuilds it through `build_graph` instead.
-# Outputs go to results/scaling_julia/ by default (the C++ wrote results/scaling/).
+# Outputs go to results/scaling/ by default.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -79,7 +79,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     kind = "delaunay"; stage = "solve"
-    outdir = joinpath(REPO, "results", "scaling_julia")
+    outdir = joinpath(REPO, "results", "scaling")
     csv_path = ""
     sites = 100; seed = 0
     i = 1
@@ -135,7 +135,7 @@ function main(args::Vector{String})
     if stage == "graph"
         row("generate", gen_s, peak_rss_mb(), load1(), -1, -1, -1, 0, 0, "ok", "-")
         println(tag, " N=", K.n_vertices(m), " F=", K.n_faces(m), " split=", K.n_split(c),
-                " hinge=", K.n_hinge(c), " gen ", cpp_g(gen_s), " s")
+                " hinge=", K.n_hinge(c), " gen ", fmt_g(gen_s), " s")
         return 0
     end
 
@@ -153,8 +153,8 @@ function main(args::Vector{String})
         end
         row("solve_dense", secs, peak_rss_mb(), l0, sr.rank_L, sr.dim_null, -1, 0, 0,
             sr.projection_ok ? "ok" : "projection_failed", "assemble+dense_svd")
-        println(tag, " solve_dense ", cpp_g(secs), " s, rank ", sr.rank_L, ", k ", sr.dim_null,
-                ", rss ", cpp_g(peak_rss_mb()), " MB")
+        println(tag, " solve_dense ", fmt_g(secs), " s, rank ", sr.rank_L, ", k ", sr.dim_null,
+                ", rss ", fmt_g(peak_rss_mb()), " MB")
         return 0
     end
 
@@ -166,7 +166,7 @@ function main(args::Vector{String})
         secs = s(t)
         row("rank_sparse", secs, peak_rss_mb(), l0, sr.rank_L, sr.dim_null, -1, 0, 0, "ok",
             "rank_only;no_null_space_basis")
-        println(tag, " rank_sparse ", cpp_g(secs), " s, rank ", sr.rank_L)
+        println(tag, " rank_sparse ", fmt_g(secs), " s, rank ", sr.rank_L)
         return 0
     end
 
@@ -186,8 +186,8 @@ function main(args::Vector{String})
         secs = s(t)
         row("characterize", secs, peak_rss_mb(), l0, sh.rank_L, sh.k, ch.n_pairs, ch.theta_max,
             ch.eps_max, "ok", "at_eq6_point;" * ch.binding)
-        println(tag, " characterize ", cpp_g(secs), " s, pairs ", ch.n_pairs, ", theta ",
-                cpp_g(ch.theta_max))
+        println(tag, " characterize ", fmt_g(secs), " s, pairs ", ch.n_pairs, ", theta ",
+                fmt_g(ch.theta_max))
         return 0
     end
 
@@ -201,7 +201,7 @@ function main(args::Vector{String})
         row("design_range_max", secs, peak_rss_mb(), l0, -1, r.design.dim_null, -1,
             r.design.ch.theta_max, r.design.ch.eps_max, r.design.ok ? "ok" : r.design.status,
             "includes_own_solve;" * (isempty(r.provenance) ? "-" : r.provenance))
-        println(tag, " design_range_max ", cpp_g(secs), " s, theta ", cpp_g(r.design.ch.theta_max),
+        println(tag, " design_range_max ", fmt_g(secs), " s, theta ", fmt_g(r.design.ch.theta_max),
                 " (", r.provenance, ")")
         return 0
     end

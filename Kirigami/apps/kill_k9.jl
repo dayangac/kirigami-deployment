@@ -1,5 +1,4 @@
 # K9 -- convexity-constrained embedding in the Tutte auxetic null space.
-# Port of code/apps/kill_k9.cpp.
 #
 # THE HYPOTHESIS (ESCALATION.md option 2). Every kill experiment so far dies on the same
 # 0+ contact, and T-1 localised it: 1,966 of the 1,968 balanced pure vertices whose 0+
@@ -43,8 +42,8 @@
 #
 # Population: the K1a graphs (frozen k1a_200 with the archived K5 `sigma_def`; `--sigma DIR`
 # reads results/kill/k5/sigma/<kind>_<id>.json instead, `--regenerate` rebuilds the graphs).
-# The shape cache is the C++ layout (results/kill/k6/cache/<sigma>/). Outputs go to
-# results/kill/k9_julia/ (the C++ wrote results/kill/k9/).
+# The shape cache is results/kill/k6/cache/<sigma>/.
+# Outputs go to results/kill/k9/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -387,9 +386,9 @@ function aggregate(outdir::String, delta_rel::Float64, split_delta_rel::Float64,
     print(o, "K9 -- convexity-constrained embedding in the Tutte auxetic null space\n")
     print(o, "population: ", length(seen_graph), " graphs (K6's), ", designs,
           " designs (2 sigma), merged from ", length(files), " shards\n")
-    print(o, "delta = ", cpp_g(delta_rel), " * med^2, split delta' = ", cpp_g(split_delta_rel),
+    print(o, "delta = ", fmt_g(delta_rel), " * med^2, split delta' = ", fmt_g(split_delta_rel),
           " * med^2, starts ", n_random, " + t=0, L-BFGS iters ", max_iter,
-          ", barrier stages ", barrier_stages, ", eps = ", cpp_g(eps), "\n")
+          ", barrier stages ", barrier_stages, ", eps = ", fmt_g(eps), "\n")
     print(o, "non-convex corners at X0: ", tot_nonconvex0, " / ", tot_corner, " (",
           fx(100.0 * tot_nonconvex0 / max(1, tot_corner), 2), " %)\n")
     print(o, "split-only repair (K6's secondary objective, the (b) fallback start) feasible on ",
@@ -429,7 +428,7 @@ function main(args::Vector{String})
     n = 200; maxf = 800; max_iter = 600; n_random = 3
     eps = 0.3; delta_rel = 1e-3; split_delta_rel = 1e-3
     barrier_stages = 6
-    outdir = joinpath(REPO, "results", "kill", "k9_julia")
+    outdir = joinpath(REPO, "results", "kill", "k9")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     shard = 0; nshards = 1; cone_maxf = 800
@@ -617,7 +616,7 @@ function main(args::Vector{String})
             accumulate!(get!(VariantStats, stat, "b:" * fname), pb)
 
             secs = s(t)
-            g_ = cpp_g
+            g_ = fmt_g
             print(csv, id, ",", row.kind, ",", fname, ",", K.n_vertices(m), ",",
                   K.n_faces(m), ",", g_(med), ",", K.n_split(c), ",", sh.k, ",",
                   2 * sh.k, ",", length(cr0), ",", nonconvex0, ",",
@@ -642,8 +641,8 @@ function main(args::Vector{String})
             flush(csv)
             println("id ", id, " ", fname, " N=", K.n_vertices(m),
                     " k=", sh.k, " nonconvex0=", nonconvex0, "/", length(cr0),
-                    " a_feas=", cpp_b(pa.feasible), " a_theta=", g_(pa.cert.theta_exact),
-                    " b_feas=", cpp_b(pb.feasible), " b_theta=", g_(pb.cert.theta_exact),
+                    " a_feas=", fmt_b(pa.feasible), " a_theta=", g_(pa.cert.theta_exact),
+                    " b_feas=", fmt_b(pb.feasible), " b_theta=", g_(pb.cert.theta_exact),
                     " (", fx(secs, 1), " s)")
         end
     end
@@ -655,9 +654,9 @@ function main(args::Vector{String})
     print(o, "K9 -- convexity-constrained embedding in the Tutte auxetic null space\n")
     print(o, "population: ", graphs, " graphs (K6's), ", designs,
           " designs (2 sigma), missing sigma_def ", missing_sigma, "\n")
-    print(o, "delta = ", cpp_g(delta_rel), " * med^2, split delta' = ", cpp_g(split_delta_rel),
+    print(o, "delta = ", fmt_g(delta_rel), " * med^2, split delta' = ", fmt_g(split_delta_rel),
           " * med^2, starts ", n_random, " + t=0, L-BFGS iters ", max_iter,
-          ", barrier stages ", barrier_stages, ", eps = ", cpp_g(eps), "\n")
+          ", barrier stages ", barrier_stages, ", eps = ", fmt_g(eps), "\n")
     print(o, "non-convex corners at X0: ", tot_nonconvex0, " / ", tot_corner, " (",
           fx(100.0 * tot_nonconvex0 / max(1, tot_corner), 2), " %)\n\n")
     print(o, "split-only repair (K6's secondary objective, the (b) fallback start) feasible on ",

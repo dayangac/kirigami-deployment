@@ -1,4 +1,4 @@
-# T-1 -- the vertex balance defect. Port of code/apps/kill_t1.cpp.
+# T-1 -- the vertex balance defect.
 #
 # The claim under test (ideas/round2_theorist.md Idea 1 / §0.c, "T-1"). At an interior
 # vertex v of the PURE case the barycentric row of Eq. (2) reads
@@ -46,8 +46,8 @@
 #         [--sigma DIR] [--cache DIR] [--mu-tol 1e-12] [--delta-tol 1e-9] [--limit K]
 #         [--regenerate]
 #
-# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def; C++ shape-cache layout).
-# Outputs go to results/kill/t1_julia/ (the C++ wrote results/kill/t1/).
+# Population as kill_k9.jl (frozen k1a_200 + archived sigma_def; shared shape-cache
+# layout). Outputs go to results/kill/t1/.
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -139,7 +139,7 @@ end
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
     n = 200; maxf = 800
-    outdir = joinpath(REPO, "results", "kill", "t1_julia")
+    outdir = joinpath(REPO, "results", "kill", "t1")
     sigmadir = ""
     cache = joinpath(REPO, "results", "kill", "k6", "cache")
     # mu and q are AREAS (a 2x2 determinant of two vectors linear in X), so the zero test
@@ -356,7 +356,7 @@ function main(args::Vector{String})
                     max_pure_delta = max(max_pure_delta, drel)
                 end
                 is_cul = (v == cu || v == cv)
-                # vertex ids are written 0-based, as the C++ did
+                # vertex ids are written 0-based (the CSV convention)
                 print(vcsv, id, ',', row.kind, ',', fname, ',', v - 1, ',',
                       length(m.vertex_edges[v]), ',', k_in[v], ',', n_split_inc[v], ',',
                       touched ? 1 : 0, ',', sci(drel, 6), ',', sci(mrel, 6), ',',
@@ -377,7 +377,7 @@ function main(args::Vector{String})
                 cul_pct = below / length(all_delta)
             end
 
-            # edge id written 0-based (-1 = none), as the C++ did
+            # edge id written 0-based (-1 = none), the CSV convention
             print(gcsv, id, ',', row.kind, ',', fname, ',', N, ',', K.n_faces(m), ',',
                   fx(med, 6), ',', K.n_split(c), ',', n_int, ',', n_pure, ',',
                   n_bad, ',', n_touched, ',', n_touched_bad, ',',
@@ -404,7 +404,7 @@ function main(args::Vector{String})
             end
         end
         (gidx + 1) % 25 == 0 && println(stderr, "  ", gidx + 1, " graphs, ", T.designs,
-                                        " designs, ", cpp_g(s(wall)), " s")
+                                        " designs, ", fmt_g(s(wall)), " s")
     end
     close(vcsv)
     close(gcsv)

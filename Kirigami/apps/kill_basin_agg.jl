@@ -1,5 +1,4 @@
 # WP2b aggregator -- merges the kill_basin shards and derives every number BASIN.md quotes.
-# Port of code/apps/kill_basin_agg.cpp.
 #
 # Kept in its own file so that re-running the analysis never touches the kill_basin
 # driver while its shards are still running. Every statistic is a function of
@@ -19,7 +18,7 @@
 #   julia --project=Kirigami Kirigami/apps/kill_basin_agg.jl [--out DIR] [--mode stats]
 #         [--nshards 3] [--no-merge]
 #
-# Reads and writes under results/yield_julia/ by default (the C++ used results/yield/).
+# Reads and writes under results/yield/ by default.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -32,7 +31,7 @@ function split_csv(line::AbstractString)
 end
 
 # `o << std::setprecision(10) << double`.
-p10(v::Real) = isfinite(v) ? @sprintf("%.10g", Float64(v)) : _cpp_nonfinite(Float64(v))
+p10(v::Real) = isfinite(v) ? @sprintf("%.10g", Float64(v)) : _fmt_nonfinite(Float64(v))
 
 # Type-7 (linear interpolation) quantile, the convention numpy.percentile uses.
 function quantile7(v_in::Vector{Float64}, p::Float64)
@@ -108,7 +107,7 @@ key_of(id::Int, sigma::AbstractString) = string(id) * "|" * sigma
 sorted_keys(d::AbstractDict) = sort!(collect(keys(d)))
 
 function main(args::Vector{String})
-    outdir = joinpath(REPO, "results", "yield_julia")
+    outdir = joinpath(REPO, "results", "yield")
     mode = "stats"
     nshards = 3
     do_merge = true

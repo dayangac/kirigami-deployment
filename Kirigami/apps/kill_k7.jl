@@ -1,5 +1,5 @@
 # K7 -- achievable periodic deployment Jacobians (R4) and the closed-form second
-# closed angle (B20). Port of code/apps/kill_k7.cpp.
+# closed angle (B20).
 #
 # C1  J(theta) = P_theta P_0^{-1} = cos(theta/2) I + sin(theta/2) K, K constant in
 #     theta and linear in the vertex positions; dim of the achievable set K.
@@ -16,15 +16,15 @@
 #         c4sweep|nu|c3] [--out DIR] [--shard i] [--nshard k] [--limit K]
 #
 # The population (21 tiling super-cells + 12 torus Voronoi patterns) is rebuilt from its
-# seeds through the bit-exact MT19937 every run, as the C++ did (it is not in the corpus).
-# Outputs go to results/kill/k7_julia/ (the C++ wrote results/kill/k7/). `--limit K`
+# seeds through the bit-exact MT19937 every run (it is not in the corpus).
+# Outputs go to results/kill/k7/. `--limit K`
 # processes only the first K patterns of the population (after sharding).
 include(joinpath(@__DIR__, "kill_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 const Mat2 = K.Mat2
 
-# C++ `std::setprecision(12)` stream output.
+# 12 significant digits (the CSV number format).
 g12(v::Real) = @sprintf("%.12g", Float64(v))
 
 # ------------------------------------------------------------------ population
@@ -139,7 +139,7 @@ mutable struct PState
     cell_face_area::Float64  # sum of the |F| face areas of one cell (theta-independent)
 end
 
-# t (length 2k, C++ layout t(2i) = T(i,0), t(2i+1) = T(i,1)) -> quotient positions
+# t (length 2k, row-major layout t(2i) = T(i,0), t(2i+1) = T(i,1)) -> quotient positions
 function shape_point(S::PState, t::AbstractVector{Float64})
     X = copy(S.X0)
     if S.k > 0
@@ -186,7 +186,7 @@ end
 # P_theta measured by an INDEPENDENT forward-kinematics call (deploy(), not the basis).
 P_fk(S::PState, theta::Float64) = K.fk_period_matrix(S.sp, S.q, S.cut, theta)
 
-# rank at Eigen's JacobiSVD threshold 1e-9 * s_max (floored at 1e-13)
+# rank at the SVD threshold 1e-9 * s_max (floored at 1e-13)
 function sv_rank(A::AbstractMatrix{Float64})
     (size(A, 1) == 0 || size(A, 2) == 0) && return 0
     sv = svdvals(A)
@@ -229,11 +229,11 @@ function K_of_t(A::K.AchievableSet, t::AbstractVector{Float64})
     return Km
 end
 
-# Eigen `completeOrthogonalDecomposition().solve(b)`: the minimum-norm least-squares solution.
+# the minimum-norm least-squares solution
 cod_solve(A::AbstractMatrix{Float64}, b::AbstractVector{Float64}) = pinv(A) * b
 
 # the free subspace of the target-hitting affine set: the right singular vectors of A
-# past its rank (Eigen `V.rightCols(nfree)` of the full JacobiSVD)
+# past its rank (the last nfree columns of V of the full SVD)
 function free_subspace(A::AbstractMatrix{Float64}, nfree::Int)
     n = size(A, 2)
     nfree > 0 || return zeros(n, 0)
@@ -420,10 +420,10 @@ function stage_bounded(outdir::String)
             end
             thm = 0.5 * (lo + hi)
         end
-        print(csv, rc.name, ",", length(cyc), ",", cpp_g(h.p), ",", cpp_g(h.q), ",", cpp_g(h.r), ",",
-              cpp_g((h.p + h.q) / max(1e-300, scale)), ",", cpp_g(thc), ",", cpp_g(thm), ",",
-              cpp_g(thm > 0 ? abs(thc - thm) : -1), ",", cpp_g(tmax), ",",
-              (thc <= tmax + 1e-9 ? 1 : 0), ",", cpp_g(fit_err / max(1e-300, scale)), "\n")
+        print(csv, rc.name, ",", length(cyc), ",", fmt_g(h.p), ",", fmt_g(h.q), ",", fmt_g(h.r), ",",
+              fmt_g((h.p + h.q) / max(1e-300, scale)), ",", fmt_g(thc), ",", fmt_g(thm), ",",
+              fmt_g(thm > 0 ? abs(thc - thm) : -1), ",", fmt_g(tmax), ",",
+              (thc <= tmax + 1e-9 ? 1 : 0), ",", fmt_g(fit_err / max(1e-300, scale)), "\n")
         @printf("%-24s H=%2d thc=%.9f meas=%.9f err=%.2e tmax=%.6f p+q/s=%.2e\n",
                 rc.name, length(cyc), thc, thm, thm > 0 ? abs(thc - thm) : -1.0, tmax, (h.p + h.q) / scale)
     end
@@ -550,7 +550,7 @@ function stage_c3(outdir::String, pats, shard::Int, nshard::Int, limit::Int)
           "nu_maxerr,min_q,min_area,zp_feasible\n")
     nrun = 0
     for (pi_, P) in enumerate(pats)
-        pi0 = pi_ - 1   # the C++ 0-based population index (seeds)
+        pi0 = pi_ - 1   # 0-based population index (part of the seeds)
         pi0 % nshard != shard && continue
         P.ok || continue
         nrun >= limit && break
@@ -717,7 +717,7 @@ function stage_main(outdir::String, pats, shard::Int, nshard::Int, limit::Int)
             G = K.NormalDist(0.0, 1.0)
             for _ in 1:31
                 t = zeros(2 * S.k); d = zeros(2 * S.k)
-                for i in 1:(2 * S.k)   # interleaved draws, as the C++ loop
+                for i in 1:(2 * S.k)   # interleaved draws (the draw order is part of the population's definition)
                     t[i] = 0.3 * S.med_edge * K.normal(G, rng)
                     d[i] = 0.3 * S.med_edge * K.normal(G, rng)
                 end
@@ -904,7 +904,7 @@ end
 
 function main(args::Vector{String})
     stage = "run"
-    outdir = joinpath(REPO, "results", "kill", "k7_julia")
+    outdir = joinpath(REPO, "results", "kill", "k7")
     shard = 0; nshard = 1
     limit = typemax(Int)
     i = 1
