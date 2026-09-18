@@ -1,7 +1,7 @@
 # core/cut.jl -- edge classification into E_hinge / E_split / E_border and the
 # construction of the kirigami structure M' = (X', F') (2026 Sec. 3).
 #
-# Port of code/src/core/cut.{hpp,cpp}. 1-based indices throughout.
+# 1-based indices throughout.
 
 @enum EdgeType::UInt8 Border Hinge Split
 
@@ -35,7 +35,7 @@ end
 n_hinge(c::CutStructure) = length(c.hinge_edges)
 n_split(c::CutStructure) = length(c.split_edges)
 
-# Union-find with path compression (the C++ DSU); `unite!` returns false if already joined.
+# Union-find with path compression; `unite!` returns false if already joined.
 struct DSU
     p::Vector{Int}
 end

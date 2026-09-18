@@ -1,12 +1,11 @@
 # method/expansive_cone.jl -- the expansive cone of a cut structure and the linear program
 # that decides it (ideas/round2_adversary.md A1, ideas/ranking_r2.md X1 / kill_k8a).
 #
-# Port of code/src/method/expansive_cone.{hpp,cpp}. 1-based indices throughout; a flex
-# vector stacks (omega_f, w_fx, w_fy) at positions 3(f-1)+1..3(f-1)+3. C++ out-pointers
-# become extra return values (`farkas_residual` returns `(resid, lambda_min, sum_err)`,
-# `normalise_rows!` returns `n_degenerate`). The LP solver is the C++'s own (smoothing
-# loop + away-step Frank-Wolfe on the min-norm point); no LP library is used, so it is
-# ported literally.
+# 1-based indices throughout; a flex vector stacks (omega_f, w_fx, w_fy) at positions
+# 3(f-1)+1..3(f-1)+3. Secondary outputs are extra return values (`farkas_residual`
+# returns `(resid, lambda_min, sum_err)`, `normalise_rows!` returns `n_degenerate`). The
+# LP solver is the project's own (smoothing loop + away-step Frank-Wolfe on the min-norm
+# point); no LP library is used.
 #
 # WHAT IS NEW HERE, AND WHAT IS NOT. The object "polyhedral cone of first-order motions
 # cut out by homogeneous linear inequalities on the velocities, decided by one linear
@@ -43,7 +42,7 @@
 #
 #       row_e(flex) = det( dV, d_e )   > 0     <=>   the cut opens.
 #
-#   Since zero_plus.jl's dS_e = 2 dV, row_e = q_e / 2 exactly; the doctests assert it.
+#   Since zero_plus.jl's dS_e = 2 dV, row_e = q_e / 2 exactly; the unit tests assert it.
 #
 #   corner incidence (copy p of v, in face f_p, against the corner of face f_a at v),
 #   e1 = X[v_next] - X[v], e2 = X[v_prev] - X[v], dV = V_{f_p}(X_v) - V_{f_a}(X_v) :
@@ -210,7 +209,7 @@ function flex_basis(g::HingeGraph, pins::Vector{Vec2}, rel_tol::Float64 = 1e-10)
         B[3 * (f - 1) + 3, fb.dim_ker_A + 2 * (comp[f] - 1) + 2] = 1.0
     end
 
-    # Householder QR, thin Q (the C++ householderQ() * Identity(3F, n)).
+    # Householder QR, thin Q (the first n columns of the full Q).
     fb.N = Matrix(qr(B).Q)[:, 1:n]
 
     # Self-check: N really is a flex.
@@ -254,8 +253,8 @@ end
 # ---------------------------------------------------------------------------
 # The linearised 0+ non-collision system.
 
-# The C++ enum class ConeRowKind {Split, CornerG1, CornerG2}; the members carry a `Cone`
-# prefix because Julia enum members are module-level names and `Split` is an EdgeType.
+# The members carry a `Cone` prefix because Julia enum members are module-level names
+# and `Split` is an EdgeType.
 @enum ConeRowKind::UInt8 ConeSplit = 0 ConeCornerG1 = 1 ConeCornerG2 = 2
 
 struct ConeRow
@@ -358,29 +357,29 @@ ConeLPResult() = ConeLPResult(Float64[], Float64[], 0.0, 0.0, 0.0, 0, 0, 0, fals
 Scales every row of `A` to unit Euclidean norm in place; rows of norm <= 0 (or not
 finite) are left alone and counted in the return value.
 
-Replicated C++ behaviour, flagged (verdict of the K8a three-way comparison,
-results/kill/k8a_julia/PROVENANCE.md "LP layer"): a row whose exact value on the flex
+Deliberate, flagged behaviour (verdict of the K8a three-way comparison; the row counts
+are locked in test/test_method_3.jl): a row whose exact value on the flex
 space is zero (a corner incidence whose two copies never separate at first order)
 arrives as ~1e-16 rounding noise, passes the `n > 0` test and is scaled to a unit row of
 noise. Such rows exist on every truncated-square configuration (16-56 of 55-244 rows),
 on snub_square_R20 (36 of 196), t3_4_3_12_R25 (2 of 154), the checkerboard squares
 (80 of 160) and on the K1a graphs at X_ini (80 to 6165 of 1641 to 8905 rows, because the
 flex space at a non-deployable X_ini is essentially the rigid motions). Their direction
-is the rounding of the flex basis (Eigen Householder vs LAPACK), so on those inputs
-`margin_l2`, `margin_inf`, `dual_bound`, `n_active`, `n_dual_support` and, at K1a X_ini,
-`sigma_chart_margin` differ between the C++ and this port (3-6 % on the margins, up to a
-factor 2 on sigma_chart_margin) although A and the flex projector N N^T agree to 1e-15.
-Dropping those rows before normalising makes every one of those numbers agree to 6+
-digits between the two implementations (measured on 5 K1a graphs, 15 deployable rows
-and the 4 reference tilings). Where no such row exists the two implementations agree to
-~1e-6 at the driver's 600 Frank-Wolfe iterations and to ~1e-7 at 20000.
+is the rounding of the flex basis (Householder QR implementation dependent), so on those
+inputs `margin_l2`, `margin_inf`, `dual_bound`, `n_active`, `n_dual_support` and, at K1a
+X_ini, `sigma_chart_margin` differ between the archived K8a results and a rerun with a
+different QR (3-6 % on the margins, up to a factor 2 on sigma_chart_margin) although A and
+the flex projector N N^T agree to 1e-15. Dropping those rows before normalising makes
+every one of those numbers agree to 6+ digits across QR implementations (measured on 5
+K1a graphs, 15 deployable rows and the 4 reference tilings). Where no such row exists the
+results agree to ~1e-6 at the driver's 600 Frank-Wolfe iterations and to ~1e-7 at 20000.
 
-The C++ header documents "rows of norm <= 0 are left alone" -- an exactly-zero row left
-in place would force the LP margin to 0, so the degenerate case was never handled
-either way; the intent of the LP (a row that is identically zero on the flex space is
-no constraint) says such rows should be DROPPED, e.g. rows with norm < 1e-9 max_i |a_i N|.
-Not applied here: the C++ numbers are the acceptance criterion and the driver columns
-quoted from them must stay comparable.
+The documented contract "rows of norm <= 0 are left alone" means an exactly-zero row left
+in place would force the LP margin to 0, so the degenerate case was never handled either
+way; the intent of the LP (a row that is identically zero on the flex space is no
+constraint) says such rows should be DROPPED, e.g. rows with norm < 1e-9 max_i |a_i N|.
+Not applied here: the archived K8a numbers are the acceptance criterion and the driver
+columns quoted from them must stay comparable.
 """
 function normalise_rows!(A::Matrix{Float64})
     bad = 0
@@ -622,7 +621,7 @@ Base.@kwdef mutable struct ExpansiveConeReport
     flex_residual::Float64 = 0.0
 
     passes::Int = 0                 # passes actually solved
-    pass_feasible::Int = -1         # first pass (0-based, as the C++) with a strictly
+    pass_feasible::Int = -1         # first pass (0-based, as the CSVs report it) with a strictly
                                     # positive margin, -1 if none
     margin_l2::Float64 = 0.0        # best over passes
     margin_inf::Float64 = 0.0

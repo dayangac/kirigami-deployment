@@ -2,24 +2,22 @@
 # to a region, and random planar graphs (own Bowyer-Watson Delaunay, half-plane Voronoi,
 # greedy quad merge).
 #
-# Port of code/src/core/generators.{hpp,cpp}. The random generators are meant to reproduce
-# the C++ meshes BIT-EXACTLY for a given `MT19937` (same draw order, same welding order,
-# same face order), so the frozen populations in data/corpus can be regenerated. Two
-# things are needed for that beyond a literal translation:
-#   * clang -O2 on arm64 contracts `a*b + c` written in ONE plain-double expression into
-#     an fma; Eigen expressions (`v.dot(w)`, `v.norm()`, `A + (B-A)*t`) are NOT contracted
-#     because the multiply and the add live in different (inlined) functions. `fma` is
-#     used below exactly where the C++ has a plain-double `a*b ± c*d` / `a*b + c`.
-#   * `std::cos/sin/tan/pow/atan2` are Apple's arm64 libm, which is not correctly rounded
-#     (~8% of arguments) and is not what an x86_64 (Rosetta) Julia reaches through ccall:
-#     the x86_64 slice of libsystem_m differs from the arm64 slice on ~33% of arguments,
-#     Julia's Base trig on ~8%. So `libm_*` below call the system libm only on an arm64
-#     Apple build (then tilings and the relaxation are bit-exact with the C++) and fall
-#     back to Base elsewhere (then tiling vertices can differ from the C++ by 1 ulp).
+# The random generators regenerate the frozen populations in data/corpus BIT-EXACTLY for
+# a given `MT19937` (same draw order, same welding order, same face order). Two rules keep
+# that property (docs/NUMERICS.md):
+#   * Fused multiply-add placement is part of the definition of the corpus: `fma` is used
+#     below exactly where a plain `a*b ± c*d` / `a*b + c` is fused, and the `_dot2` /
+#     `_sqnorm2` / `_norm2` reductions and lerps `A + (B-A)*t` stay UNFUSED.
+#   * Trig / pow / atan2 are the arm64 Apple libm, which is not correctly rounded (~8% of
+#     arguments) and is not what an x86_64 (Rosetta) Julia reaches through ccall: the
+#     x86_64 slice of libsystem_m differs from the arm64 slice on ~33% of arguments,
+#     Julia's Base trig on ~8%. So `libm_*` call the system libm only on an arm64 Apple
+#     build (then tilings and the relaxation reproduce the corpus bit for bit) and fall
+#     back to Base elsewhere (then tiling vertices can differ from the corpus by 1 ulp).
 
 # libm_* shims live in core/mesh.jl (shared with the export layer).
 
-# Eigen `v.dot(w)`, `v.squaredNorm()`, `v.norm()` for Vector2d: x*x' + y*y', not contracted.
+# Unfused 2-vector dot / squared norm / norm: x*x' + y*y', never contracted into an fma.
 _dot2(a::Vec2, b::Vec2) = a[1] * b[1] + a[2] * b[2]
 _sqnorm2(a::Vec2) = a[1] * a[1] + a[2] * a[2]
 _norm2(a::Vec2) = sqrt(_sqnorm2(a))
@@ -27,8 +25,8 @@ _norm2(a::Vec2) = sqrt(_sqnorm2(a))
 const kSqrt3 = 1.7320508075688772
 
 # Welds points closer than `tol` (grid hash of cell size tol, 3x3 neighbourhood). The
-# grid stores ONE id per cell and `add!` overwrites it, exactly like the C++ std::map
-# assignment; replicated on purpose.
+# grid stores ONE id per cell and `add!` overwrites it (deliberate: a later point in the
+# same cell replaces the earlier one, which the corpus depends on).
 mutable struct VertexWelder
     tol::Float64
     grid::Dict{Tuple{Int64,Int64},Int}
@@ -168,7 +166,7 @@ end
 
 # ---------------------------------------------------------------- tilings
 
-# Triangular-lattice point (i, j); `i + 0.5*j` is contracted in the C++ but 0.5*j is exact.
+# Triangular-lattice point (i, j); `i + 0.5*j` needs no fma because 0.5*j is exact.
 _tri_P(i::Int, j::Int) = Vec2(i + 0.5 * j, kSqrt3 * 0.5 * j)
 _tri_mid(i1, j1, i2, j2) = 0.5 * (_tri_P(i1, j1) + _tri_P(i2, j2))
 
@@ -261,7 +259,7 @@ function tiling_snub_square(r::ClipRegion)
     K = lattice_extent(r, _norm2(u))
     squares = Vector{Vec2}[]
     for i in -K:K, j in -K:K
-        # Eigen `i*u + j*v`: coefficient-wise i*u.x + j*v.x, not contracted
+        # coefficient-wise i*u.x + j*v.x, unfused
         c = Vec2(Float64(i) * u[1] + Float64(j) * v[1], Float64(i) * u[2] + Float64(j) * v[2])
         rot = ((i + j) & 1) != 0 ? 30.0 : 0.0
         push!(squares, [c + polar(sqrt(2.0) / 2, rot + 45.0 + 90.0 * k) for k in 0:3])
@@ -323,7 +321,7 @@ function add_periodic_pairs!(m::Mesh, th::Vec2, tv::Vec2, tol::Float64 = 1e-6)
     N = n_vertices(m)
     for (t, out) in ((th, m.periodic.pairs_h), (tv, m.periodic.pairs_v))
         for i in 1:N
-            j = add!(w, m.X[i] + t)   # may append a new (unmatched) point, as in the C++
+            j = add!(w, m.X[i] + t)   # may append a new (unmatched) point (deliberate)
             (j <= N && j != i) && push!(out, (j, i))  # x_j - x_i = t
         end
     end
@@ -408,7 +406,7 @@ end
     delaunay_triangles(pts) -> Vector{NTuple{3,Int}}
 
 Delaunay triangulation of a point set (Bowyer-Watson with a super-triangle); returns
-triangle index triples (1-based) in the C++ triangle order.
+triangle index triples (1-based) in insertion order.
 """
 function delaunay_triangles(pts::Vector{Vec2})
     n = length(pts)
@@ -427,7 +425,7 @@ function delaunay_triangles(pts::Vector{Vec2})
     push!(P, mid + Vec2(0.0, d))
     a, b, c = n + 1, n + 2, n + 3
 
-    # circumcircle; plain-double products/sums are fma-contracted as in the C++ build
+    # circumcircle; products/sums are fma-contracted (corpus definition, docs/NUMERICS.md)
     function circum(i, j, k)
         A = P[i]; B = P[j]; C = P[k]
         ax = B[1] - A[1]; ay = B[2] - A[2]
@@ -539,7 +537,7 @@ function voronoi_of_random_points(n::Int, box::Float64, rng::MT19937)
     return largest_component(g)
 end
 
-# strict convexity of the quad (a, b, c, d) with the C++ contracted cross product
+# strict convexity of the quad (a, b, c, d) with the fma-contracted cross product
 function _quad_convex(X::Vector{Vec2}, q::Vector{Int})
     convex = true
     for k in 1:4
@@ -590,8 +588,7 @@ end
 """
     generate(kind, params, rng) -> Mesh
 
-Named factory (kiri_gen / sweep driver): `params[i]` defaults as in the C++
-(`static_cast<int>` = truncation toward zero).
+Named factory (kiri_gen / sweep driver): integer `params[i]` are truncated toward zero.
 """
 function generate(kind::AbstractString, p::AbstractVector{<:Real}, rng::MT19937)
     par(i, d) = i <= length(p) ? Float64(p[i]) : d

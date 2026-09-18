@@ -1,7 +1,7 @@
 # method/range_embed.jl -- the RANGE-MAXIMISING point of the convexity-constrained slice of
 # the Tutte auxetic shape space (experiment K9c).
 #
-# Port of code/src/method/range_embed.{hpp,cpp}. The paper's headline algorithm.
+# The paper's headline algorithm.
 #
 # WHY THIS EXISTS. K9 and K9b solve the same feasibility problem inside the null space
 # X(t) = X0 + Phi t: every face corner strictly convex (cross_i >= delta) and every split

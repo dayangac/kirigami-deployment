@@ -1,17 +1,17 @@
 # core/collision.jl -- polygon overlap, the deployment range, and the collision-aware
 # optimization of Eq. (7)-(9), 2026 Sec. 4.5 / Sec. 5.2.
 #
-# Port of code/src/core/collision.{hpp,cpp}. The C++ accumulates the orientation
-# determinants in `long double`; on the reference platform (Apple arm64) that type IS
-# the 64-bit double, so plain Float64 here reproduces the C++ predicate exactly.
+# The orientation determinants are accumulated in plain Float64 (the reference platform,
+# Apple arm64, has no wider hardware type), and every reduction below is written in a
+# fixed contraction form so the predicate's tie decisions are platform-independent.
 
 rot90(v::Vec2) = Vec2(-v[2], v[1])
 
-# Eigen's Vector2d dot()/squaredNorm() are UNFUSED sums of products (a redux over separate
-# statements, untouched by clang's -ffp-contract=on), whereas StaticArrays' `dot` is a
-# muladd that becomes an fma on aarch64.  Inline C++ expressions such as `ux*vy - uy*vx`
-# and `ux*ux + uy*uy` WERE contracted (fma on the first product).  Both forms are written
-# out explicitly so the predicate's tie decisions are the C++ ones on every platform.
+# Dot products and squared norms are UNFUSED sums of products, whereas StaticArrays' `dot`
+# is a muladd that becomes an fma on aarch64.  Inline cross products `ux*vy - uy*vx` and
+# `ux*ux + uy*uy` ARE contracted (fma on the first product).  Both forms are written out
+# explicitly so the predicate's tie decisions are the same on every platform
+# (docs/NUMERICS.md).
 _dot(a::Vec2, b::Vec2) = a[1] * b[1] + a[2] * b[2]
 _sq(a::Vec2) = a[1] * a[1] + a[2] * a[2]
 
@@ -496,8 +496,7 @@ function optimize_collision(c::CutStructure, X0::Vector{Vec2}, Phi::AbstractMatr
     return res
 end
 
-# The C++ derives CollisionSweepResult from CollisionOptResult; here the fields are
-# flattened into one struct.
+# CollisionSweepResult extends CollisionOptResult; the fields are flattened into one struct.
 mutable struct CollisionSweepResult
     T::Matrix{Float64}
     X_opt::Vector{Vec2}

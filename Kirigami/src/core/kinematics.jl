@@ -1,14 +1,13 @@
 # core/kinematics.jl -- forward kinematics of the kirigami structure M' (2026 Sec. 4.5).
 #
-# Convention (derived, see code/README.md): every face f is transformed rigidly by
+# Convention (derived): every face f is transformed rigidly by
 #     y = R(-sigma(f) * theta / 2) * x + t_f,
 # so that across a hinge edge the two duplicates open by exactly |theta|, and across
 # a split edge both faces carry the same rotation (hence the duplicates of a split
 # edge stay parallel -- Remark A.4, which this convention reproduces automatically).
 # The translations t_f are propagated by BFS over the hinge adjacency of M'.
 #
-# Port of code/src/core/kinematics.{hpp,cpp}. 1-based faces; `seed_face` defaults to 1
-# (the C++ default 0 = the first face).
+# 1-based faces; `seed_face` defaults to 1 (the first face).
 
 const Mat2 = SMatrix{2,2,Float64,4}
 
@@ -21,9 +20,9 @@ mutable struct Deployment
     bfs_order::Vector{Int}    # faces in BFS order
 end
 
-# Trig via the project's libm shim (mesh.jl): the C++ rot()/drot() call std::cos and
-# std::sin of the same angle, which clang fuses into Apple's `__sincos_stret`, so the
-# combined `libm_sincos` is what reproduces the rotation entries bit for bit.
+# Trig via the project's libm shim (mesh.jl): rot()/drot() need cos and sin of the same
+# angle, and the combined `libm_sincos` (Apple's `__sincos_stret`) is what reproduces the
+# reference rotation entries bit for bit (docs/NUMERICS.md).
 function _rot(a::Float64)                       # column-major
     s, c = libm_sincos(a)
     return Mat2(c, s, -s, c)
@@ -33,8 +32,8 @@ function _drot(a::Float64)                      # d/da rot(a)
     return Mat2(-s, c, -c, -s)
 end
 
-# Eigen's fixed-size 2x2 * vector product as clang -O2 (-ffp-contract=on) compiled it:
-# y_i = fma(R(i,1), x_1, R(i,0) * x_0). Verified bit-exact against the C++ deployed
+# 2x2 * vector product with the contraction the reference data was produced with:
+# y_i = fma(R(i,1), x_1, R(i,0) * x_0). Verified bit-exact against the archived deployed
 # positions of four frozen patches (382/382 vertices); a plain `R * x` differs by an ulp.
 _mv(R::Mat2, x::Vec2) = Vec2(fma(R[1, 2], x[2], R[1, 1] * x[1]), fma(R[2, 2], x[2], R[2, 1] * x[1]))
 

@@ -1,20 +1,20 @@
 # core/mesh.jl -- planar graph data model, JSON I/O, half-edge structure and the
 # face-orientation (sigma) induced half-edge direction of Segall et al. 2026 Sec. 3.
 #
-# Port of code/src/core/mesh.{hpp,cpp}. All indices are 1-based internally; the JSON
-# file format stays 0-based (as the C++ wrote it) and is converted at the I/O boundary.
-# Naming deviation from the C++: functions that mutate their argument carry the Julia
-# `!` suffix (`build_topology!`, `normalize_face_ccw!`); everything else keeps the C++ name.
+# All indices are 1-based internally; the JSON file format is 0-based and is converted at
+# the I/O boundary. Functions that mutate their argument carry the Julia `!` suffix
+# (`build_topology!`, `normalize_face_ccw!`).
 
 # 2-D cross product (signed parallelogram area); shared by several method modules.
 _det2(u::Vec2, v::Vec2) = u[1] * v[2] - u[2] * v[1]
 
-# Platform libm shims. The C++ reference linked Apple's libm; Julia's Base trig differs
-# from it by 1 ulp on some arguments, which is visible in bit-exact reproductions (tiling
-# generators, float32 STL normals). On macOS call the system libm; elsewhere use Base.
-# True only when the system libm is the arm64 Apple libm the C++ reference linked against
-# (an x86_64 Julia under Rosetta gets Apple's x86_64 libm, which differs by 1 ulp on some
-# arguments); bit-exact trig-dependent tests key on this.
+# Platform libm shims. The frozen corpora and fixtures were produced with Apple's arm64
+# libm; Julia's Base trig differs from it by 1 ulp on some arguments, which is visible in
+# bit-exact reproductions (tiling generators, float32 STL normals). On macOS call the
+# system libm; elsewhere use Base (docs/NUMERICS.md).
+# True only when the system libm is the arm64 Apple libm (an x86_64 Julia under Rosetta
+# gets Apple's x86_64 libm, which differs by 1 ulp on some arguments); bit-exact
+# trig-dependent tests key on this.
 const _USE_SYSTEM_LIBM = Sys.isapple() && Sys.ARCH === :aarch64
 if Sys.isapple()
     const _LIBM = "libSystem.B.dylib"
@@ -31,10 +31,10 @@ else
     libm_atan2(y::Float64, x::Float64) = atan(y, x)
 end
 
-# Where the C++ evaluates BOTH std::sin(x) and std::cos(x) in one function (the rotation
-# of kinematics.cpp, the harmonic p + q cos + r sin, ...), clang -O2 on Apple combines the
-# pair into a single `__sincos_stret` call, whose sine differs from the standalone `sin`
-# by 1 ulp on ~4% of arguments.  `libm_sincos(x) -> (sin, cos)` calls that same routine.
+# Where BOTH sin(x) and cos(x) of one argument are needed in one function (the rotation of
+# kinematics.jl, the harmonic p + q cos + r sin, ...), the reference values come from
+# Apple libm's combined `__sincos_stret`, whose sine differs from the standalone `sin` by
+# 1 ulp on ~4% of arguments.  `libm_sincos(x) -> (sin, cos)` calls that same routine.
 struct _SinCosRet
     s::Float64
     c::Float64
@@ -150,7 +150,7 @@ function build_topology!(m::Mesh)
             hi = length(m.half_edges)
             e = m.edges[ei]
             if e.n_faces >= 2
-                # error message reports 0-based vertex ids like the C++ did
+                # error message reports 0-based vertex ids (the JSON file's numbering)
                 error("non-manifold input: edge ($(k.a - 1),$(k.b - 1)) is shared by more than two faces")
             end
             e.n_faces += 1
@@ -329,7 +329,7 @@ function load_mesh_json(path::AbstractString)
     return mesh_from_json(JSON.parsefile(path))
 end
 
-"""Writes the mesh as JSON in the C++ file format (0-based indices)."""
+"""Writes the mesh as JSON in the project file format (0-based indices)."""
 function save_mesh_json(m::Mesh, path::AbstractString)
     open(path, "w") do io
         JSON.print(io, mesh_to_json(m), 2)

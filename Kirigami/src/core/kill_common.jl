@@ -1,6 +1,6 @@
 # core/kill_common.jl -- the graph populations shared by the Phase-5 kill experiments and
-# the eight Phase-2 reference cases. Port of code/apps/kill_common.hpp (the parts that
-# define INPUTS; the shape-space cache helpers are app-side and not ported).
+# the eight Phase-2 reference cases (the parts that define INPUTS; the shape-space cache
+# helpers live app-side in apps/kill_common.jl).
 #
 # Everything is a deterministic function of the graph id through the bit-exact `MT19937`,
 # so `make_graph(id, ...)` regenerates the frozen populations in data/corpus.
@@ -88,7 +88,7 @@ struct RefCase
     periodic::Bool
 end
 
-"""The eight Phase-2 reference cases, rebuilt exactly as in kiri_reference.cpp: ONE shared
+"""The eight Phase-2 reference cases, rebuilt exactly as apps/kiri_reference.jl does: ONE shared
 `MT19937(20260903)` feeds the four relaxation calls in file order."""
 function reference_cases()
     rng = MT19937(20260903)

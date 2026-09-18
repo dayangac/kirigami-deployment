@@ -14,9 +14,9 @@
 # centroid and rho_f for a bound on the distance from it to any vertex of the face,
 # two faces can only touch while |m_f - m_g| <= rho_f + rho_g.
 #
-# Port of code/src/method/contact.{hpp,cpp}, literal (theorems T4/T5). Face pairs are
-# `Tuple{Int,Int}` with 1-based faces; M'-vertex ids in the witnesses are 1-based; the
-# C++ "-1 = none" sentinels become 0 (`first_root = -1.0` stays -1.0).
+# Theorems T4/T5 implemented literally. Face pairs are `Tuple{Int,Int}` with 1-based
+# faces; M'-vertex ids in the witnesses are 1-based with 0 = none (`first_root = -1.0`
+# is the "no root" sentinel).
 
 mutable struct SweptDiscs
     gc::Matrix{Float64}      # |F| x 2: m_f(theta) = cos(theta/2) gc + sin(theta/2) gs
@@ -49,7 +49,7 @@ function swept_discs(c::CutStructure, B::DeployBasis)
         for pv in pf
             x = basis_c(B, pv) - gc
             chi = basis_s(B, pv) - gs
-            # Eigen squaredNorm()/norm(): unfused reductions
+            # squaredNorm()/norm(): unfused reductions
             sd.rho[f] = max(sd.rho[f], sqrt(_sqnormu(x) + _sqnormu(chi)))
             sd.rho_max[f] = max(sd.rho_max[f], max(_normu(x), _normu(chi)))
             sd.circum[f] = max(sd.circum[f], _normu(x))
@@ -66,8 +66,8 @@ function min_center_distance(sd::SweptDiscs, f::Int, g::Int, theta_hi::Real)
     # tan(2t) = 2 a.b / (|a|^2 - |b|^2).
     aa = _sqnormu(a); bb = _sqnormu(b); ab = _dotu(a, b)
     hi = 0.5 * theta_hi
-    # C++ `aa*ct*ct + 2*ab*ct*st + bb*st*st` with clang's contraction of (fadd (fmul x y) z)
-    # -> fma(x, y, z), applied twice left to right; cos/sin pair -> __sincos_stret
+    # `aa*ct*ct + 2*ab*ct*st + bb*st*st` with (fadd (fmul x y) z) -> fma(x, y, z) applied
+    # twice left to right; cos/sin pair -> __sincos_stret (docs/NUMERICS.md)
     function val(t)
         st, ct = libm_sincos(t)
         return sqrt(max(0.0, fma(bb * st, st, fma(aa * ct, ct, ((2 * ab) * ct) * st))))
@@ -245,7 +245,7 @@ end
 mutable struct OverlapRangeReport
     theta_max::Float64
     candidates::Vector{Float64}  # C(X), ascending, deduplicated
-    i_star::Int                  # C++ index into `candidates`: 0 => zero range, -1 => none
+    i_star::Int                  # 0-based index into `candidates`: 0 => zero range, -1 => none
     n_intervals_tested::Int
     first_contact::ContactWitness  # the theta_1 that min-over-roots would have returned
     zero_range::Bool
@@ -423,8 +423,7 @@ function validity_certificate(c::CutStructure, B::DeployBasis, X::Vector{Vec2},
     PF = c.prime_faces
 
     # --- POS: every face of M positively oriented at theta = 0 (T5.1) -------------
-    # (the C++ copies the mesh with X substituted and calls face_signed_area; the same
-    # shoelace sum is evaluated on X directly here)
+    # (the same shoelace sum as face_signed_area, evaluated on X directly)
     let lo = 0.0, hi = 0.0, first = true
         for f in 1:n_faces(m)
             vs = m.faces[f]
@@ -432,7 +431,7 @@ function validity_certificate(c::CutStructure, B::DeployBasis, X::Vector{Vec2},
             s = 0.0
             for i in 1:n
                 p = X[vs[i]]; q = X[vs[mod1(i + 1, n)]]
-                s += fma(p[1], q[2], -(q[1] * p[2]))   # C++ face_signed_area: inline a*b - c*d, contracted
+                s += fma(p[1], q[2], -(q[1] * p[2]))   # as face_signed_area: inline a*b - c*d, contracted
             end
             a = 0.5 * s
             if first

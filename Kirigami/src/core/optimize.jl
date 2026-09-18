@@ -1,7 +1,5 @@
 # core/optimize.jl -- a small self-contained L-BFGS with backtracking line search.
 # No external optimization library is used (see specs/common_preamble.md).
-#
-# Port of code/src/core/optimize.{hpp,cpp}.
 
 Base.@kwdef mutable struct LbfgsOptions
     max_iter::Int = 500
@@ -24,7 +22,7 @@ end
 """
     lbfgs_minimize(fg, x0, opt = LbfgsOptions()) -> LbfgsResult
 
-`fg(x, g)` returns f(x) and writes the gradient into `g` (same contract as the C++).
+`fg(x, g)` returns f(x) and writes the gradient into `g`.
 """
 function lbfgs_minimize(fg, x0::Vector{Float64}, opt::LbfgsOptions = LbfgsOptions())
     x = copy(x0)

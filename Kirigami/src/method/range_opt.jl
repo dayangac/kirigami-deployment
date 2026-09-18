@@ -16,9 +16,9 @@
 # L-BFGS iterations. Nothing here is refereed by its own objective: the caller
 # measures the result with collision.jl's bisection.
 #
-# Port of code/src/method/range_opt.{hpp,cpp}. The C++ member functions of
-# `RangeObjective` are `setup!(ob, ...)`, `basis(ob, t)`, `rebuild_active!(ob, t)` and
-# `value_and_grad(ob, t, g)` (g written in place, the `lbfgs_minimize` contract).
+# `RangeObjective` is driven through `setup!(ob, ...)`, `basis(ob, t)`,
+# `rebuild_active!(ob, t)` and `value_and_grad(ob, t, g)` (g written in place, the
+# `lbfgs_minimize` contract).
 # The flattened coefficient vector t stores T row-major: t[2i-1] = T[i,1], t[2i] = T[i,2].
 
 Base.@kwdef mutable struct RangeOptOptions
@@ -82,7 +82,7 @@ function setup!(ob::RangeObjective, cc::CutStructure, X0::Vector{Vec2}, P::Abstr
         for i in eachindex(vs)
             a = X0[vs[i]]
             b = X0[vs[mod1(i + 1, length(vs))]]
-            s += fma(a[1], b[2], -(a[2] * b[1]))   # C++ inline a*b - c*d, contracted
+            s += fma(a[1], b[2], -(a[2] * b[1]))   # inline a*b - c*d, contracted
         end
         ob.area0[f] = 0.5 * s
     end
@@ -145,7 +145,7 @@ function rebuild_active!(ob::RangeObjective, t::AbstractVector{Float64})
         scan(f, g)
         scan(g, f)
     end
-    # std::sort by the angle only: ties keep no particular order in the C++ either
+    # sort by the angle only: ties keep no particular order
     sort!(found; by = first)
     empty!(ob.active)
     for i in 1:min(length(found), ob.opt.active_max)
@@ -185,7 +185,7 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
             tol = 1e-12 * max(1e-300, lscale)
             (s < -tol || s > l2 + tol) && continue
             th[i] = r
-            # C++ `-q*sin(r) + r*cos(r)`: one __sincos_stret, contracted as fma(-q, sin, r*cos)
+            # `-q*sin(r) + r*cos(r)`: one __sincos_stret, contracted as fma(-q, sin, r*cos)
             sr, cr = libm_sincos(r)
             dFdtheta[i] = fma(-det.q, sr, det.r * cr)
             has[i] = true
@@ -212,7 +212,7 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
         alpha < 1e-12 && continue
         a, b, p = ob.active[i]
         ss, cc = libm_sincos(0.5 * th[i])
-        Ya = cc * basis_c(B, a) + ss * basis_s(B, a)   # Eigen: unfused per component
+        Ya = cc * basis_c(B, a) + ss * basis_s(B, a)   # unfused per component
         Yb = cc * basis_c(B, b) + ss * basis_s(B, b)
         Yp = cc * basis_c(B, p) + ss * basis_s(B, p)
         A = Yb - Ya; Bv = Yp - Ya
@@ -237,7 +237,7 @@ function value_and_grad(ob::RangeObjective, t::AbstractVector{Float64}, g::Abstr
         s = 0.0
         for i in 1:nf
             u = vs[i]; v = vs[mod1(i + 1, nf)]
-            s += fma(X[u, 1], X[v, 2], -(X[u, 2] * X[v, 1]))   # C++ inline a*b - c*d, contracted
+            s += fma(X[u, 1], X[v, 2], -(X[u, 2] * X[v, 1]))   # inline a*b - c*d, contracted
         end
         area = 0.5 * s
         ob.area0[f] == 0 && continue

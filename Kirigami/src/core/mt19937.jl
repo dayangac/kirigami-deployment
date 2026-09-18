@@ -1,8 +1,8 @@
-# core/mt19937.jl -- bit-exact port of std::mt19937 and of the Apple libc++ (LLVM 18,
-# _LIBCPP_VERSION 180100, Xcode MacOSX.sdk) distributions the C++ code drew from:
+# core/mt19937.jl -- bit-exact MT19937 (std::mt19937) with the libc++-compatible (LLVM 18,
+# _LIBCPP_VERSION 180100) distributions the frozen corpora were drawn with:
 # generate_canonical<double,53>, uniform_real_distribution<double>,
-# uniform_int_distribution<int>, std::shuffle.  Deliberately independent of Random so the
-# stream is exactly the one the frozen corpora were produced with.
+# uniform_int_distribution<int>, std::shuffle.  Deliberately independent of Random so that
+# seeds reproduce the archived design populations (`data/corpus/mt19937_vectors.json`).
 
 const MT_N = 624
 const MT_M = 397
@@ -55,7 +55,8 @@ const MT_RANGE = 4294967296.0   # R = max - min + 1 as double
 
 """libc++ `std::generate_canonical<double,53>(mt19937)`: k = ⌈53/32⌉ = 2 draws,
 S = d0 + d1·R, result S / R².  This libc++ has no clamp of 1.0 (LWG 2524 not applied), so
-the result may equal 1.0 exactly when S rounds up to 2^64; replicated on purpose."""
+the result may equal 1.0 exactly when S rounds up to 2^64; deliberate, the corpus
+depends on it."""
 function generate_canonical53(rng::MT19937)::Float64
     sp = Float64(next_u32(rng))
     base = MT_RANGE
@@ -65,8 +66,8 @@ function generate_canonical53(rng::MT19937)::Float64
 end
 
 """libc++ `uniform_real_distribution<double>(a,b)(rng)` = (b-a)·generate_canonical + a.
-Evaluated with `fma`: clang on arm64 (default -ffp-contract=on, as in the C++ build) fuses
-this multiply-add, and the unfused form differs from the C++ stream by 1 ulp ~40% of the time."""
+Evaluated with `fma` so the result matches the reference RNG stream / the frozen corpora
+bit for bit; the unfused form differs by 1 ulp ~40% of the time (docs/NUMERICS.md)."""
 uniform_real(rng::MT19937, a::Real, b::Real)::Float64 =
     fma(Float64(b) - Float64(a), generate_canonical53(rng), Float64(a))
 
@@ -119,7 +120,7 @@ end
 # libc++ uniform_int_distribution<T>::operator() with working type W (unsigned of T's width,
 # at least 32 bits).  Returns the offset u in [0, b-a] as W.
 function _uniform_int_offset(rng::MT19937, ::Type{W}, a::Integer, b::Integer)::W where {W<:Union{UInt32,UInt64}}
-    rp = W(b % W) - W(a % W) + W(1)          # wraps like the C++ unsigned arithmetic
+    rp = W(b % W) - W(a % W) + W(1)          # wrapping unsigned arithmetic (deliberate)
     rp == 1 && return W(0)
     dt = 8 * sizeof(W)
     rp == 0 && return _independent_bits(rng, W, dt)
@@ -162,7 +163,7 @@ end
 
 """libc++ `std::normal_distribution<double>(mean, stddev)`: Marsaglia polar method; the
 second variate of each pair is cached in `v` (`__v_hot_`), so the object carries state and
-one instance must live for the whole C++ distribution's lifetime."""
+one instance must live for the whole stream's lifetime."""
 mutable struct NormalDist
     mean::Float64
     stddev::Float64
@@ -171,9 +172,9 @@ mutable struct NormalDist
 end
 NormalDist(mean::Real = 0.0, stddev::Real = 1.0) = NormalDist(Float64(mean), Float64(stddev), 0.0, false)
 
-"""`normal_distribution::operator()(rng)`.  Products/sums use `fma` where clang -O2 on arm64
-contracts them (`u*u + v*v` -> fma(u,u,v*v), `up*stddev + mean`).  `log` is Julia's, not
-Apple libm's; it agreed on every reference draw but is not guaranteed to be bit-identical."""
+"""`normal_distribution::operator()(rng)`.  Products/sums use `fma` where the reference
+stream has them fused (`u*u + v*v` -> fma(u,u,v*v), `up*stddev + mean`).  `log` is Julia's,
+not Apple libm's; it agreed on every reference draw but is not guaranteed to be bit-identical."""
 function normal(d::NormalDist, rng::MT19937)::Float64
     if d.v_hot
         d.v_hot = false
@@ -195,16 +196,16 @@ function normal(d::NormalDist, rng::MT19937)::Float64
 end
 
 # ---------------------------------------------------------------------------- std::sort
-# Bit-faithful port of libc++ 18 `std::sort` (__algorithm/sort.h) for a NON-arithmetic
+# Bit-faithful libc++ 18 `std::sort` (__algorithm/sort.h) for a NON-arithmetic
 # value type with an arbitrary comparator: `__introsort<..., _UseBitSetPartition = false>`
 # = pdqsort-style introsort with __sort3/4/5 networks, guarded insertion sort on the
 # leftmost range and unguarded elsewhere (limit 24), median-of-3 (Tukey ninther above 128),
 # `__partition_with_equals_on_right`, the "already partitioned -> try
 # __insertion_sort_incomplete" shortcut, and `__partition_with_equals_on_left` when the
-# range's predecessor equals the pivot. The result is unstable, so where the C++ result
+# range's predecessor equals the pivot. The result is unstable, so where an archived result
 # depends on the ORDER of equivalent elements (e.g. `detect_lattice`'s tie among lattice
 # vectors of equal length) only this exact algorithm reproduces it. The heap-sort fallback at
-# depth exhaustion is not ported; it is unreachable on the inputs this code base sorts and
+# depth exhaustion is not implemented; it is unreachable on the inputs this code base sorts and
 # raises an error rather than silently sorting differently.
 
 @inline function _lc_swap!(v, a, b)
@@ -433,7 +434,7 @@ function _lc_introsort!(v, first, last, lt, depth, leftmost)
             leftmost ? _lc_insertion_sort!(v, first, last, lt) : _lc_insertion_sort_unguarded!(v, first, last, lt)
             return
         end
-        depth == 0 && error("libcxx_sort!: introsort depth exhausted; the heap-sort fallback is not ported")
+        depth == 0 && error("libcxx_sort!: introsort depth exhausted; the heap-sort fallback is not implemented")
         depth -= 1
         half = len ÷ 2
         if len > ninther

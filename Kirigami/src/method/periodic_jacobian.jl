@@ -2,15 +2,15 @@
 # pattern, its Tutte auxetic shape space, and the deployment Jacobian of the
 # fundamental parallelogram (2026 Sec. 5.1, Eqs. (11)-(13)).
 #
-# Port of code/src/method/periodic_jacobian.{hpp,cpp}. 1-based indices throughout;
-# lattice offsets stay integer 2-vectors (`SVector{2,Int}`). C++ out-pointers become
-# extra return values (`fk_period_matrix` returns `(P, spread)`).
+# 1-based indices throughout; lattice offsets stay integer 2-vectors (`SVector{2,Int}`);
+# `fk_period_matrix` returns `(P, spread)`.
 #
-# WHY A QUOTIENT AND NOT THE FINITE PATCH.  code/README.md deviation 11 imposes
+# WHY A QUOTIENT AND NOT THE FINITE PATCH.  The `Periodic` boundary mode of
+# tutte_auxetic.jl imposes
 # Eqs. (3b)-(3c) as linear constraints on a finite patch "whose boundary edges are
 # not topologically identified".  The hole preimages that straddle the seam of that
-# patch therefore contribute NO row of L (deviation 2 drops every preimage touching
-# the mesh boundary), so the patch system is missing exactly the deployability
+# patch therefore contribute NO row of L (every preimage touching the mesh boundary is
+# dropped, holes.jl `all_interior`), so the patch system is missing exactly the deployability
 # conditions of the holes that wrap around.  Those conditions are what makes the
 # face potential u of derivations/core.md T1 exist on the infinite tiling, which is
 # what makes the deployed structure periodic at all.  This file therefore builds the
@@ -88,7 +88,7 @@ function CentroidIndex(p::Vector{Vec2}, cell::Float64)
     end
     return CentroidIndex(bins, cell, p)
 end
-# Index of a point within `tol` of q, 0 if none (the C++ `find`).
+# Index of a point within `tol` of q, 0 if none.
 function _find(idx::CentroidIndex, q::Vec2, tol::Float64)
     bx = floor(Int64, q[1] / idx.h)
     by = floor(Int64, q[2] / idx.h)
@@ -184,10 +184,10 @@ function detect_lattice(big::Mesh, tol::Float64 = 1e-6)
         out.err = "no lattice found ($(length(good)) candidates)"
         return out
     end
-    # The C++ std::sort is unstable (libc++ introsort) and the tie order among candidates
-    # of equal length decides t1/t2 (e.g. +-t for the square and kagome lattices), so the
-    # libc++ algorithm itself is used (core/mt19937.jl `libcxx_sort!`), with Eigen's
-    # unfused squaredNorm as the comparator.
+    # The sort is unstable (libc++ introsort) and the tie order among candidates of equal
+    # length decides t1/t2 (e.g. +-t for the square and kagome lattices); the archived
+    # lattices were produced with that exact algorithm, so `libcxx_sort!`
+    # (core/mt19937.jl) is used, with an unfused squared norm as the comparator.
     libcxx_sort!(good, (a, b) -> a[1] * a[1] + a[2] * a[2] < b[1] * b[1] + b[2] * b[2])
     t1 = good[1]
     t2 = Vec2(0, 0)
@@ -295,7 +295,7 @@ n_faces(q::Quotient) = n_faces(q.cell)
 """
 function build_quotient(cell_in::Mesh, T::Mat2, tol::Float64 = 1e-6)
     q = Quotient()
-    q.cell = deepcopy(cell_in)   # the C++ copies the mesh by value
+    q.cell = deepcopy(cell_in)   # own copy: the quotient must not alias the input
     q.T = T
     cell = q.cell
     isempty(cell.half_edges) && build_topology!(cell)
@@ -332,8 +332,8 @@ function build_quotient(cell_in::Mesh, T::Mat2, tol::Float64 = 1e-6)
     q.nq = length(canon)
     q.Xq = canon
 
-    # Quotient edges, keyed by (class pair, lattice offset), canonicalised. The C++
-    # std::map iterates in key order, so the edge list is built from the sorted keys.
+    # Quotient edges, keyed by (class pair, lattice offset), canonicalised; the edge list
+    # is built from the sorted keys so its order is deterministic.
     bykey = Dict{NTuple{4,Int},Vector{Int}}()
     for h in eachindex(cell.half_edges)
         he = cell.half_edges[h]
@@ -527,7 +527,7 @@ function build_super(q::Quotient, half::Int = 1)
     return sp
 end
 
-"""Writes the super-patch vertex positions from quotient positions Xq (C++ `set_super_positions`)."""
+"""Writes the super-patch vertex positions from quotient positions Xq."""
 function set_super_positions!(sp::SuperPatch, q::Quotient, Xq::Vector{Vec2})
     for i in eachindex(sp.vert_class)
         sp.mesh.X[i] = Xq[sp.vert_class[i]] + q.T * sp.vert_off[i]

@@ -1,9 +1,8 @@
 # core/tutte_auxetic.jl -- the deployability residual (Eq. 2) and the Tutte auxetic
 # linear system (Eqs. 3-6) of 2026 Sec. 4.4.
 #
-# Port of code/src/core/tutte_auxetic.{hpp,cpp}. 1-based indices throughout. The C++
-# keeps the system DENSE (Eigen::MatrixXd) and solves it with a dense BDCSVD; the port
-# does the same with LinearAlgebra.svd so the rank tolerance semantics carry over.
+# 1-based indices throughout. The system is kept DENSE and solved with LinearAlgebra.svd;
+# the rank rule below is the one the archived results were produced with.
 
 @enum BoundaryMode None Fixed Periodic
 
@@ -128,7 +127,7 @@ mutable struct SolveReport
 end
 SolveReport() = SolveReport(0, 0, 0, 0, 0, zeros(0, 2), zeros(0, 0), 0.0, false, false, 0.0)
 
-# The C++ rank rule: sv > max(rel_tol * smax, 1e-14) * max(1, rows, cols).
+# Rank rule: sv > max(rel_tol * smax, 1e-14) * max(1, rows, cols).
 function _sv_rank_tol(sv::AbstractVector, rel_tol::Float64, rows::Int, cols::Int)
     smax = isempty(sv) ? 0.0 : sv[1]
     return max(rel_tol * smax, 1e-14) * max(1, max(rows, cols))
@@ -146,7 +145,7 @@ function solve_system(sys::LinearSystem, X_ini::Vector{Vec2}, rel_tol::Float64 =
     A = sys.A
     nr = size(A, 1)
 
-    # Full V (Eigen: ComputeThinU | ComputeFullV): the trailing N - rank columns span the
+    # Full V (thin U, full V): the trailing N - rank columns span the
     # null space. A 0-row system has no singular values; its null space is all of R^N.
     if nr == 0
         U = zeros(0, 0); sv = Float64[]; V = Matrix{Float64}(I, N, N)
@@ -186,8 +185,8 @@ end
     rank_only_sparse(sys) -> SolveReport
 
 Rank only, via sparse QR (for large systems where the dense SVD is impractical).
-The C++ uses Eigen::SparseQR with `setPivotThreshold(1e-9)`; SuiteSparse SPQR's `tol`
-is the analogous column-norm threshold, so `qr(S; tol = 1e-9)` + `rank` is used here.
+SuiteSparse SPQR's `tol` is a column-norm pivot threshold; `qr(S; tol = 1e-9)` + `rank`
+is used here (the archived rank counts were produced with a pivot threshold of 1e-9).
 """
 function rank_only_sparse(sys::LinearSystem)
     rep = SolveReport()

@@ -11,8 +11,7 @@
 # Everything here is measured; where an identity fails the report carries the
 # counterexample data instead of the routine asserting.
 #
-# Port of code/src/core/rank_checks.{hpp,cpp}. 1-based; the C++ "-1 = none" sentinels
-# of the first_* fields are 0 here.
+# 1-based; the first_* fields use 0 as the "none" sentinel.
 
 # ---------------------------------------------------------------- check 1 ----
 

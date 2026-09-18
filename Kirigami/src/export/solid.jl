@@ -8,7 +8,7 @@
 #     hinge site, and the two faces of a hinge sit in different z slabs
 #     (sigma 2-colours the hinge adjacency), so they overlap only over the pad.
 #
-# Port of code/src/export/solid.{hpp,cpp}. Triangle indices are 1-based into `V`.
+# Triangle indices are 1-based into `V`.
 
 const Vec3 = SVector{3,Float64}
 
@@ -23,20 +23,20 @@ end
 TriMesh() = TriMesh(Vec3[], NTuple{3,Int}[], Int[])
 n_tris(M::TriMesh) = length(M.T)
 
-# The reference build (Apple clang, arm64, -ffp-contract=on) fuses every
-# `x*y - z*w` into fma(x, y, -(z*w)). The ear-clipping tie-breaks and the STL
-# float32 normals depend on those sub-ulp residuals, so the 2D/3D cross products
-# reproduce the contraction explicitly (verified byte-for-byte on the hero exports).
-fms(x, y, z, w) = fma(x, y, -(z * w))  # x*y - z*w as the C++ binary computes it
-cross_cpp(a::Vec3, b::Vec3) = Vec3(fms(a[2], b[3], a[3], b[2]),
+# Every `x*y - z*w` is evaluated as fma(x, y, -(z*w)) (docs/NUMERICS.md). The
+# ear-clipping tie-breaks and the STL float32 normals depend on those sub-ulp
+# residuals, so the 2D/3D cross products spell the contraction out explicitly
+# (verified byte-for-byte against the archived hero exports).
+fms(x, y, z, w) = fma(x, y, -(z * w))  # x*y - z*w, contracted
+cross_fma(a::Vec3, b::Vec3) = Vec3(fms(a[2], b[3], a[3], b[2]),
                                    fms(a[3], b[1], a[1], b[3]),
-                                   fms(a[1], b[2], a[2], b[1]))  # Eigen's cross()
+                                   fms(a[1], b[2], a[2], b[1]))
 
 function normal(M::TriMesh, t::Int)
     a = M.V[M.T[t][1]]
     b = M.V[M.T[t][2]]
     c = M.V[M.T[t][3]]
-    return cross_cpp(b - a, c - a)
+    return cross_fma(b - a, c - a)
 end
 
 """Axis-aligned bounding box `(lo, hi)` of the vertices (zeros when empty)."""
@@ -68,7 +68,7 @@ function summary(r::ManifoldReport)
            (r.consistently_oriented ? "consistently oriented" : "INCONSISTENT orientation") *
            ", boundary edges $(r.n_boundary_edges), non-manifold edges $(r.n_nonmanifold_edges)" *
            ", flipped edges $(r.n_flipped_edges), degenerate tris $(r.n_degenerate)" *
-           ", components $(r.n_components), volume $(cpp_num(r.volume)) mm^3"
+           ", components $(r.n_components), volume $(fmt_num(r.volume)) mm^3"
 end
 
 cross2(a::Vec2, b::Vec2) = fms(a[1], b[2], a[2], b[1])
@@ -86,7 +86,8 @@ const Key3 = NTuple{3,Int64}
 llround(x::Float64) = round(Int64, x, RoundNearestTiesAway)
 key_of(p::Vec3, tol::Float64) = (llround(p[1] / tol), llround(p[2] / tol), llround(p[3] / tol))
 
-# the C++ solid/threemf DSU (`join` does not path-compress the second argument)
+# deliberate: `join` does not path-compress the second argument (the component
+# representatives, and with them the 3MF object order, depend on it)
 function dsu_join!(d::DSU, a::Int, b::Int)
     d.p[find!(d, a)] = find!(d, b)
 end
@@ -187,7 +188,7 @@ function check_manifold(M::TriMesh, weld_tol::Float64 = 1e-6)
         a = M.V[t[1]]
         b = M.V[t[2]]
         c = M.V[t[3]]
-        vol += dot(a, cross_cpp(b, c))
+        vol += dot(a, cross_fma(b, c))
     end
     r.volume = vol / 6.0
     return r
@@ -454,8 +455,8 @@ function build_solid(L::Layout)
         end
     end
 
-    # tri_group values are 0-based face ids in the C++; keep them so the 3MF object
-    # order and the per-body checks match. Living-hinge sheets are one body (0).
+    # tri_group values are 0-based face ids so the 3MF object order and the per-body
+    # checks match the archived exports. Living-hinge sheets are one body (0).
     tri_group_of(face) = pad_mode ? face - 1 : 0
     function add_v(p::Vec2, z::Float64)
         push!(M.V, Vec3(p[1], p[2], z))

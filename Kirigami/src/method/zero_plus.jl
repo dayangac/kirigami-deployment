@@ -2,8 +2,6 @@
 # feasibility problem "make every split cut open OUTWARD and every face positively
 # oriented, somewhere in the Tutte auxetic null space".
 #
-# Port of code/src/method/zero_plus.{hpp,cpp}.
-#
 # By T1.B the two copies of a split edge e = {a, b} between faces f, g (sigma_f = sigma_g)
 # are the SAME vector at every theta and differ by a pure translation, so with
 # Y = cos(theta/2) C + sin(theta/2) S,
@@ -33,7 +31,7 @@
 # dS_e(X0 + Phi t) = dS_e(X0) + sum_j t_j dS_e(Phi_j) and d_e is affine in t; hence q_e is a
 # QUADRATIC polynomial in t, as is every face signed area.
 #
-# Shape-space coefficient layout (as in the C++): Phi is N x k and acts on each coordinate
+# Shape-space coefficient layout: Phi is N x k and acts on each coordinate
 # separately, so t has length m = 2k ordered (column 1 x, column 1 y, column 2 x, ...):
 # t[2j-1] is the x-coefficient of column j, t[2j] its y-coefficient.
 
@@ -313,7 +311,7 @@ Base.@kwdef mutable struct ZeroPlusRepairResult
     f_end::Float64 = 0.0
 end
 
-# The exact constraint values one `_repair_eval` produces alongside F (the C++ out-pointers).
+# The exact constraint values one `_repair_eval` produces alongside F.
 mutable struct _RepairMeasure
     min_q::Float64
     min_a::Float64

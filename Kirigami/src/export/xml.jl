@@ -3,9 +3,8 @@
 # element, balanced and correctly nested tags, quoted attribute values, no stray
 # '<' or '>' in text, and well-formed comments / declarations / CDATA.
 #
-# Port of code/src/export/xml.{hpp,cpp}. Works on code units (bytes) like the C++,
-# with C-locale (ASCII) character classes; byte positions in messages are 0-based
-# like the C++ so the texts match.
+# Works on code units (bytes) with C-locale (ASCII) character classes; byte positions
+# in messages are 0-based.
 
 _xml_isalpha(ch::UInt8) = (UInt8('a') <= ch <= UInt8('z')) || (UInt8('A') <= ch <= UInt8('Z'))
 _xml_isdigit(ch::UInt8) = UInt8('0') <= ch <= UInt8('9')

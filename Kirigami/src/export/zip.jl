@@ -1,8 +1,7 @@
 # export/zip.jl -- a minimal STORE-only (compression method 0) zip writer, enough for
 # the OPC container that a 3MF file is. No external libraries, per the spec.
 #
-# Port of code/src/export/zip.{hpp,cpp}. The archive is a Vector{UInt8}; entry names
-# and contents are Strings (byte strings, like std::string).
+# The archive is a Vector{UInt8}; entry names and contents are Strings (byte strings).
 
 const CRC_TABLE = let t = zeros(UInt32, 256)
     for i in 0:255
@@ -103,8 +102,8 @@ function bytes(z::ZipWriter)
     return out
 end
 
-# Extends Base.write so `write(z, path)` keeps the C++ name without shadowing Base.write
-# for the rest of the module.
+# Extends Base.write so `write(z, path)` reads naturally without shadowing Base.write for
+# the rest of the module.
 function Base.write(z::ZipWriter, path::AbstractString)
     open(path, "w") do io
         write(io, bytes(z))

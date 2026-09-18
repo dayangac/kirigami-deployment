@@ -1,9 +1,9 @@
 # core/orientation.jl -- face-orientation assignment sigma (2026 Sec. 4.2, Eq. 1).
 #
-# Port of code/src/core/orientation.{hpp,cpp}. `assign_orientation_relaxation` reproduces the
-# C++ sigma bit-for-bit for a given `MT19937`: the random angles are `uniform_real(rng, 0, 2pi)`
-# in the same order, cos/sin are the system libm (see generators.jl) and the Eigen vector
-# arithmetic of the projected gradient descent is written out uncontracted.
+# `assign_orientation_relaxation` reproduces the archived sigma bit-for-bit for a given
+# `MT19937`: the random angles are `uniform_real(rng, 0, 2pi)` in a fixed order, cos/sin
+# are the system libm (see generators.jl) and the vector arithmetic of the projected
+# gradient descent is written out uncontracted (docs/NUMERICS.md).
 
 mutable struct OrientationReport
     sigma::Vector{Int}
@@ -28,7 +28,7 @@ function dual_graph(m::Mesh)
     return adj
 end
 
-# shallow copy of the mesh with a different sigma (the C++ `Mesh copy = m; copy.sigma = ...`)
+# shallow copy of the mesh with a different sigma (topology shared)
 function _with_sigma(m::Mesh, sigma::Vector{Int})
     return Mesh(m.X, m.faces, sigma, m.periodic, m.half_edges, m.edges, m.edge_index,
                 m.vertex_half_edges, m.vertex_edges, m.vertex_faces, m.vertex_is_boundary)

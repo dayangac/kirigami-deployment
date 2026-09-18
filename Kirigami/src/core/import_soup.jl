@@ -1,6 +1,6 @@
 # core/import_soup.jl -- a welding importer for polygon soup.
 #
-# Port of code/src/core/import_soup.{hpp,cpp}. The 2025 paper's fabrication SVGs draw every
+# The 2025 paper's fabrication SVGs draw every
 # tile edge as an independent segment with each tile's corners repeated once per incident
 # tile; turning that into a Mesh is three steps:
 #   1. WELD   endpoints within `weld_tol` become one vertex (uniform grid hash).
@@ -8,7 +8,7 @@
 #   3. WALK   the standard planar face traversal: neighbours sorted by angle, successor of
 #             (u -> v) is (v -> w) with w immediately clockwise from u at v. Walks of
 #             positive signed area are the bounded faces; the outer face is dropped.
-# Curved `<path>` elements of an SVG are ignored (counted), as in the C++.
+# Curved `<path>` elements of an SVG are ignored (counted).
 
 mutable struct SoupReport
     mesh::Mesh
@@ -50,7 +50,7 @@ function add!(w::Welder, p::Vec2)
     return id
 end
 
-# polygon_area (shoelace, the C++ file-local copy) is shared with export/layout.jl.
+# polygon_area (shoelace) is shared with export/layout.jl.
 
 # `std::stod`: optional leading whitespace, then the longest valid floating-point prefix.
 const _STOD_RE = r"^\s*[+-]?(?:(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?|inf(?:inity)?|nan)"i

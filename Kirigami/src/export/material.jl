@@ -5,8 +5,6 @@
 # All lengths are millimetres. The profile is the ONLY place fabrication
 # constants live; the SVG, STL and 3MF writers read it and never hard-code a
 # number of their own.
-#
-# Port of code/src/export/material.{hpp,cpp}.
 
 @enum HingeType begin
     LivingHingeNeck  # faces stay connected through a thin neck of material

@@ -1,7 +1,7 @@
 # core/holes.jl -- hole preimage detection (2026 Sec. 4.1, Algorithm 1), an
 # independent partition formulation, and a geometric cross-check on M'.
 #
-# Port of code/src/core/holes.{hpp,cpp}. 1-based indices throughout.
+# 1-based indices throughout.
 
 mutable struct HolePreimage
     edges::Vector{Int}     # edge indices of M, sorted

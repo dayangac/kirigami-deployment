@@ -1,7 +1,7 @@
 # export/stl.jl -- binary STL writer and reader (the reader exists so the tests can
 # validate what was actually written, not what we think we wrote).
 #
-# Port of code/src/export/stl.{hpp,cpp}. Little-endian, like the C++ on x86/ARM.
+# Little-endian (the STL binary convention on x86/ARM).
 
 """Writes `M` as a binary STL (80-byte header, uint32 count, 50 bytes per triangle)."""
 function write_stl_binary(M::TriMesh, path::AbstractString, header::AbstractString = "kiri export")
@@ -32,8 +32,8 @@ function write_stl_binary(M::TriMesh, path::AbstractString, header::AbstractStri
 end
 
 """
-Reads a binary STL back. Vertices are NOT welded here (the C++ header comment says
-they are, but the C++ body only unpacks the triangles); `check_manifold` welds.
+Reads a binary STL back. Vertices are NOT welded here, only the triangles are unpacked;
+`check_manifold` welds.
 """
 function read_stl_binary(path::AbstractString)
     isfile(path) || error("cannot read $path")

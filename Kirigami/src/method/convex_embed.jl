@@ -1,8 +1,6 @@
 # method/convex_embed.jl -- the CONVEXITY-CONSTRAINED point of the Tutte auxetic shape space
 # (ESCALATION.md option 2, experiment K9).
 #
-# Port of code/src/method/convex_embed.{hpp,cpp}.
-#
 # THE PROBLEM SOLVED HERE. Inside the affine shape space X(t) = X0 + Phi t (Phi acting on
 # each coordinate separately, so t has dimension m = 2k as in zero_plus.jl),
 #
@@ -46,7 +44,7 @@
 # The log barrier -log(u), extended linearly (C^1) below u0 so that the backtracking line
 # search never evaluates an infinity and can walk back into the feasible region on its
 # own. Strict feasibility is checked separately, on the exact constraint values.
-# Returns (B, dB/du). Shared with range_embed.jl (the C++ duplicates it per TU).
+# Returns (B, dB/du). Shared with range_embed.jl.
 const kBarrierU0 = 1e-8
 function _log_barrier(u::Float64)
     u >= kBarrierU0 && return -log(u), -1.0 / u

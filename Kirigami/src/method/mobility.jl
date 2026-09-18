@@ -4,16 +4,15 @@
 #
 #     dim ker A  ==  |F \ core2(Gamma)|  +  dim ker A|core2 .
 #
-# A is the closure operator of ideas/rigidity_rig_check.cpp: for each cycle z of a
+# A is the closure operator of the rigidity check of ideas/ (K3a): for each cycle z of a
 # spanning-forest cycle basis of Gamma,
 #     sum_i z_i (omega_{head(i)} - omega_{tail(i)}) p_i = 0     in R^2,
 # with p_i the pin position (the hinge SOURCE vertex) in the current configuration.
 # Here the cycle basis is stored implicitly as a BFS forest plus the non-tree edges,
 # so A is assembled sparsely and the whole thing scales to a few thousand faces.
 #
-# Port of code/src/method/mobility.{hpp,cpp}. Faces, hinge edges and mesh edge ids are
-# 1-based; "-1 at a root" of the C++ becomes 0. `subgraph` returns (HingeGraph, sub_pins)
-# instead of taking the out-pointer.
+# Faces, hinge edges and mesh edge ids are 1-based; a root's parent is 0. `subgraph`
+# returns (HingeGraph, sub_pins).
 
 mutable struct HingeGraph
     F::Int
@@ -155,14 +154,14 @@ function build_A(g::HingeGraph, pins::Vector{Vec2})
             push!(I, 2k);     push!(J, g.tail[i]); push!(V, -z * pins[i][2])
         end
     end
-    return sparse(I, J, V, 2 * nz, g.F)   # duplicates summed, as Eigen setFromTriplets
+    return sparse(I, J, V, 2 * nz, g.F)   # duplicates summed
 end
 
 """
     matrix_rank(A, rel_tol = 1e-10, dense_limit = 700) -> (rank, used_sparse)
 
-Rank: dense column-pivoted Householder QR below `dense_limit` columns (Eigen's rule:
-count |R_ii| > rel_tol * |R_11|), sparse QR (SPQR) above.
+Rank: dense column-pivoted Householder QR below `dense_limit` columns (count
+|R_ii| > rel_tol * |R_11|), sparse QR (SPQR) above.
 """
 function matrix_rank(A::SparseMatrixCSC{Float64,Int}, rel_tol::Float64 = 1e-10,
                      dense_limit::Int = 700)

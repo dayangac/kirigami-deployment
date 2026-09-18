@@ -6,8 +6,7 @@
 # touches `Mesh` or `CutStructure` directly, so the fabrication geometry is
 # defined in exactly one place.
 #
-# Port of code/src/export/layout.{hpp,cpp}. Geometry decisions (documented in
-# code/README.md, section "Export"):
+# Geometry decisions:
 #
 #  * A face's cut outline is its deployed polygon offset inward by
 #    `face_inset(profile)` along every side that is actually cut (hinge or
@@ -31,7 +30,7 @@
 #    sigma is a proper 2-colouring of the hinge adjacency), which is what makes
 #    "alternating up/down, overlapping only at the pad" well defined.
 #
-# Indices are 1-based; "none" markers that the C++ stored as -1 are 0 here.
+# Indices are 1-based; "none" markers are 0.
 
 # One face of M', ready to cut or extrude. All coordinates are millimetres.
 mutable struct FacePiece
@@ -214,8 +213,8 @@ function build_layout(m::Mesh, c::CutStructure, X::Vector{Vec2}, theta::Float64,
                 hd.src == fv[j] && (fp.side_neck_end[i] = true)
             end
             if len[i] > kLayoutEps && ins[i] > 0.4 * len[i]
-                # face / side ids are reported 0-based like the C++ messages
-                push!(warnings, "face $(f - 1) side $(i - 1): inset $(cpp_num(ins[i])) mm exceeds 40% of the side length $(cpp_num(len[i])) mm")
+                # face / side ids are reported 0-based (the JSON file's numbering)
+                push!(warnings, "face $(f - 1) side $(i - 1): inset $(fmt_num(ins[i])) mm exceeds 40% of the side length $(fmt_num(len[i])) mm")
             end
         end
 
@@ -333,7 +332,7 @@ function build_layout(m::Mesh, c::CutStructure, X::Vector{Vec2}, theta::Float64,
             end
         end
         if polygon_area(fp.outline) <= 0
-            push!(warnings, "face $(f - 1): outline is degenerate or inverted (area $(cpp_num(polygon_area(fp.outline))) mm^2) -- inset/neck too large for this face")
+            push!(warnings, "face $(f - 1): outline is degenerate or inverted (area $(fmt_num(polygon_area(fp.outline))) mm^2) -- inset/neck too large for this face")
         end
 
         # z layer: sigma is a proper 2-colouring of the hinge adjacency.
@@ -360,7 +359,7 @@ function build_layout(m::Mesh, c::CutStructure, X::Vector{Vec2}, theta::Float64,
         pb = prime_vertex(c, hs.face_b, hs.src_vertex)
         hs.p = Y[pa]
         if norm(Y[pa] - Y[pb]) > 1e-6 * max(1.0, width(L))
-            push!(warnings, "hinge edge $(e - 1): the two copies of the source vertex are $(cpp_num(norm(Y[pa] - Y[pb]))) mm apart")
+            push!(warnings, "hinge edge $(e - 1): the two copies of the source vertex are $(fmt_num(norm(Y[pa] - Y[pb]))) mm apart")
         end
         da = Y[prime_vertex(c, hs.face_a, hs.dst_vertex)] - Y[pa]
         db = Y[prime_vertex(c, hs.face_b, hs.dst_vertex)] - Y[pb]
@@ -382,7 +381,7 @@ function build_layout(m::Mesh, c::CutStructure, X::Vector{Vec2}, theta::Float64,
                 sa = (hs.face_a <= length(m.sigma)) ? m.sigma[hs.face_a] : -1
                 sb = (hs.face_b <= length(m.sigma)) ? m.sigma[hs.face_b] : -1
                 if sg == sa || sg == sb
-                    push!(warnings, "pin-pad: the pad of hinge edge $(e - 1) at vertex $(hs.src_vertex - 1) (radius $(cpp_num(profile.pad_radius)) mm) reaches face $(g - 1), which prints in the same layer -- reduce pad_radius or increase the scale")
+                    push!(warnings, "pin-pad: the pad of hinge edge $(e - 1) at vertex $(hs.src_vertex - 1) (radius $(fmt_num(profile.pad_radius)) mm) reaches face $(g - 1), which prints in the same layer -- reduce pad_radius or increase the scale")
                     break
                 end
             end
@@ -392,5 +391,5 @@ function build_layout(m::Mesh, c::CutStructure, X::Vector{Vec2}, theta::Float64,
     return L
 end
 
-# std::ostream default formatting of a double (%g with precision 6), used in warnings.
-cpp_num(v::Float64) = @sprintf("%g", v)
+# Default number formatting of the warning texts (%g, precision 6).
+fmt_num(v::Float64) = @sprintf("%g", v)

@@ -1,8 +1,8 @@
 # export/svg.jl -- laser-cutter SVG for a Layout, in millimetres, with the three usual
 # layers as SVG groups: "cut", "score", "engrave".
 #
-# Port of code/src/export/svg.{hpp,cpp}. Face / edge ids in the SVG are 0-based like
-# the C++ output so the files are byte-identical.
+# Face / edge ids in the SVG are 0-based (the JSON file's numbering) so the files are
+# byte-identical to the archived exports.
 
 mutable struct SvgOptions
     margin::Float64       # mm of empty stock around the bounding box

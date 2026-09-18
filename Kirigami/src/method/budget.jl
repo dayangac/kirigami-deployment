@@ -4,10 +4,9 @@
 # HINGE part (fixed by the flat combinatorics) and a SPLIT part (the design freedom,
 # and the quantity whose sign K5/K6/F30 measure).
 #
-# Port of code/src/method/budget.{hpp,cpp}. 1-based indices throughout. C++ out-pointers
-# become extra return values: `face_potential` returns `(u, worst_closure)` and
-# `periodic_cell_edges` returns `(keep, n_preimage)`; the C++ `std::vector<char>` masks
-# are `Vector{Bool}` (an empty mask selects every edge).
+# 1-based indices throughout. Secondary outputs are extra return values: `face_potential`
+# returns `(u, worst_closure)` and `periodic_cell_edges` returns `(keep, n_preimage)`; edge
+# masks are `Vector{Bool}` (an empty mask selects every edge).
 #
 # THE IDENTITY.  With u the face potential of derivations/core.md T1
 # (u_g - u_f = sigma_g x_src(e) across a hinge edge) the deployed area of the preimage
@@ -46,7 +45,7 @@
 #
 # THE SPLIT TERM IS THE 0+ MARGIN.  method/zero_plus.jl measures
 # q_e = det(dS_e, d_e) with d_e = x_b - x_a and dS_e = 2 Jrot (u_{f1} - u_{f0}); since
-# det(Jrot p, v) = -<p, v>, this is  q_e = 2 r_e  EXACTLY (asserted by a doctest).  So
+# det(Jrot p, v) = -<p, v>, this is  q_e = 2 r_e  EXACTLY (asserted by a unit test).  So
 # "every split cut opens at 0+" is  min_e r_e > 0, and averaging over the n_split cuts,
 #
 #      min_e r_e <= R / n_split = (det(P_0) tr K - W) / n_split ,

@@ -3,7 +3,7 @@
 # One <object> per connected solid, so a living-hinge sheet is a single object
 # and a pin-pad assembly is one object per face plate.
 #
-# Port of code/src/export/threemf.{hpp,cpp}. Vertex indices in the model XML are
+# Vertex indices in the model XML are
 # 0-based (3MF format), converted from the 1-based TriMesh at the print site.
 
 # std::ostream << setprecision(9) << double

@@ -1,7 +1,6 @@
 # method/design.jl -- the deliverable method, as one API (specs/builder_method.md D7 update).
 #
-# Port of code/src/method/design.{hpp,cpp}. The project has two halves and this file is
-# the entry point to both.
+# The project has two halves and this file is the entry point to both.
 #
 # (A) CHARACTERIZATION -- `characterize(mesh, sigma, X)`. Given ANY oriented planar graph
 #     and ANY flat embedding of it, return the EXACT deployment range Theta_max by T4.2''
@@ -20,14 +19,14 @@
 #     projection and nothing else, i.e. t = 0, characterized by exactly the same code.
 #
 # (D) RANGE-MAXIMISING CONSTRUCTION -- `design_range_max` runs EXACTLY the per-design
-#     pipeline of apps/kill_k9c.cpp (arms k9, k9b, stage A from each start, stage B on
+#     pipeline of apps/kill_k9c.jl (arms k9, k9b, stage A from each start, stage B on
 #     the stage-A winner, best-of-three by exact Theta_max), with no wall-clock gating.
 #
 # DEFAULTS ARE K9'S / K9c's, so that with the runs' seeds these functions reproduce
 # results/kill/k9/k9.csv and results/kill/k9c/k9c.csv row for row (test/test_design.jl).
 #
 # Shape-space coefficients `t` are plain `Vector{Float64}` of length 2 * dim_null; an
-# empty vector stands for Eigen's empty VectorXd (t = 0 / no coefficients).
+# empty vector stands for t = 0 (no coefficients).
 
 # ---------------------------------------------------------------------------
 # (A) Characterization.
@@ -201,8 +200,8 @@ RangeMaxResult() = RangeMaxResult(DesignResult(), "", false, 0.0, RangeMaxArm[])
 # ---------------------------------------------------------------------------
 # Internals.
 
-# The scale every area-valued quantity here is measured in. Copied verbatim from
-# apps/kill_common.hpp (nth_element at L.size()/2, i.e. the upper median).
+# The scale every area-valued quantity here is measured in: the upper median of the edge
+# lengths (element at index length/2 of the sorted list), as apps/kill_common.jl defines it.
 function median_edge_length(m::Mesh)
     L = [norm(m.X[e.key.a] - m.X[e.key.b]) for e in m.edges]
     isempty(L) && return 1.0
@@ -254,7 +253,7 @@ function referee_theta(c::CutStructure, X::Vector{Vec2}, grid::Int, iters::Int, 
 end
 
 # Mesh + sigma + X, validated once, so every entry point rejects the same bad inputs
-# (C++ std::invalid_argument -> ArgumentError).
+# (ArgumentError).
 function prepare(mesh::Mesh, sigma::Vector{Int}, X::Vector{Vec2}, who::String)
     n_vertices(mesh) == 0 && throw(ArgumentError("$who: mesh has no vertices"))
     n_faces(mesh) == 0 && throw(ArgumentError("$who: mesh has no faces"))
@@ -510,7 +509,7 @@ function design_constrained(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec
     # --- K9 variant (b), verbatim ---------------------------------------------
     # Variant (a) (convexity only) and K6's split-only repair are both RELAXATIONS of
     # (b), so their minimisers are strictly better starts than the origin. They are
-    # computed only when the cold solve fails, exactly as in apps/kill_k9.cpp.
+    # computed only when the cold solve fails, exactly as apps/kill_k9.jl does.
     ra = nothing
     sp = nothing
     if opt.warm_starts
@@ -585,7 +584,7 @@ function design_baseline(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec2},
 end
 
 # ---------------------------------------------------------------------------
-# (D) The range-maximising construction (K9c), as apps/kill_k9c.cpp runs it.
+# (D) The range-maximising construction (K9c), as apps/kill_k9c.jl runs it.
 
 # One scored candidate point of design_range_max. `delta` is the arm's OWN margin: the
 # k9b arm is solved (and judged) at 1e-2, every other arm at 1e-3, exactly as in K9c.
@@ -603,7 +602,7 @@ end
 RangeCand() = RangeCand(false, "", Vec2[], Float64[], false, 0.0, 0.0, 0.0, Characterization())
 
 # K9c's ordering of candidates: exact Theta_max first, the certified eps_max as the
-# tie-break. Bit-identical to the `best` loop of apps/kill_k9c.cpp.
+# tie-break. Identical to the `best` loop of apps/kill_k9c.jl.
 function beats(a::RangeCand, b::RangeCand)
     !b.have && return true
     a.theta_max > b.theta_max + 1e-12 && return true
@@ -805,7 +804,7 @@ end
 
 K5's defect-minimizing sigma: greedy single-face and adjacent-pair flips on D(sigma),
 4 starts (Eq. (1)'s sigma plus 3 random), rejecting any sigma whose hinge graph is
-disconnected. `restart_used` is 0-based like the C++ (0 = sigma_start).
+disconnected. `restart_used` is 0-based (0 = sigma_start), as the archived CSVs report it.
 """
 function orientation_defect(mesh::Mesh, sigma_start::Vector{Int}, cap::Int, seed::Integer = 7000)
     length(sigma_start) != n_faces(mesh) &&
