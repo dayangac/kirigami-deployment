@@ -1,23 +1,24 @@
 WP2b -- solver basin vs geometry, derived from results/yield/basin.csv
 deploy threshold: exact Theta_max > 1e-9
 
-designs: 8 (8 originally failing, 0 sampled successes); designs without all 9 rows: 3
+designs: 123 (93 originally failing, 30 sampled successes); designs without all 9 rows: 0
 
 == 1. FLIP RATE OF THE FAILURES (>= 1 of 8 new seeds deploying)
-overall: 0 / 8 = 0 %, Wilson 95 % [0, 32.44075649] %
-of the flipped, eps_max >= 0.1 rad at the best seed: 0; confirmed by the 1e-9 bisection referee: 0
+overall: 7 / 93 = 7.52688172 %, Wilson 95 % [3.693668398, 14.7297001] %
+of the flipped, eps_max >= 0.1 rad at the best seed: 4; confirmed by the 1e-9 bisection referee: 7
 by family:
-  delaunay: 0 / 2 = 0 %  [0, 65.76197725]
-  quad_random: 0 / 5 = 0 %  [0, 43.44824648]
-  voronoi: 0 / 1 = 0 %  [0, 79.34506856]
+  delaunay: 3 / 26 = 11.53846154 %  [4.003244624, 28.97590321]
+  quad_random: 2 / 55 = 3.636363636 %  [1.002954129, 12.32346397]
+  voronoi: 2 / 12 = 16.66666667 %  [4.696514218, 44.80308623]
 by original binding:
-  inverted: 0 / 4 = 0 %  [0, 48.98908365]
-  split-inward: 0 / 4 = 0 %  [0, 48.98908365]
+  inverted: 2 / 27 = 7.407407407 %  [2.055465406, 23.36959268]
+  split-inward: 4 / 57 = 7.01754386 %  [2.762642023, 16.7001701]
+  vertex-edge: 1 / 9 = 11.11111111 %  [1.989088764, 43.49997056]
 by orientation rule:
-  sigma_def: 0 / 4 = 0 %  [0, 48.98908365]
-  sigma_mc: 0 / 4 = 0 %  [0, 48.98908365]
+  sigma_def: 5 / 48 = 10.41666667 %  [4.532171904, 22.16742169]
+  sigma_mc: 2 / 45 = 4.444444444 %  [1.227412671, 14.82751077]
 distribution of the number of deploying seeds (out of 8), failures only:
-  n=0: 8
+  n=0: 86
   n=1: 0
   n=2: 0
   n=3: 0
@@ -25,23 +26,63 @@ distribution of the number of deploying seeds (out of 8), failures only:
   n=5: 0
   n=6: 0
   n=7: 0
-  n=8: 0
+  n=8: 7
+best Theta_max over the flipped designs: min 0.006630505024, median 0.1475999041, max 0.4795353834
 flipped designs:
+  voronoi_39_sigma_def (n=8, theta=0.006631)
+  quad_random_47_sigma_def (n=8, theta=0.164840)
+  delaunay_40_sigma_def (n=8, theta=0.479535)
+  delaunay_151_sigma_def (n=8, theta=0.206047)
+  delaunay_145_sigma_def (n=8, theta=0.147600)
+  voronoi_135_sigma_mc (n=8, theta=0.030685)
+  quad_random_170_sigma_mc (n=8, theta=0.062224)
 
 == 2. SEED-TO-SEED SPREAD ON THE 30 SAMPLED SUCCESSES (9 seeds each)
 id,sigma,n_seeds,min,q25,median,q75,max,iqr,rel_iqr,theta_k0,best_k,orig_is_best,n_zero
-successes: 0; original seed was the best of the 9 on 0 (0 %)
-successes with at least one NON-deploying seed: 0; all 9 deploy: 0
-sampled successes with eps_max >= 0.1: k = 0: 0, best of 9: 0
+65,sigma_mc,9,0.3625597141,0.3625597141,0.3625597141,0.3625597141,0.743443,0,0,0.743443,0,1,0
+88,sigma_mc,9,1.816360104,1.816360104,1.816360104,1.816360104,2.36977,0,0,2.36977,0,1,0
+130,sigma_def,9,0.3805541294,0.3805541294,0.3805541294,0.3805541294,0.423461,0,0,0.423461,0,1,0
+31,sigma_def,9,0.2058899804,0.2058899804,0.2058899804,0.2058899804,0.373062,0,0,0.373062,0,1,0
+48,sigma_def,9,0.491928,1.156763864,1.156763864,1.156763864,1.156763864,0,0,0.491928,1,0,0
+109,sigma_def,9,0.294074,0.3797071902,0.3797071902,0.3797071902,0.3797071902,0,0,0.294074,1,0,0
+117,sigma_mc,9,0.004706542247,0.004706542247,0.004706542247,0.004706542247,0.0120059,0,0,0.0120059,0,1,0
+131,sigma_mc,9,0.03643319341,0.03643319341,0.03643319341,0.03643319341,0.0364332,0,0,0.0364332,0,1,0
+173,sigma_def,9,0.3835048164,0.3835048164,0.3835048164,0.3835048164,0.78567,0,0,0.78567,0,1,0
+42,sigma_def,9,1.340639347,1.340639347,1.340639347,1.340639347,1.8823,0,0,1.8823,0,1,0
+57,sigma_mc,9,0.03607988895,0.03607988895,0.03607988895,0.03607988895,0.0361507,0,0,0.0361507,0,1,0
+103,sigma_mc,9,0.3019566666,0.3019566666,0.3019566666,0.3019566666,0.301957,0,0,0.301957,0,1,0
+158,sigma_def,9,0.2561852838,0.2561852838,0.2561852838,0.2561852838,0.457311,0,0,0.457311,0,1,0
+168,sigma_def,9,0.9350944512,0.9350944512,0.9350944512,0.9350944512,0.987294,0,0,0.987294,0,1,0
+174,sigma_mc,9,0.01028055235,0.01028055235,0.01028055235,0.01028055235,0.0570791,0,0,0.0570791,0,1,0
+16,sigma_mc,9,0.4527348249,0.4527348249,0.4527348249,0.4527348249,0.466545,0,0,0.466545,0,1,0
+35,sigma_mc,9,0.003644610321,0.003644610321,0.003644610321,0.003644610321,0.00621137,0,0,0.00621137,0,1,0
+44,sigma_def,9,0.09048922289,0.09048922289,0.09048922289,0.09048922289,0.207534,0,0,0.207534,0,1,0
+193,sigma_mc,9,1.55524,3.07624989,3.07624989,3.07624989,3.07624989,0,0,1.55524,1,0,0
+46,sigma_def,9,0.713545,0.8850885864,0.8850885864,0.8850885864,0.8850885864,0,0,0.713545,1,0,0
+74,sigma_mc,9,0.007669799179,0.007669799179,0.007669799179,0.007669799179,0.0264202,0,0,0.0264202,0,1,0
+147,sigma_def,9,1.76905,1.781106273,1.781106273,1.781106273,1.781106273,0,0,1.76905,1,0,0
+176,sigma_mc,9,0.140412,0.1404124049,0.1404124049,0.1404124049,0.1404124049,0,0,0.140412,1,0,0
+37,sigma_def,9,0.284656,0.3331822625,0.3331822625,0.3331822625,0.3331822625,0,0,0.284656,1,0,0
+63,sigma_mc,9,0.003525333775,0.003525333775,0.003525333775,0.003525333775,0.00352782,0,0,0.00352782,0,1,0
+108,sigma_def,9,0.0007939948244,0.0007939948244,0.0007939948244,0.0007939948244,0.0240148,0,0,0.0240148,0,1,0
+114,sigma_mc,9,0.005627945415,0.005627945415,0.005627945415,0.005627945415,0.060604,0,0,0.060604,0,1,0
+172,sigma_mc,9,0.6386399198,0.6386399198,0.6386399198,0.6386399198,1.34943,0,0,1.34943,0,1,0
+177,sigma_def,9,0.642659866,0.642659866,0.642659866,0.642659866,1.24184,0,0,1.24184,0,1,0
+187,sigma_mc,9,0.345759,0.4117952078,0.4117952078,0.4117952078,0.4117952078,0,0,0.345759,1,0,0
+successes: 30; original seed was the best of the 9 on 22 (73.33333333 %)
+successes with at least one NON-deploying seed: 0; all 9 deploy: 30
+relative IQR (IQR / median Theta_max): median 0, q90 0, max 0
+best / original Theta_max: median 1, q90 1.2454889, max 2.351490186
+sampled successes with eps_max >= 0.1: k = 0: 21, best of 9: 21
 
 == 3. BEST-OF-9 YIELD ON THE 400 K9c DESIGNS
 single-seed (archived K9c): 307 / 400 = 76.75 %
-best-of-9 (EXACT on the deploy count: every one of the 93 failures was rerun, and a success stays a success because k = 0 is one of the nine): 307 / 400 = 76.75 %, Wilson 95 % [72.36773297, 80.62335929] %
-eps_max >= 0.1 rad: EXTRAPOLATED from the 0 sampled successes only (the other 307 successes were not rerun).
-  sampled-success rate at k = 0: 0, best of 9: 0
-  implied count over the 307 successes: 0 -> 0, plus 0 from the flipped failures
-  implied 400-design rate: 0 % (best of 9) against the archived 103/400 = 25.75 % single-seed on the fresh set and K9c's own count; treat as an estimate, not a measurement.
+best-of-9 (EXACT on the deploy count: every one of the 93 failures was rerun, and a success stays a success because k = 0 is one of the nine): 314 / 400 = 78.5 %, Wilson 95 % [74.21294765, 82.24485158] %
+eps_max >= 0.1 rad: EXTRAPOLATED from the 30 sampled successes only (the other 277 successes were not rerun).
+  sampled-success rate at k = 0: 0.7, best of 9: 0.7
+  implied count over the 307 successes: 214.9 -> 214.9, plus 4 from the flipped failures
+  implied 400-design rate: 54.725 % (best of 9); treat as an estimate, not a measurement.
 
 == 4. PRE-REGISTERED RULE
-flip rate 0 % < 20 % -> PREDOMINANTLY GEOMETRIC: the failure set is not a solver basin.
+flip rate 7.52688172 % < 20 % -> PREDOMINANTLY GEOMETRIC: the failure set is not a solver basin.
 

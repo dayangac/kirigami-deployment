@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """WP2 -- why the K9c yield is not scale-free.
 
-Reads only CSVs written by code/apps/kill_yield.cpp:
+Reads only CSVs written by Kirigami/apps/kill_yield.jl:
   results/yield/features.csv  400 K9c designs, input-side features + the K9c outcomes
                               joined from results/kill/k9c/k9c.csv
   results/yield/fresh.csv     held-out designs (ids 1000..), features and outcomes both
@@ -42,7 +42,7 @@ def say(*a):
 
 # --- statistics --------------------------------------------------------------
 def wilson(k, n, z=1.96):
-    """Wilson score interval, identical to code/scripts/plot_final.py's."""
+    """Wilson score interval, identical to Kirigami/scripts/plot_common.jl's."""
     if n == 0:
         return 0.0, 0.0, 0.0
     phat = k / n
