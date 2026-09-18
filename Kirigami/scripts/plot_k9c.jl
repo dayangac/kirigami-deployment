@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-# K9c figures (port of plot_k9c.py).
+# K9c figures.
 #   k9c_gallery.png -- the 20 best designs by certified eps_max, closed and at Theta_max/2.
 #   k9c_hist.png    -- certified eps_max distribution + per-solver counts.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k9c.jl [results/kill/k9c]
@@ -103,10 +103,11 @@ function hist()
     k9b = count(r -> fnum(r, "k9b_theta") > 1e-9, R)
     k9c = count(r -> fnum(r, "k9c_theta") > 1e-9, R)
     best = count(r -> fnum(r, "theta_exact") > 1e-9 && fnum(r, "theta_ref9") > 1e-9, R)
-    names = ["Eq. (6)\n(K1a)", "σ_mc\n(K5)", "σ_def\n(K5)", "0+ repair\n(K6)",
+    names = ["Eq. (6)\n(K1a)", "σ_mc\n(K5)", "σ_def\n(K5)", "0+ repair\n(K6, best of 4)",
              "convexity\nonly (K9a)", "prox. arm\n(K9)", "prox. arm\n(K9b-like)",
              "K9c\nrange-max", "best of\nthree"]
-    vals = [0, 0, 0, 0, 0, k9, k9b, k9c, best]
+    k6 = k6_baseline_deployable()  # Eq. (6) + repairs, best of K6's four variants per design
+    vals = [0, 0, 0, k6, 0, k9, k9b, k9c, best]
     cols = vcat(fill(GREY(0.7), 5),
                 parse.(Makie.Colors.Colorant, ["#9BB7F0", "#9BB7F0", "#5B8FF9", "#3363C7"]))
     ax1 = Axis(fig[1, 2]; xticks = (0:length(vals)-1, names), xticklabelsize = 8,

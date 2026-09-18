@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-# Summarise results/kill/k8a/k8a.csv (written by code/apps/kill_k8a.cpp).
-# Port of summarise_k8a.py: a text reduction of the merged CSV, printed to stdout so the
+# Summarise results/kill/k8a/k8a.csv (written by Kirigami/apps/kill_k8a.jl).
+# A text reduction of the merged CSV, printed to stdout so the
 # caller can tee it into summary.txt.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/summarise_k8a.jl results/kill/k8a
 using CSV, DataFrames, Printf

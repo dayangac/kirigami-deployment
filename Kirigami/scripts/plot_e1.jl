@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
 # E1 -- histogram of |Theta_max(T4.2") - bisect| over the extended population.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_e1.jl
-# Port of plot_e1.py (matplotlib) to CairoMakie.
 include(joinpath(@__DIR__, "plot_common.jl"))
 
 const CSVP = "results/final/e1/e1.csv"
@@ -18,7 +17,7 @@ ax = Axis(fig[1, 1];
           xlabel = L"|\Theta_{max}(\mathrm{T4.2''}) - \Theta_{max}(\mathrm{bisection})|\ \mathrm{(rad)}",
           ylabel = "count (log)", yscale = log10,
           title = "E1: exact vs. bisection referee, N=$(length(gaps))")
-hist_bars!(ax, gaps, linbins(gaps, 60); color = "#3b6ea5", logy = true)
+gap_hist_log!(ax, gaps; color = "#3b6ea5")
 vlines!(ax, [1e-5]; color = :crimson, linestyle = :dash, linewidth = 1,
         label = "1e-5 agreement bar")
 axislegend(ax)

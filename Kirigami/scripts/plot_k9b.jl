@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-# K9b figures (port of plot_k9b.py).
+# K9b figures.
 #   k9b_gallery.png -- >= 20 deployed random graphs, each shown closed (theta = 0) and at
 #                      theta = Theta_max / 2, from the JSON dumped by kill_k9b.
 #   k9b_hist.png    -- the certified eps_max distribution of K9b against the baselines.
@@ -69,7 +69,9 @@ function gallery(n_want = 20)
     return length(entries)
 end
 
-# Per design, the better of K9's solver configuration and K9b's sweep (see the .py).
+# Per design, the better of K9's solver configuration and K9b's sweep. Both are exact-verified
+# positives under the same certificate on the same 400 designs, so the per-design maximum is a
+# legitimate multi-start count -- reported next to the two runs, never in place of either.
 function union_positives(R)
     path = "results/kill/k9/k9.csv"
     isfile(path) || return count(r -> fnum(r, "theta_ref9") > 1e-9, R)
@@ -98,14 +100,17 @@ function hist()
     ymax = maximum(bincounts(eps, linbins(eps, 24)); init = 1)
     text!(ax0, 0.105, ymax * 0.92; text = "0.1 rad target", color = "#E8684A", fontsize = 10)
 
-    # Every baseline on this exact population is identically zero.
-    names = ["Eq. (6)\n(K1a)", "σ_mc\n(K5)", "σ_def\n(K5)", "0+ repair\n(K6)",
+    # Every baseline on this exact population is zero except the K6 repair, read from k6.csv
+    # under its best-of-four rule.
+    names = ["Eq. (6)\n(K1a)", "σ_mc\n(K5)", "σ_def\n(K5)", "0+ repair\n(K6, best of 4)",
              "convexity\nonly (K9a)", "K9 (b)", "K9b\nsweep", "best of\nboth"]
     k9 = 36
-    # A positive needs BOTH the exact scan and the referee (see the .py for the case).
+    # A positive needs BOTH the exact scan and the referee: delaunay 40 sigma_mc has
+    # bisection(1e-9) = 2.07e-7 rad, below the bisection's own grid resolution, with the exact
+    # scan at 0. It is bisection noise, not a design that deploys.
     k9b = count(r -> fnum(r, "theta_exact") > 1e-9 && fnum(r, "theta_ref9") > 1e-9, R)
     union = union_positives(R)
-    vals = [0, 0, 0, 0, 0, k9, k9b, union]
+    vals = [0, 0, 0, k6_baseline_deployable(), 0, k9, k9b, union]
     cols = vcat(fill(GREY(0.7), 5), parse.(Makie.Colors.Colorant, ["#9BB7F0", "#9BB7F0", "#5B8FF9"]))
     ax1 = Axis(fig[1, 2]; xticks = (0:length(vals)-1, names), xticklabelsize = 9,
                ylabel = L"designs with refereed $\Theta_{max} > 0$",

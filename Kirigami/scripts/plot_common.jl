@@ -1,9 +1,8 @@
-# plot_common.jl -- helpers shared by the plot_*.jl ports of code/scripts/plot_*.py.
+# plot_common.jl -- helpers shared by the plot_*.jl CairoMakie figure scripts.
 #
-# The Python originals read CSVs with csv.DictReader (every cell a string) and parsed on
-# use; `rows(path)` reproduces that so the per-script logic stays a line-by-line port.
-# Output paths get a "_julia" suffix (outpath) while the matplotlib originals are kept
-# for visual diffing.
+# CSVs are read as String cells (csv.DictReader semantics) and parsed on use, so every
+# per-script tally is explicit about which column it counts and how. `outpath` is the
+# single hook through which every script names its figure.
 using CairoMakie
 using CSV
 using DataFrames
@@ -44,17 +43,23 @@ inum(r::Row, k, d = 0) = (v = tryparse(Int, get(r, k, "")); v === nothing ? d : 
 fnum(s::AbstractString, d = NaN) = (v = tryparse(Float64, s); v === nothing ? d : v)
 
 # ---- output naming ----------------------------------------------------------------------
-"insert `_julia` before the extension: results/x/fig.png -> results/x/fig_julia.png"
-function outpath(p::AbstractString)
-    base, ext = splitext(p)
-    return base * "_julia" * ext
-end
+"canonical output path (identity; kept so every script names its figure through one hook)"
+outpath(p::AbstractString) = String(p)
 
 function savefig(fig, p::AbstractString; px_per_unit = 2)
     mkpath(dirname(p))
     save(p, fig; px_per_unit)
     println("wrote ", p)
 end
+
+# ---- K6 baseline (Eq. (6) + repairs) --------------------------------------------------
+# The headline K6 rule: a design counts as deployable when the best of the four repair variants
+# (primary, split-only secondary, lambda ladder, stage 2) has a refereed range > 0.
+const K6_BASELINE_CSV = "results/kill/k6/k6.csv"
+const K6_THETA_COLS = ["theta_exact", "sec_theta_bisect", "lad_theta_bisect", "s2_theta_bisect"]
+k6_best_theta(r::Row) = maximum(fnum(r, c, 0.0) for c in K6_THETA_COLS)
+"number of K6 designs deployable under the best-of-four rule (17 of 400 in the committed run)"
+k6_baseline_deployable(path = K6_BASELINE_CSV) = isfile(path) ? count(r -> k6_best_theta(r) > 1e-9, rows(path)) : 0
 
 # ---- statistics -----------------------------------------------------------------------
 "Wilson 95 % interval -> (p, lo, hi)"
@@ -108,6 +113,19 @@ function hist_bars!(ax, v, edges; color, alpha = 1.0, strokecolor = :white,
     barplot!(ax, ctr[keep], c[keep]; width = w[keep], gap = 0,
              color = (color, alpha), strokecolor, strokewidth, label,
              fillto = logy ? 0.5 : 0.0)
+end
+
+"""log-x histogram of non-negative gaps: quarter-decade bins from `floor` to `top`; exact zeros
+are floored to `floor` so they land in the leftmost bin (the x tick there reads `0 / <=floor`)."""
+function gap_hist_log!(ax, gaps; floor = 1e-14, top = 1e-4, color, logy = true)
+    g = [max(x, floor) for x in gaps]
+    edges = 10 .^ collect(log10(floor):0.25:log10(top))
+    hist_bars!(ax, g, edges; color, logy)
+    ax.xscale = log10
+    ax.xticks = (10.0 .^ (log10(floor):2:log10(top)),
+                 [i == 0 ? "0 / ≤1e$(Int(round(log10(floor))))" : "1e$(Int(round(log10(floor) + 2i)))"
+                  for i in 0:length(log10(floor):2:log10(top))-1])
+    xlims!(ax, floor / 1.5, top * 1.5)
 end
 
 # ---- polygon drawing (matplotlib PatchCollection equivalents) ------------------------

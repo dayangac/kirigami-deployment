@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-# K7 figures (port of plot_k7.py): Poisson-ratio curves (predicted vs measured), the
+# K7 figures: Poisson-ratio curves (predicted vs measured), the
 # achievable-K dimension histogram, the C4 area-fit deviation and the C3 outcome bars.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k7.jl [results/kill/k7]
 include(joinpath(@__DIR__, "plot_common.jl"))
@@ -75,7 +75,9 @@ function dim_figure()
     savefig(fig, outpath(joinpath(D, "k7_dimK_hist.png")))
 end
 
-# Where the hole-area harmonic and forward kinematics part company (see the .py).
+# Where the hole-area harmonic and forward kinematics part company: only on the theta-interval
+# where the deployed cell has inverted (det P_theta < 0), because the measured area uses |det P|
+# while the harmonic is the signed det P_0 (det J - 1).
 function c4_figure()
     path = joinpath(D, "k7_c4_sweep.csv")
     isfile(path) || return
@@ -101,7 +103,9 @@ function c4_figure()
     savefig(fig, outpath(joinpath(D, "k7_c4_area_fit.png")))
 end
 
-# C3 outcome per pattern (see the .py); prefers the post-F32 certificate run.
+# C3 outcome per pattern: the target is always hit to machine precision; what fails is
+# certifying a positive deployment range at the hitting design. Prefers the post-F32
+# certificate run.
 function c3_figure()
     path = joinpath(D, "k7_c3_all_v2.csv")
     isfile(path) || (path = joinpath(D, "k7_c3_all.csv"))

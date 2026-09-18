@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # A3 jitter-transition figure: deployable / certified fraction against jitter amplitude,
 # one curve per authored tiling per sigma rule, drawn from ladder.csv written by
-# `kill_jitter --analyze`.  Port of plot_jitter.py.
+# `kill_jitter --analyze`.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_jitter.jl [results/kill/jitter]
 include(joinpath(@__DIR__, "plot_common.jl"))
 

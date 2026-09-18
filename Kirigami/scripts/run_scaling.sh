@@ -1,7 +1,6 @@
 #!/bin/zsh
 # WP7b -- drives Kirigami/apps/kill_scaling.jl one (cell, routine) per process, strictly
 # sequentially, so that the peak resident set at exit (Sys.maxrss) is that routine's own.
-# Julia port of code/scripts/run_scaling.sh.
 #
 # Each invocation is wrapped in the repo's `perl -e alarm` cap (no GNU coreutils `timeout`
 # on this machine). A routine that is killed writes no row; the script records the miss in
@@ -11,7 +10,7 @@
 #   Kirigami/scripts/run_scaling.sh [outdir]      (run from the repo root)
 set -u
 export PATH=$HOME/.juliaup/bin:$PATH
-OUT=${1:-results/scaling_julia}
+OUT=${1:-results/scaling}
 BIN=(julia --project=Kirigami Kirigami/apps/kill_scaling.jl)
 CSV=$OUT/scaling.csv
 CAP_CSV=$OUT/capped.csv

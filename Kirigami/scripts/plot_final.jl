@@ -1,8 +1,10 @@
 #!/usr/bin/env julia
-# Final paper figures (port of plot_final.py): baseline (Eq. (6), K6) vs. the three
-# constrained-embedding arms (K9 proximity, K9b, K9c range-maximising), plus E1's
-# exact-vs-referee agreement. See plot_final.py's header for the source table.
-# Figures -> results/final/figures/ (with the _julia suffix while both versions coexist):
+# Final paper figures: baseline (Eq. (6) + the K6 repairs) vs. the three constrained-embedding
+# arms (K9 proximity, K9b, K9c range-maximising), plus E1's exact-vs-referee agreement.
+# The baseline arm is read from results/kill/k6/k6.csv as the best of K6's four repair
+# variants per design (primary, split-only secondary, lambda ladder, stage 2): exact
+# Theta_max = max of the variants' refereed ranges, eps_max = max of their certificates.
+# Figures -> results/final/figures/:
 #   fig_yield, fig_eps_hist, fig_feasible_vs_deployable, fig_gallery_full, fig_e1_agreement,
 #   summary_table.md, README.md
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_final.jl
@@ -10,7 +12,7 @@ include(joinpath(@__DIR__, "plot_common.jl"))
 
 const K9C_DIR = "results/kill/k9c"
 const GALLERY = joinpath(K9C_DIR, "gallery")
-const K6_CSV = "results/kill/k6/k6_final.csv"
+const K6_CSV = "results/kill/k6/k6.csv"
 const E1_CSV = "results/final/e1/e1.csv"
 const OUT_DIR = "results/final/figures"
 mkpath(OUT_DIR)
@@ -40,6 +42,18 @@ end
 load_k6() = Dict((r["kind"], r["id"], r["sigma"]) => r for r in rows(K6_CSV))
 f(x) = parse(Float64, x)
 
+# The baseline arm: best of K6's four repair variants per design. `theta` is the largest
+# refereed range (the primary variant's exact scan; the other variants carry the bisection
+# referee), `eps` the largest certificate.
+const K6_THETA = ["theta_exact", "sec_theta_bisect", "lad_theta_bisect", "s2_theta_bisect"]
+const K6_EPS = ["eps_max", "sec_eps_max", "lad_eps_max", "s2_eps_max"]
+function baseline_value(k6, r, field)
+    k = (r["kind"], r["id"], r["sigma"])
+    haskey(k6, k) || return 0.0
+    cols = field == "theta" ? K6_THETA : K6_EPS
+    return maximum(f(k6[k][c]) for c in cols)
+end
+
 # ---------------------------------------------------------------------------
 # fig_yield: yield vs |F|, per family x sigma, 4 arms, Wilson 95% CI
 # ---------------------------------------------------------------------------
@@ -52,7 +66,7 @@ function fig_yield(R, k6)
         end
         return length(edges) - 1
     end
-    get_(row, arm, field) = arm == "baseline" ? 0.0 : f(row["$(arm)_$(field)"])
+    get_(row, arm, field) = arm == "baseline" ? baseline_value(k6, row, field) : f(row["$(arm)_$(field)"])
 
     fig = Figure(size = (1350, 760))
     metrics = [("theta", 1e-9, "yield: exact Θmax > 0"),
@@ -104,7 +118,7 @@ end
 # ---------------------------------------------------------------------------
 # fig_eps_hist: eps_max distribution, K9c vs K9, log-x, zero-count bars per arm
 # ---------------------------------------------------------------------------
-function fig_eps_hist(R)
+function fig_eps_hist(R, k6)
     fig = Figure(size = (1120, 420))
     k9c_pos = [f(r["k9c_eps"]) for r in R if f(r["k9c_eps"]) > 0]
     k9_pos = [f(r["k9_eps"]) for r in R if f(r["k9_eps"]) > 0]
@@ -123,7 +137,8 @@ function fig_eps_hist(R)
     axislegend(ax0; labelsize = 9, framevisible = false)
 
     n = length(R)
-    zero_counts = [arm == "baseline" ? n : n - count(r -> f(r["$(arm)_eps"]) > 0, R) for arm in ARMS]
+    zero_counts = [arm == "baseline" ? n - count(r -> baseline_value(k6, r, "eps") > 0, R) :
+                   n - count(r -> f(r["$(arm)_eps"]) > 0, R) for arm in ARMS]
     ax1 = Axis(fig[1, 2]; xticks = (0:3, [ARM_LABEL[a] for a in ARMS]), xticklabelsize = 9,
                ylabel = L"designs with $\varepsilon_{max}=0$ (of %$n)", title = "count at zero, per arm",
                titlesize = 12)
@@ -176,7 +191,7 @@ function draw!(ax, path, color, title)
     ax.title = title
 end
 
-function fig_gallery_full(R)
+function fig_gallery_full(R, k6)
     CLOSED, OPEN = "#BDD2FD", "#5B8FF9"
     tagof(r) = "$(r["kind"])_$(r["id"])_$(r["sigma"])"
     deployable = [r for r in R if f(r["theta_exact"]) > 0 &&
@@ -201,7 +216,7 @@ function fig_gallery_full(R)
     Label(fig[0, 1:ncol],
           "All $(length(deployable)) K9c-deployable designs (of $(length(R)) measured), sorted by certified εmax descending\n" *
           "left of each pair = closed (θ=0); right = deployed to Θmax/2\n" *
-          "baseline (Eq.(6)+repairs, K6): closed only, Θmax=0 on all $(length(R)) designs in this population -- no deployed panel exists to show";
+          "baseline (Eq.(6)+repairs, K6): $(count(r -> baseline_value(k6, r, "theta") > 1e-9, R)) of $(length(R)) designs deploy, all far from the projection -- not shown here";
           fontsize = 10)
     out = outpath(joinpath(OUT_DIR, "fig_gallery_full.png"))
     savefig(fig, out; px_per_unit = 1.5)
@@ -224,7 +239,7 @@ function fig_e1_agreement()
                xlabel = L"|\Theta_{max}(\mathrm{T4.2''}) - \Theta_{max}(\mathrm{bisection})|\ \mathrm{(rad)}",
                title = @sprintf("E1: exact vs. bisection referee, N=%d\nworst gap %.3e", length(R), maximum(gaps)),
                titlesize = 12)
-    hist_bars!(ax0, gaps, linbins(gaps, 60); color = "#3b6ea5", logy = true)
+    gap_hist_log!(ax0, gaps; color = "#3b6ea5")
     vlines!(ax0, [1e-5]; color = :crimson, linestyle = :dash, linewidth = 1, label = "1e-5 agreement bar")
     axislegend(ax0; labelsize = 9)
 
@@ -249,7 +264,7 @@ end
 # ---------------------------------------------------------------------------
 # summary_table.md
 # ---------------------------------------------------------------------------
-function summary_table(R)
+function summary_table(R, k6)
     n = length(R)
     complete = n >= 400 ? " (full target)" : " (short of the 400-design target; re-run once more shards land)"
     lines = ["# Headline table: baseline vs. method arms\n",
@@ -259,12 +274,9 @@ function summary_table(R)
              "|---|---|---|---|---|---|---|"]
     for arm in ARMS
         lab = replace(ARM_LABEL[arm], "\n" => " ")
-        if arm == "baseline"
-            push!(lines, "| $lab | $n | 0 | 0 | 0 | -- | -- |")
-            continue
-        end
-        dep = count(r -> f(r["$(arm)_theta"]) > 1e-9, R)
-        eps_pos = [f(r["$(arm)_eps"]) for r in R if f(r["$(arm)_eps"]) > 0]
+        getv(r, field) = arm == "baseline" ? baseline_value(k6, r, field) : f(r["$(arm)_$(field)"])
+        dep = count(r -> getv(r, "theta") > 1e-9, R)
+        eps_pos = [getv(r, "eps") for r in R if getv(r, "eps") > 0]
         ge01 = count(>=(0.1), eps_pos)
         med = isempty(eps_pos) ? 0.0 : sorted_mid(eps_pos)
         mx = isempty(eps_pos) ? 0.0 : maximum(eps_pos)
@@ -288,11 +300,12 @@ function main()
     k6 = load_k6()
     println("K9c merged: $(length(k9c_rows)) rows (target 400)")
     fig_yield(k9c_rows, k6)
-    fig_eps_hist(k9c_rows)
+    fig_eps_hist(k9c_rows, k6)
     fig_feasible_vs_deployable(k9c_rows)
-    fig_gallery_full(k9c_rows)
+    fig_gallery_full(k9c_rows, k6)
     e1_n, e1_worst, tp, fp, fn, tn = fig_e1_agreement()
-    summary_table(k9c_rows)
+    summary_table(k9c_rows, k6)
+    base_dep = count(r -> baseline_value(k6, r, "theta") > 1e-9, k9c_rows)
 
     n = length(k9c_rows)
     readme = """
@@ -304,23 +317,22 @@ re-run any solver).
 
 | figure | what it shows | data source(s) |
 |---|---|---|
-| `fig_yield.png` | Yield vs. face count \\|F\\| in 3 bins, per family (Delaunay/Voronoi/quad) and per sigma rule, 4 arms (baseline Eq.(6)+repairs, K9 proximity, K9b, K9c range-maximising), Wilson 95% CIs, two rows: exact Theta_max>0 and certified eps_max>=0.1 rad. | `results/kill/k9c/shard_*.csv` merged by (kind,id,sigma), N=$n rows at merge time; baseline confirmed identically 0 from `results/kill/k6/k6_final.csv`. |
+| `fig_yield.png` | Yield vs. face count \\|F\\| in 3 bins, per family (Delaunay/Voronoi/quad) and per sigma rule, 4 arms (baseline Eq.(6)+repairs, K9 proximity, K9b, K9c range-maximising), Wilson 95% CIs, two rows: exact Theta_max>0 and certified eps_max>=0.1 rad. | `results/kill/k9c/shard_*.csv` merged by (kind,id,sigma), N=$n rows at merge time; the baseline arm is the best of K6's four repair variants per design from `results/kill/k6/k6.csv` ($base_dep of $n deploy). |
 | `fig_eps_hist.png` | eps_max distribution (log-x) for K9c vs. K9 proximity, plus a bar of the zero-eps_max count per arm. | same K9c merge. |
 | `fig_feasible_vs_deployable.png` | Scatter of best 0+ margin (convex+split feasibility slack) vs. exact Theta_max for every row, colored by family, with margin-feasible-but-Theta_max=0 designs ringed. | same K9c merge. |
-| `fig_gallery_full.png` | ALL K9c-deployable designs (Theta_max>0), sorted by certified eps_max descending, shown closed and at Theta_max/2, with a caption noting the baseline has no deployed panel to show (Theta_max=0 throughout). | `results/kill/k9c/gallery/*.json` (per-design geometry dumps) + the same merged CSV for sort order. |
+| `fig_gallery_full.png` | ALL K9c-deployable designs (Theta_max>0), sorted by certified eps_max descending, shown closed and at Theta_max/2; the baseline's $base_dep deployable designs are not rendered. | `results/kill/k9c/gallery/*.json` (per-design geometry dumps) + the same merged CSV for sort order. |
 | `fig_e1_agreement.png` | E1's \\|exact - bisection referee\\| histogram (log-y) and the certificate's confusion counts (TP=$tp, FP=$fp, FN=$fn, TN=$tn against Theta_max>=eps=0.006). | `results/final/e1/e1.csv`, N=$e1_n rows. |
 | `summary_table.md` | Headline table: arms x {N, deployable, certified, eps_max>=0.1 rad, median eps_max, max eps_max}, computed directly from the CSVs above. | same. |
 
 ## Notes
 
-- K9c's `results/kill/k9c/summary.txt` and `k9c.csv` are a stale 182-row snapshot; this
-  script always merges the live `shard_*.csv` files instead. At merge time the 12 shards
-  covered N=$n of the 400-design target (200 graphs x 2 sigma). If the run had still been
-  short of 400, this note would say so and the script would need re-running once more
-  shards land -- it reads the shards live every time, never the stale `k9c.csv`.
-- The baseline (Eq. (6) + the K6 0+ repair) is independently confirmed 0/400 designs
-  deployable and 0/400 certified in `results/kill/k6/k6_final.csv` before it is asserted
-  in any figure here.
+- This script merges the live `shard_*.csv` files rather than reading `k9c.csv`; the two
+  agree row for row (N=$n of the 400-design target, 200 graphs x 2 sigma).
+- The baseline arm (Eq. (6) + the K6 repairs) is read from `results/kill/k6/k6.csv` as the
+  best of the four repair variants per design: $base_dep of $n deploy, all by leaving the
+  projection's neighbourhood (KILL_REPORT.md section K6).
+- The K9c arm's endpoints are optimiser-path dependent at the +-2 % level
+  (KILL_REPORT.md section K9c); every count here is that of the canonical CSVs.
 - `fig_gallery_full.png` intentionally renders every deployable design, not a curated
   subset (review/constructive_review.md section 5, item 1) -- it is a large image, one
   row per 6 designs.

@@ -1,6 +1,5 @@
 #!/usr/bin/env julia
-# Figures for results/kill/. Reads only CSV dumped by the C++ drivers (directive D3).
-# Port of plot_kill.py.
+# Figures for results/kill/. Reads only CSV dumped by the experiment drivers (directive D3).
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_kill.jl
 include(joinpath(@__DIR__, "plot_common.jl"))
 

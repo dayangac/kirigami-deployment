@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
-# Render the poster teaser panels (closed / half-open / 0.9*Theta_max) directly from the
+# Render the poster teaser panels (paper/poster/poster.tex, a sibling folder outside the repo) (closed / half-open / 0.9*Theta_max) directly from the
 # kiri_export SVGs for hero2 (export/hero2/*.svg, "cut" layer = one closed straight-line
-# polygon path per face). Port of plot_teaser.py: each state on its own square canvas,
+# polygon path per face). Each state on its own square canvas,
 # filled faces in mid-blue, dark thin edges, no axes, tight centred square crop.
 # The living-hinge neck notches make each path self-intersecting; a small Ramer-Douglas-
 # Peucker pass (RDP_EPS_MM, in the SVG's mm units) recovers the macro polygon first.
@@ -19,7 +19,7 @@ const STATES = [("closed", "hero2_130_sigma_mc_closed.svg", "teaser_closed.png")
                 ("half", "hero2_130_sigma_mc_open_half.svg", "teaser_half.png"),
                 ("open90", "hero2_130_sigma_mc_open_0.9tm.svg", "teaser_open90.png")]
 const SRC_DIR = "export/hero2"
-const OUT_DIR = "docs/poster/figs"
+const OUT_DIR = "results/final/figures"  # read by paper/poster/poster.tex via \graphicspath
 
 function perp_dist(pt, a, b)
     (x, y), (x1, y1), (x2, y2) = pt, a, b

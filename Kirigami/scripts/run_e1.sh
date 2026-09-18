@@ -1,10 +1,10 @@
 #!/bin/bash
-# Runs E1 (results/final/e1_julia) 12-way sharded, then merges the shard CSVs.
-# Julia port of code/scripts/run_e1.sh: drives Kirigami/apps/kill_e1.jl.
+# Runs E1 (results/final/e1) 12-way sharded, then merges the shard CSVs.
+# Drives Kirigami/apps/kill_e1.jl.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 export PATH=$HOME/.juliaup/bin:$PATH
-OUT=results/final/e1_julia
+OUT=results/final/e1
 mkdir -p "$OUT/shards"
 NSHARDS=12
 NRANDOM=${1:-900}

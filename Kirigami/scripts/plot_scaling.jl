@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 # fig_scaling.png + the fitted exponents of SCALING.md, from results/scaling/scaling.csv.
-# Port of plot_scaling.py: log-log wall time against |F| per routine with an OLS fit of
+# Log-log wall time against |F| per routine with an OLS fit of
 # log10(t) on log10(|F|) (95 % interval from a small t table), and peak RSS against |F|.
 # Rows below the driver's 1 ms clock resolution are excluded from the fit and drawn hollow.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_scaling.jl

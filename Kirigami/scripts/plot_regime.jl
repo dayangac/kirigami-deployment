@@ -1,7 +1,20 @@
 #!/usr/bin/env julia
 # fig_regime.png -- deployment yield against |F| from 20 to 800, three arms.
-# Port of plot_regime.py; see that file's header for the data-source table. Bars are
-# Wilson 95 % intervals; a design counts as deployable when the exact Theta_max > 1e-9.
+# Joins the paper-regime population (results/regime/regime.csv, |F| in [20,100]) with the
+# population every earlier kill experiment used (|F| in [101,793]), so the two halves of the
+# face-count axis are read off one figure:
+#
+#   Eq. (6) baseline   regime.csv base_theta                 | results/kill/k1a/k1a.csv
+#                                                              theta_max_X0 (the Eq. (6)
+#                                                              projection, one row per graph)
+#   native pipeline    regime.csv natour_theta / natcol_theta | results/kill/native200/
+#                                                              native200.csv our_theta_exact,
+#                                                              completed cells only
+#   k9c range-max      regime.csv k9c_theta                   | results/kill/k9c/k9c.csv
+#                                                              k9c_theta
+#
+# Every column above is the same exact scan; a design counts as deployable when the exact
+# Theta_max > 1e-9. Bars are Wilson 95 % intervals.
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_regime.jl
 include(joinpath(@__DIR__, "plot_common.jl"))
 
@@ -70,7 +83,7 @@ function main()
           color = GREY(0.35), rotation = pi / 2, align = (:center, :bottom))
     ylims!(ax, -4, 104)
     xlims!(ax, 18, 900)
-    axislegend(ax; position = :lc, labelsize = 10)
+    axislegend(ax; position = :rc, labelsize = 10)
     savefig(fig, OUT)
     for (name, data) in arms
         println(name, " n = ", length(data))

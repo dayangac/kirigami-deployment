@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
 # Plot the uncut mesh M and the kirigami structure M' at several opening angles.
-# Reads the JSON produced by the C++ tools (kiri_analyze / kiri_deploy / kiri_reference).
-# Port of plot_embedding.py.
+# Reads the JSON produced by the apps (kiri_analyze / kiri_deploy / kiri_reference).
 #
 # usage:
 #   plot_embedding.jl case <case_dir> [-o out.png]     # M.json + deploy_*.json panels
