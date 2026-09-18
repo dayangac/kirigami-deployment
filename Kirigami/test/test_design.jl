@@ -1,6 +1,6 @@
 # Tests for the consolidated method API (method/design.jl): the characterization
 # wrapper, the K9 constrained embedding, the Eq. (6) baseline, the K9c range-maximising
-# construction and the argument checks. Port of code/tests/test_design.cpp, case by case.
+# construction and the argument checks, case by case.
 #
 # The two "named designs" are rows of results/kill/k9/k9.csv, the run STATE.md F36
 # reports. They are the regression lock on the whole constructive half: if a change to
@@ -11,7 +11,7 @@ include("helpers.jl")
 include(joinpath(@__DIR__, "..", "apps", "kill_common.jl"))
 import JSON
 
-# The K9 population, exactly as apps/kill_k9.cpp builds it: `make_graph` (bit-exact
+# The K9 population, exactly as apps/kill_k9.jl builds it: `make_graph` (bit-exact
 # against data/corpus/k1a_200.json, checked below) with X_ini = mesh.X and K9's seed
 # 9000 + 7 * id + which, which = 0 for sigma_mc.
 function k9_design(id::Int)
@@ -39,22 +39,23 @@ function arm_named(r::Kirigami.RangeMaxResult, tag::String)
 end
 
 # WHAT IS AND IS NOT REPRODUCED (data/corpus/method_fixtures/README_design.md). The
-# C++ locks below are on the OUTPUT OF AN OPTIMISER. On identical inputs the Julia
-# `characterize` is bit-identical to the C++, `convex_embed` agrees to converged-solver
+# reference locks below are on the OUTPUT OF AN OPTIMISER. On identical inputs
+# `characterize` is bit-identical to the reference fixtures, `convex_embed` agrees to converged-solver
 # tolerance (|dX| <= 1.4e-6), but `range_embed` runs a fixed 6 x 120 L-BFGS budget that
 # never converges, so it is reproduced to path level only (iterates agree to 1e-15 for
 # ~10 iterations, then rounding amplifies to |dX| ~ 1e-2 after 714) and the exact theta
 # at its output differs at the 1e-2 level. The 1e-9 / 1e-5 locks that
-# depend on that path are kept verbatim as `@test_broken`: they document the C++ number,
-# fail today, and turn into an error the day the optimiser path becomes bit-exact. Which
-# checks are broken was decided on the native arm64 Julia (the supported platform, see
-# PORTING.md); the x86_64/Rosetta build follows a different path again and is unsupported.
-# The module's own numerics are locked instead on the frozen C++ points (next testset).
+# depend on that path are kept verbatim as `@test_broken`: optimiser-path-dependent locks
+# (see docs/NUMERICS.md) that document the reference number, fail today, and turn into an
+# error the day the optimiser path becomes bit-exact. Which checks are broken was decided
+# on the native arm64 Julia (the supported platform, docs/NUMERICS.md); the x86_64/Rosetta
+# build follows a different path again and is unsupported. The module's own numerics are
+# locked instead on the frozen design points (next testset).
 const FIXTURES = joinpath(CORPUS, "method_fixtures")
 fixture(name) = JSON.parsefile(joinpath(FIXTURES, name))
 fpts(a) = [Kirigami.Vec2(Float64(p[1]), Float64(p[2])) for p in a]
 
-@testset "design: characterize and the exact margins at the frozen C++ points" begin
+@testset "design: characterize and the exact margins at the frozen design points" begin
     # K9 row 148: the design point, X0 and X_ini of design_intermediates_148.json.
     j = fixture("design_intermediates_148.json")
     mesh, X_ini, opt = k9_design(148)
@@ -72,7 +73,7 @@ fpts(a) = [Kirigami.Vec2(Float64(p[1]), Float64(p[2])) for p in a]
         @test length(ch.contacts) == length(f["contacts"])
         @test all(isapprox.(ch.contacts, Float64.(f["contacts"]); rtol = 1e-12))
     end
-    # The exact variant-(b) margins at the C++ design point, in med^2 (what `finish` reports).
+    # The exact variant-(b) margins at the reference design point, in med^2 (what `finish` reports).
     c = Kirigami.make_cut(mesh)
     med = Kirigami.median_edge_length(mesh)
     s = med * med
@@ -85,7 +86,7 @@ fpts(a) = [Kirigami.Vec2(Float64(p[1]), Float64(p[2])) for p in a]
     @test isapprox(Kirigami.rms_move(Xd, X_ini, med), j["design"]["dist_ini"]; rtol = 1e-12)
     @test count(v -> v <= 0, Kirigami.corner_crosses(mesh, fpts(j["X0"]))) == j["design"]["n_nonconvex_x0"]
 
-    # K9c rows: the exact theta and 0+ margin at every point the C++ scored.
+    # K9c rows: the exact theta and 0+ margin at every point the reference run scored.
     for id in (130, 148, 30, 42)
         k = fixture("k9c_calls_$(id).json")
         m, _, _ = k9c_row(id)
@@ -141,8 +142,8 @@ end
     @test r.n_nonconvex_x0 == 6
 
     # k9.csv: b_theta_exact = b_eps_max = 1.99678 (6 significant digits in the CSV; the
-    # full-precision values below were read back from the C++ API and are the regression
-    # lock at 1e-9).
+    # full-precision values below were read back from the reference run and are the
+    # regression lock at 1e-9; optimiser-path-dependent lock, see docs/NUMERICS.md).
     @test_broken isapprox(r.ch.theta_max, 1.9967778150149833; rtol = 1e-9)
     @test_broken isapprox(r.ch.eps_max, 1.9967778150139832; rtol = 1e-9)
     # eps_max is the first admissible deflated root minus the root routine's 1e-12, and
@@ -335,7 +336,7 @@ end
     @test isapprox(o.delta_convex, 1e-3)
     @test isapprox(o.delta_split, 1e-3)
     @test isapprox(o.delta_wide, 1e-2)
-    @test o.stages == 6            # apps/kill_k9c.cpp was run with --stages 6
+    @test o.stages == 6            # apps/kill_k9c.jl is run with --stages 6
     @test o.iter_per_stage == 120  # ... and --stage-iters 120
     @test o.max_iter == 600
     @test o.arm_proximity
@@ -393,8 +394,9 @@ end
     @test r.design.dim_null == 16
 
     # k9c.csv: best_src = k9, theta_exact = eps_max = 1.99678, k9c_theta = 0.469648.
-    # In the C++ the K9c arm LOSES here. On arm64 Julia the stage-A path lands elsewhere
-    # and stage B then beats the k9 arm, so the provenance itself is path-level on this row.
+    # In the reference run the K9c arm LOSES here. On arm64 Julia the stage-A path lands
+    # elsewhere and stage B then beats the k9 arm, so the provenance itself is
+    # optimiser-path-dependent on this row (see docs/NUMERICS.md).
     @test_broken r.provenance == "k9"
     @test_broken !r.stage_b_used
     @test_broken isapprox(r.design.ch.theta_max, 1.9967778150149833; rtol = 1e-9)

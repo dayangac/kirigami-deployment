@@ -1,4 +1,4 @@
-# test_range_embed.jl -- port of code/tests/test_range_embed.cpp, case by case: the
+# test_range_embed.jl -- method/range_embed, case by case: the
 # RANGE-MAXIMISING point of the convexity-constrained slice of the Tutte auxetic shape
 # space (K9c).
 #
@@ -230,11 +230,11 @@ end
 end
 
 # ---------------------------------------------------------------------------
-# The frozen C++ numbers (data/corpus/method_fixtures/test_method_2.json, see its README):
-# the acceptance criterion of the port. The C++ null basis Phi is used so that the probe
-# point and the solve live in the same coordinates as the C++ run.
+# The frozen reference numbers (data/corpus/method_fixtures/test_method_2.json, see its
+# README): the acceptance criterion. The frozen null basis Phi is used so that the probe
+# point and the solve live in the same coordinates as the reference run.
 
-@testset "range_embed reproduces the frozen C++ reference numbers" begin
+@testset "range_embed reproduces the frozen reference numbers" begin
     relerr(a, b) = isempty(b) ? 0.0 : maximum(abs.(a .- b)) / max(1e-300, maximum(abs.(b)))
     fixtures = JSON.parsefile(joinpath(CORPUS, "method_fixtures", "test_method_2.json"))["cases"]
     for fx in fixtures
@@ -260,7 +260,7 @@ end
         end
         # The solve: same verdict and stage counts, the exact start margin to 1e-12, and the
         # end point to the L-BFGS rounding-path level. Measured on snub_square_3.2 (305
-        # softmin entries, kappa 5e-3): the C++ and Julia iterates agree to 1e-15 for the
+        # softmin entries, kappa 5e-3): the reference and fresh iterates agree to 1e-15 for the
         # first ~10 iterations and diverge to 1e-12 / 1e-8 / 1e-5 after 20 / 40 / 60, so
         # after three 60-iteration stages the margins differ by ~1e-4 and the (unoptimised)
         # min cross by ~2e-3. The other five cases agree to ~1e-8.
@@ -277,7 +277,7 @@ end
     end
 end
 
-# No C++ test case covers stage B; this replays one run of the C++ (scratch driver on the
+# Stage B has no frozen fixture case; this replays one reference run (scratch driver on the
 # frozen truncated_square_3.0 input, 2026-09-19): theta_before = theta_after = 3 pi / 4,
 # three caps tried, none accepted, margin unchanged.
 @testset "maximize_margin_range: stage B on the frozen truncated-square case" begin

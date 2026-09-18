@@ -1,22 +1,20 @@
-# test_system.jl -- port of code/tests/test_system.cpp, case by case.
+# test_system.jl -- the Tutte auxetic system (assemble / solve / residuals), case by case.
 #
-# The C++ cases build their meshes with generators.hpp and (for some) sigma from
-# assign_orientation_relaxation with a case-local std::mt19937. Those inputs, plus every
-# number the C++ computes inline (ranks, residuals, X0, the random affine maps / null-space
-# offsets and the resulting "worst" values), were frozen by replaying the C++ test bodies
-# (data/corpus/reference_patterns/freeze_fixtures_2a.cpp, linked against the C++ library)
-# into CORPUS/reference_patterns/test_fixtures_system.json. The checks below are the C++
-# CHECKs, and where the C++ printed a MESSAGE its number is asserted against the port.
+# The cases build their meshes with the generators and (for some) sigma from
+# assign_orientation_relaxation with a case-local MT19937. Those inputs, plus every
+# number the reference run computed inline (ranks, residuals, X0, the random affine maps /
+# null-space offsets and the resulting "worst" values), are frozen in
+# CORPUS/reference_patterns/test_fixtures_system.json (provenance in data/corpus/README.md).
+# Where the reference run printed a MESSAGE its number is asserted against the fresh run.
 include("helpers.jl")
 
 const K = Kirigami
-# TODO(generators): the RNG-dependent blocks (t3_4_3_12, nullspace, orientation_small_patch)
-# are still read from the fixture; regenerate via the call recorded in each block's
-# "provenance" field once assign_orientation_relaxation reproduces the C++ stream bit-exactly.
+# The RNG-dependent blocks (t3_4_3_12, nullspace, orientation_small_patch) are read from
+# the fixture; the call that regenerates each is recorded in its "provenance" field.
 const SYSTEM_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_system.json"))
 
 # Deterministic (RNG-free) cases call the Julia generators directly and assert that the
-# result is bit-identical to the frozen C++ mesh; the checkerboard sigma is recomputed and
+# result is bit-identical to the frozen mesh; the checkerboard sigma is recomputed and
 # compared to the frozen one too. The RNG / relaxation-dependent cases stay on the fixtures.
 function checkerboard_case(g::K.Mesh, fx_mesh)
     @test same_mesh_as_fixture(g, fx_mesh)
@@ -38,7 +36,7 @@ function analyze(g::K.Mesh, mode::K.BoundaryMode = K.Fixed)
     rep = K.solve_system(sys, g.X)
     return Analysis(c, hs, sys, rep)
 end
-# the C++ solve numbers frozen next to each mesh
+# the reference solve numbers frozen next to each mesh
 function check_solve_matches(a::Analysis, s)
     @test a.rep.rank_full == s["rank_full"]
     @test a.rep.rank_L == s["rank_L"]
@@ -95,9 +93,9 @@ end
 
 @testset "hexagonal tiling: every connected sigma satisfies dim_null == #interior - H" begin
     fx = SYSTEM_FIXTURES["hexagons_exhaustive"]
-    # TODO(generators): tiling_hexagons(disk(Vec2(0.13, 0.07), 2.4)) -- same faces, but the
-    # Julia vertex coordinates differ from the C++ by 1 ulp (FMA contraction), so the
-    # frozen mesh is used to keep the numbers identical.
+    # tiling_hexagons(disk(Vec2(0.13, 0.07), 2.4)) -- same faces, but the regenerated vertex
+    # coordinates differ from the frozen mesh by 1 ulp (FMA contraction), so the frozen
+    # mesh is used to keep the numbers identical.
     g = fixture_mesh_raw(fx["mesh"])
     @test K.n_faces(g) <= 20
     @test K.n_faces(g) >= 6
@@ -123,7 +121,7 @@ end
     @test connected > 0
     @test with_split > 0
     @test violations == 0
-    # the C++ tallies: F=7: 39 connected sigma assignments (39 with split cuts), 0 violations
+    # the reference tallies: F=7: 39 connected sigma assignments (39 with split cuts), 0 violations
     @test connected == fx["connected"]
     @test with_split == fx["with_split"]
     @test violations == fx["violations"]
@@ -141,13 +139,13 @@ end
     X0 = K.matrix_to_points(a.rep.X0)
     @test K.hole_residuals(a.c, X0, a.hs).max_norm < 1e-9
     @test K.deploy(a.c, X0, 0.4).max_mismatch < 1e-9
-    # C++: 12 of 16 hole preimages violate Eq. (2), max residual 0.517638
+    # reference: 12 of 16 hole preimages violate Eq. (2), max residual 0.517638
     @test violating == fx["violating"]
     @test length(r.per_hole) == fx["n_per_hole"]
     @test isapprox(r.max_norm, fx["max_norm"]; rtol = 1e-12)
     @test isapprox(r.l2_norm, fx["l2_norm"]; rtol = 1e-12)
-    per_hole_cpp = fixture_points(fx["per_hole"])
-    @test maximum(norm.(r.per_hole .- per_hole_cpp)) < 1e-12
+    per_hole_ref = fixture_points(fx["per_hole"])
+    @test maximum(norm.(r.per_hole .- per_hole_ref)) < 1e-12
     check_solve_matches(a, fx["solve"])
 end
 
@@ -159,7 +157,7 @@ end
     X0 = K.matrix_to_points(a.rep.X0)
     @test K.hole_residuals(a.c, X0, a.hs).max_norm < 1e-12
     worst = 0.0
-    # the 100 maps [a00, a01, a10, a11, bx, by] the C++ drew from mt19937(19), U(-1.5, 1.5)
+    # the 100 maps [a00, a01, a10, a11, bx, by] drawn from mt19937(19), U(-1.5, 1.5)
     for mp in fx["maps"]
         A = K.Mat2(mp[1], mp[3], mp[2], mp[4])  # column-major
         b = K.Vec2(mp[5], mp[6])
@@ -168,7 +166,7 @@ end
         worst = max(worst, K.hole_residuals(a.c, Y, a.hs).max_norm / max(scale, 1e-12))
     end
     @test worst < 1e-12
-    @test worst < 1e-14   # C++: 4.11271e-16 (rounding-noise level); fx["worst"] holds it
+    @test worst < 1e-14   # reference: 4.11271e-16 (rounding-noise level); fx["worst"] holds it
 end
 
 @testset "null space: X0 + phi_i t^T stays deployable" begin
@@ -176,13 +174,13 @@ end
     g = fixture_mesh_raw(fx["mesh"])
     a = analyze(g)
     @test a.rep.dim_null > 0
-    @test a.rep.dim_null == fx["solve"]["dim_null"]   # C++: 5 basis vectors
+    @test a.rep.dim_null == fx["solve"]["dim_null"]   # reference: 5 basis vectors
     X0 = K.matrix_to_points(a.rep.X0)
     @test K.hole_residuals(a.c, X0, a.hs).max_norm < 1e-9
     worst = 0.0
-    # offsets[i][t] = [ux, uy], the C++ draws from mt19937(23), U(-4, 4). The null-space
-    # basis of the port need not equal Eigen's column for column, so the offsets are
-    # applied to the port's Phi; the property is basis independent.
+    # offsets[i][t] = [ux, uy], drawn from mt19937(23), U(-4, 4). The fresh null-space
+    # basis need not equal the frozen one column for column, so the offsets are applied to
+    # the fresh Phi; the property is basis independent.
     for i in 1:a.rep.dim_null, (ux, uy) in fx["offsets"][i]
         X = copy(a.rep.X0)
         X[:, 1] += a.rep.Phi[:, i] * ux
@@ -195,11 +193,11 @@ end
         end
     end
     @test worst < 1e-9
-    @test worst < 1e-13  # C++: 3.49368e-15 over 500 random offsets (fx["worst"])
-    # the two null-space bases span the same subspace (C++ Phi vs port Phi)
-    Phi_cpp = fixture_matrix(fx["Phi"])
-    @test size(Phi_cpp) == size(a.rep.Phi)
-    @test opnorm(Phi_cpp * Phi_cpp' - a.rep.Phi * a.rep.Phi') < 1e-9
+    @test worst < 1e-13  # reference: 3.49368e-15 over 500 random offsets (fx["worst"])
+    # the two null-space bases span the same subspace (frozen Phi vs fresh Phi)
+    Phi_ref = fixture_matrix(fx["Phi"])
+    @test size(Phi_ref) == size(a.rep.Phi)
+    @test opnorm(Phi_ref * Phi_ref' - a.rep.Phi * a.rep.Phi') < 1e-9
     check_solve_matches(a, fx["solve"])
 end
 
@@ -223,9 +221,9 @@ end
 end
 
 @testset "orientation assignment (Eq. 1) and brute force agree on a small patch" begin
-    # TODO(generators): bf = brute_force_orientation(g); re = assign_orientation_relaxation(g,
-    # MT19937(101), 10, 600, 180) -- both belong to orientation.jl; until then the two
-    # C++ reports are read from the fixture and their statistics re-derived here.
+    # frozen from: bf = brute_force_orientation(g); re = assign_orientation_relaxation(g,
+    # MT19937(101), 10, 600, 180). The two reference reports are read from the fixture and
+    # their statistics re-derived here.
     fx = SYSTEM_FIXTURES["orientation_small_patch"]
     g = fixture_mesh_raw(fx["mesh"])
     @test K.n_faces(g) <= 20

@@ -1,33 +1,33 @@
-# test_holes.jl -- port of code/tests/test_holes.cpp, case by case.
+# test_holes.jl -- hole preimages (seed growing, partition, geometric cross-check), case
+# by case.
 #
-# The C++ cases build their meshes with generators.hpp + std::mt19937 random sigmas and,
-# for the geometric cross-check, deploy them through the Tutte auxetic system / FK /
-# collision units. Those sequences were frozen by replaying the C++ tests exactly into
-# CORPUS/reference_patterns/test_fixtures_holes.json: per graph the mesh with its sigma,
-# and -- where the C++ reached the geometric stage -- the deployed M'-vertex positions Yd
-# and the C++ holes_geometric output `geo` (0-based edge ids). The checks below are the
-# C++ CHECKs applied to the frozen data; where the C++ skipped a graph (no deployable,
-# overlap-free embedding) Yd is null and the Julia test skips it too.
+# The cases build their meshes with the generators + MT19937 random sigmas and, for the
+# geometric cross-check, deploy them through the Tutte auxetic system / FK / collision
+# units. Those sequences are frozen in CORPUS/reference_patterns/test_fixtures_holes.json:
+# per graph the mesh with its sigma, and -- where the reference run reached the geometric
+# stage -- the deployed M'-vertex positions Yd and the holes_geometric output `geo`
+# (0-based edge ids). The checks below are applied to the frozen data; where the reference
+# run skipped a graph (no deployable, overlap-free embedding) Yd is null and the test
+# skips it too.
 include("helpers.jl")
 import JSON
 
 const K = Kirigami
-# TODO(generators): regenerate via generators.jl + tutte_auxetic/kinematics/collision once
-# those are ported; each fixture block carries a "provenance" record (test case, generator
-# call + args, seed, sigma method, how X/Yd were produced). See data/corpus/README.md.
+# Each fixture block carries a "provenance" record (test case, generator call + args,
+# seed, sigma method, how X/Yd were produced). See data/corpus/README.md.
 const HOLES_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_holes.json"))
 
 holes_fixture_mesh(j) = K.mesh_from_json_string(JSON.json(j))
 holes_fixture_sigma(s) = Int[x for x in s]
 holes_fixture_points(P) = [K.Vec2(Float64(p[1]), Float64(p[2])) for p in P]
-# C++ edge ids are 0-based in the fixture -> 1-based
+# edge ids are 0-based in the fixture -> 1-based
 holes_fixture_geo(g) = sort!([Int[e + 1 for e in cyc] for cyc in g])
 
 # The two independent hole-preimage constructions must agree, must partition
 # E_hinge union E_split, and (on a deployable embedding) must reproduce the
 # bounded complement components of M' traced geometrically.
 @testset "hole preimages: seed-growing == partition formulation == geometry" begin
-    # TODO(generators): rng = MT19937(2024); see fx["provenance"] for the exact sequence.
+    # frozen from: rng = MT19937(2024); see fx["provenance"] for the exact sequence.
     fx = HOLES_FIXTURES["case1"]
     graphs = 0
     geometric_checks = 0
@@ -73,7 +73,7 @@ holes_fixture_geo(g) = sort!([Int[e + 1 for e in cyc] for cyc in g])
     @test graphs >= 50
     # Every geometric mismatch we saw came with a split cycle or a disconnected M'.
     @test cycle_mismatch <= split_cycles + disconnected
-    # the frozen C++ run's own tallies
+    # the frozen reference run's own tallies
     cnt = fx["counts"]
     @test graphs == cnt["graphs"]
     @test geometric_checks == cnt["geometric_checks"]
@@ -86,7 +86,7 @@ holes_fixture_geo(g) = sort!([Int[e + 1 for e in cyc] for cyc in g])
 end
 
 @testset "hole preimages of the rotating-squares pattern are the interior vertices" begin
-    # TODO(generators): tiling_squares(rect(Vec2(2, 2), 2.01, 2.01)) + checkerboard_sigma.
+    # frozen from: tiling_squares(rect(Vec2(2, 2), 2.01, 2.01)) + checkerboard_sigma.
     m = holes_fixture_mesh(HOLES_FIXTURES["rotating_squares"])  # checkerboard sigma frozen
     c = K.make_cut(m)
     @test K.n_split(c) == 0
@@ -100,7 +100,7 @@ end
 end
 
 @testset "split cuts merge holes: H = #interior - #interior split edges (forest case)" begin
-    # TODO(generators): rng = MT19937(99); generate(kind, [3.2], rng) + 8 x random_sigma per kind
+    # frozen from: rng = MT19937(99); generate(kind, [3.2], rng) + 8 x random_sigma per kind
     # (see HOLES_FIXTURES["case3_provenance"]).
     for fam in HOLES_FIXTURES["case3"]
         g = holes_fixture_mesh(fam["mesh"])
@@ -134,9 +134,9 @@ end
 #      geometric trace is not defined -- this is the paper's own open limitation.
 #  (B) random embeddings inside the shape space of deployable tilings: a random
 #      affine map (Remark 4.1) plus a random null-space offset (Eq. 5).
-# The embeddings X and the overlap-free deployments Yd come frozen from the C++ run.
+# The embeddings X and the overlap-free deployments Yd come frozen from the reference run.
 @testset "hole preimages: geometric agreement on >= 50 random instances" begin
-    # TODO(generators): rng = MT19937(31337); see fx["provenance"] for populations (A) and (B).
+    # frozen from: rng = MT19937(31337); see fx["provenance"] for populations (A) and (B).
     fx = HOLES_FIXTURES["case4"]
     checked = 0
     for rec in fx["instances"]
@@ -148,7 +148,7 @@ end
         @test K.same_hole_sets(a, b)[1]
         @test K.holes_partition_edges(c, b)[1]
         rec["Yd"] === nothing && continue
-        # the C++ only deployed forest && connected instances
+        # the reference run only deployed forest && connected instances
         @test K.split_subgraph_is_forest(c)[1]
         @test K.count_components(c) == 1
         Yd = holes_fixture_points(rec["Yd"])

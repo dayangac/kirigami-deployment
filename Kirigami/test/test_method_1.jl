@@ -1,21 +1,19 @@
-# test_method_1.jl -- port of the tests/test_method.cpp cases that exercise
-# method/{deploy_basis, mobility, contact, range_opt}, case by case.
+# test_method_1.jl -- method/{deploy_basis, mobility, contact, range_opt}, case by case.
 #
-# Inputs: the C++ `make_case` tilings (checkerboard or relaxation sigma, Eq. (6)
-# projection), the delaunay meshes of the mobility cases and the range-objective case were
-# frozen by replaying test_method.cpp exactly into
-# CORPUS/method_fixtures/test_method_1.json (producer: freeze_method_1.cpp next to it,
-# linked against the C++ libkiri_core.a). Each block carries a `provenance` string with
-# the generator call, seed and sigma method. Besides the inputs the fixture holds every
-# number the C++ computed (theta_max variants, contact-angle sets, certificate counters,
-# mobility reports, objective value and gradient), which the tests below check against in
-# addition to the C++ CHECKs themselves. The synthetic-harmonic cases draw their
-# coefficients from the bit-exact MT19937 with the C++ seeds.
+# Inputs: the `make_case` tilings (checkerboard or relaxation sigma, Eq. (6) projection),
+# the delaunay meshes of the mobility cases and the range-objective case are frozen in
+# CORPUS/method_fixtures/test_method_1.json (provenance in data/corpus/method_fixtures/
+# README.md). Each block carries a `provenance` string with the generator call, seed and
+# sigma method. Besides the inputs the fixture holds every number the reference run
+# computed (theta_max variants, contact-angle sets, certificate counters, mobility reports,
+# objective value and gradient), which the tests below check against in addition to the
+# property checks themselves. The synthetic-harmonic cases draw their coefficients from
+# the bit-exact MT19937 with fixed seeds.
 #
-# Bit-exactness: on the arm64 Julia (PORTING.md) the deploy basis, every harmonic
-# coefficient, every root, C(X), the witnesses and all certificate counters reproduce the C++
-# bit for bit (fma placed as clang contracts it, __sincos_stret for sin/cos pairs, unfused
-# Eigen dots, libm atan2/acos/hypot/atan), and the tie-sensitive fields are asserted exactly.
+# Bit-exactness: on the arm64 Julia (docs/NUMERICS.md) the deploy basis, every harmonic
+# coefficient, every root, C(X), the witnesses and all certificate counters reproduce the
+# reference fixtures bit for bit (fma placement, __sincos_stret for sin/cos pairs, unfused
+# dots, libm atan2/acos/hypot/atan), and the tie-sensitive fields are asserted exactly.
 # On a non-arm64 Julia (x86_64 under Rosetta: different libm ulps) the tie-sensitive
 # DIAGNOSTIC counters -- ExactRangeReport.n_roots, ValidityCertificate.n_roots_undeflated,
 # the 1e-9 dedup length of C(X) -- are asserted loosely (M1_EXACT_TIES = false).
@@ -36,10 +34,10 @@ end
 
 m1_points(P) = [K.Vec2(Float64(p[1]), Float64(p[2])) for p in P]
 m1_matrix(A) = isempty(A) ? zeros(0, 0) : Float64[Float64(A[i][j]) for i in eachindex(A), j in eachindex(A[1])]
-# fixture face pairs are 0-based (C++) -> 1-based
+# fixture face pairs are 0-based -> 1-based
 m1_pairs(P) = Tuple{Int,Int}[(Int(p[1]) + 1, Int(p[2]) + 1) for p in P]
 
-# The frozen mesh carries its sigma under "orientation"; X is the C++ make_case's X.
+# The frozen mesh carries its sigma under "orientation"; X is make_case's X.
 function m1_case(rec)
     m = K.mesh_from_json_string(JSON.json(rec["mesh"]))
     m.sigma = Int[s for s in rec["sigma"]]
@@ -49,7 +47,7 @@ function m1_case(rec)
 end
 m1_tiling(name) = m1_case(M1["tilings"][name])
 
-# The C++ make_case, on the Julia generators (used only to check the frozen inputs).
+# make_case on the generators (used only to check the frozen inputs).
 function m1_make_case(m::K.Mesh, checker::Bool)
     rng = K.MT19937(2026)
     K.build_topology!(m)
@@ -66,8 +64,8 @@ function m1_make_case(m::K.Mesh, checker::Bool)
     return M1Case(m, c, hs, X)
 end
 
-# Bisection on the true polygon overlap. collision.hpp's default shrink of 1e-6
-# (README deviation 9) reports first contact up to ~5e-5 PAST the true angle on the
+# Bisection on the true polygon overlap. collision.jl's default shrink of 1e-6
+# reports first contact up to ~5e-5 PAST the true angle on the
 # 4.8.8 pattern -- measured, see results/kill/KILL_REPORT.md K2a -- so the reference
 # used here shrinks by 1e-12 instead.
 function bisect_theta_max(c::K.CutStructure, X::Vector{K.Vec2}, shrink::Float64)
@@ -108,7 +106,7 @@ const M1_TILING_GEN = Dict(
 )
 
 @testset "frozen make_case inputs reproduce from the Julia generators" begin
-    # Not a C++ case: pins that the fixture inputs are what generators.jl / orientation.jl /
+    # Not a reference case: pins that the fixture inputs are what generators.jl / orientation.jl /
     # tutte_auxetic.jl produce for the same calls, so the fixture is a cross-check and not
     # a fork of the inputs.
     for (name, (gen, checker)) in M1_TILING_GEN
@@ -139,7 +137,7 @@ end
             err = maximum(norm(Y[i] - Yb[i]) for i in eachindex(Y))
             @test err < 1e-12 * scale
         end
-        # and equals the C++ basis
+        # and equals the frozen basis
         fx = M1["tilings"][name]
         @test maximum(abs, B.C - m1_matrix(fx["C"])) < 1e-12
         @test maximum(abs, B.S - m1_matrix(fx["S"])) < 1e-12
@@ -254,7 +252,7 @@ end
         @test abs(te - tb) < 1e-5
         # and the shipped bisection is within its own documented slack
         @test K.theta_max(cs.c, cs.X, 90, 40).theta_max_geometric >= te - 1e-9
-        # C++ values
+        # reference values
         @test length(all) == fx["n_pairs_all"]
         @test length(pruned) == fx["n_pairs_pruned"]
         @test pruned == m1_pairs(fx["pairs_pruned"])
@@ -263,8 +261,8 @@ end
     end
 end
 
-@testset "contact: every C++ number of the exact scan, per frozen tiling" begin
-    # Not a C++ case: the C++ ExactRangeReport / OverlapRangeReport / swept radii on each
+@testset "contact: every reference number of the exact scan, per frozen tiling" begin
+    # Not a reference case: the frozen ExactRangeReport / OverlapRangeReport / swept radii on each
     # of the 10 make_case tilings, field by field.
     for (name, fx) in M1["tilings"]
         cs = m1_tiling(name)
@@ -284,14 +282,14 @@ end
         if M1_EXACT_TIES
             @test ep.n_roots == e["n_roots"]
         else
-            ep.n_roots == e["n_roots"] || @info "$name: n_roots $(ep.n_roots) (C++ $(e["n_roots"])), tie-order dependent"
+            ep.n_roots == e["n_roots"] || @info "$name: n_roots $(ep.n_roots) (reference $(e["n_roots"])), tie-order dependent"
             @test ep.n_roots >= (e["found"] ? 1 : 0)
         end
         @test ep.n_zero_contacts == e["n_zero_contacts"]
         @test ep.first.found == e["found"]
         @test isapprox(ep.theta_max, fx["theta_exact_pruned"]; rtol = 1e-12, atol = 1e-13)
         if e["found"]
-            # C++ M'-vertex / face ids are 0-based
+            # fixture M'-vertex / face ids are 0-based
             @test ep.first.pv == e["pv"] + 1
             @test ep.first.pa == e["pa"] + 1
             @test ep.first.pb == e["pb"] + 1
@@ -354,7 +352,7 @@ end
         # the 2-core identity
         @test r_0.identity_holds
         @test r_ini.identity_holds
-        # the C++ reports, field by field
+        # the reference reports, field by field
         for (r, fr) in ((r_ini, rec["r_ini"]), (r_0, rec["r_0"]))
             for fld in (:F, :n_hinge, :n_cycles, :components, :dim_ker_A, :n_dangling,
                         :core_faces, :core_edges, :core_cycles, :c_core, :dim_ker_A_core,
@@ -382,7 +380,7 @@ end
         pins = K.pins_flat(c, g, m.X)
         r = K.mobility_at(c, g, pins)
         R = K.build_rigidity(g, pins)
-        # Eigen ColPivHouseholderQR rank with threshold 1e-10 on R / max|R|
+        # column-pivoted QR rank with threshold 1e-10 on R / max|R|
         F = qr(R / maximum(abs, R), ColumnNorm())
         d = abs.(diag(F.R))
         rank_R = count(>(1e-10 * maximum(d)), d)
@@ -396,8 +394,8 @@ end
 end
 
 @testset "matrix_rank: the SparseQR path agrees with the dense one" begin
-    # Not a C++ case. The C++ tests never exceed `dense_limit` = 700 columns, so the sparse
-    # branch (SPQR here, Eigen::SparseQR there) is exercised by forcing it on a small A.
+    # Not a reference case. The reference cases never exceed `dense_limit` = 700 columns,
+    # so the sparse branch (SPQR) is exercised by forcing it on a small A.
     for rec in M1["mobility_sigma_kernel"]["cases"]
         rec["skipped"] && continue
         m = K.mesh_from_json_string(JSON.json(rec["mesh"]))
@@ -424,7 +422,7 @@ end
     @test sr.dim_null > 0
     @test sr.dim_null == rec["dim_null"]
     # The null-space basis is only defined up to an orthogonal change of basis, so the
-    # C++ Phi is used from here on (the C++ t, f0 and g refer to it).
+    # frozen Phi is used from here on (the frozen t, f0 and g refer to it).
     X0 = m1_points(rec["X0"])
     @test maximum(norm.(K.matrix_to_points(sr.X0) .- X0)) < 1e-9
     Phi = m1_matrix(rec["Phi"])
@@ -472,7 +470,7 @@ end
         err = abs(fd - g[i]) / max(1.0, abs(fd))
         worst = max(worst, err)
         checked += 1
-        # the C++ drew the same index and got the same difference quotient
+        # the reference run drew the same index and got the same difference quotient
         fc = rec["fd_checks"][trial]
         @test i == fc["i"] + 1
         @test isapprox(fd, fc["fd"]; rtol = 1e-6, atol = 1e-9)
@@ -480,7 +478,7 @@ end
     @test checked == 12
     @test worst < 1e-4
 
-    # a short maximize_range run against the C++ end-to-end numbers
+    # a short maximize_range run against the reference end-to-end numbers
     o2 = K.RangeOptOptions(rounds = 2, iters_per_round = 5)
     rr = K.maximize_range(cs.c, X0, Phi, o2)
     mr = rec["maximize_range_2x5"]
@@ -645,7 +643,7 @@ end
         for i in 1:399
             th = pi * i / 400.0
             @test K.harmonic_eval(h, th) > 0
-            # doctest Approx.epsilon(1e-14) is |a-b| <= 1e-14 (1 + max|a|,|b|): absolute near 0
+            # |a-b| <= 1e-14 (1 + max|a|,|b|): absolute near 0
             @test isapprox(K.harmonic_eval(h, th), h.p * (1 - cos(th)); rtol = 1e-14, atol = 1e-14)
         end
         @test isempty(K.harmonic_roots_deflated(h, 0.0, pi))

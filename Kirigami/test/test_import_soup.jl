@@ -1,4 +1,4 @@
-# test_import_soup.jl -- port of code/tests/test_import_soup.cpp, case by case.
+# test_import_soup.jl -- the welding importer, case by case.
 include("helpers.jl")
 
 const K = Kirigami
@@ -78,7 +78,7 @@ end
     @test r.status == "no_segments"
 end
 
-# Julia additions: the SVG reader and the area floor, which the C++ tests do not cover.
+# The SVG reader and the area floor.
 @testset "read_svg_segments reads line/polyline/polygon and skips path" begin
     svg = """<svg xmlns="http://www.w3.org/2000/svg">
       <line x1="0" y1="0" x2="1" y2="0" stroke="black"/>

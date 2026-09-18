@@ -1,10 +1,10 @@
-# test_export.jl -- port of code/tests/test_export.cpp, case by case, plus byte-level
-# comparison of every writer against the C++ reference outputs.
+# test_export.jl -- the fabrication export layer, case by case, plus byte-level
+# comparison of every writer against the reference outputs.
 #
-# Reference bytes/inputs live in CORPUS/export_fixtures (produced by freeze_export.cpp,
-# see data/corpus/README.md): the squares_patch meshes, the 3.4.3.12 patch with its
-# relaxation sigma (the only generator/orientation input), the C++ theta_max values, and
-# the SVG / STL / 3MF the C++ writers produced. The migrated hero/sample exports under
+# Reference bytes/inputs live in CORPUS/export_fixtures (provenance in
+# data/corpus/README.md): the squares_patch meshes, the 3.4.3.12 patch with its
+# relaxation sigma (the only generator/orientation input), the reference theta_max
+# values, and the reference SVG / STL / 3MF files. The migrated hero/sample exports under
 # REPO/export are regenerated from their own input graphs and compared byte for byte.
 include("helpers.jl")
 import JSON
@@ -15,8 +15,8 @@ const EXPORT_INDEX = JSON.parsefile(joinpath(EXPORT_FIXTURES, "index.json"))
 const EXPORT_DIR = joinpath(REPO, "export")
 
 # A small oriented patch: the rotating-squares pattern, whose sigma is a proper
-# checkerboard, so every interior edge is a hinge. (Same construction as the C++
-# test; the frozen squares_3x3*.json are compared against it below.)
+# checkerboard, so every interior edge is a hinge. (The frozen squares_3x3*.json are
+# compared against it below.)
 function squares_patch(nx::Int = 3, ny::Int = 3, make_split::Bool = false)
     m = K.Mesh()
     vid(i, j) = j * (nx + 1) + i + 1
@@ -82,8 +82,8 @@ function check_solid_against(S::K.TriMesh, r::K.ManifoldReport, w, ref)
     @test length(K.split_components(S)) == ref["n_objects"]
 end
 
-# Byte-level comparison policy for the 3D writers. The C++ reference ran natively on
-# arm64 and its trig calls go through Apple's __sincos_stret; this Julia may run as
+# Byte-level comparison policy for the 3D writers. The reference files were produced on
+# arm64 with trig through Apple's __sincos_stret; this Julia may run as
 # x86_64 under Rosetta, where neither Base nor the x86 libm reproduces those values to
 # the last ulp. Vertex coordinates still agree to 9+ significant digits and the SVG text
 # is byte-identical, but two things can move: the ~1e-18 residual in a float32 wall
@@ -124,7 +124,7 @@ function check_stl_against(path, ref_bytes)
     @test ra.closed == rb.closed && ra.consistently_oriented == rb.consistently_oriented
     @test ra.n_components == rb.n_components
     @test isapprox(ra.volume, rb.volume; rtol=1e-6)
-    # Byte identity is NOT asserted: the C++ binary's trig went through clang's fused
+    # Byte identity is NOT asserted: the reference trig went through Apple's fused
     # __sincos_stret, which no libm call reproduces on every argument; 1-ulp differences
     # move float32 wall normals and the tie-break among degenerate needles. The structural
     # checks above are the acceptance criterion; EXACT_TALLY records how many matched anyway.
@@ -154,7 +154,7 @@ function check_3mf_against(path, ref_bytes)
     @test sort(filter(l -> occursin("<vertex ", l), ma)) == sort(filter(l -> occursin("<vertex ", l), mb))
     @test count(l -> occursin("<triangle ", l), ma) == count(l -> occursin("<triangle ", l), mb)
     @test count(l -> occursin("<object ", l), ma) == count(l -> occursin("<object ", l), mb)
-    # Byte identity is NOT asserted: the C++ binary's trig went through clang's fused
+    # Byte identity is NOT asserted: the reference trig went through Apple's fused
     # __sincos_stret, which no libm call reproduces on every argument; 1-ulp differences
     # move float32 wall normals and the tie-break among degenerate needles. The structural
     # checks above are the acceptance criterion; EXACT_TALLY records how many matched anyway.
@@ -237,7 +237,7 @@ end
     @test length(wid[1]) > 2
     @test endswith(wid[1], "mm")
 
-    # byte-identical to the C++ writer
+    # byte-identical to the reference file
     @test svg == fixture_text("squares_felt_theta0.svg")
     check_layout_against(L, EXPORT_INDEX["squares_felt_theta0"])
     # write_svg writes exactly svg_string
@@ -393,7 +393,7 @@ end
     @test isapprox(rb.volume, r.volume; rtol=1e-4)
     # header + count + 50 bytes per triangle
     @test filesize(path) == 84 + 50 * length(solid.T)
-    # identical to the C++ writer (default header "kiri export")
+    # identical to the reference file (default header "kiri export")
     check_stl_against(path, fixture_bytes("squares_felt.stl"))
 
     lo, hi = K.bbox(solid)
@@ -423,7 +423,7 @@ end
     @test r.n_components == K.n_faces(m)
     lo, hi = K.bbox(solid)
     @test isapprox(hi[3] - lo[3], 2 * p.thickness + p.clearance)  # two layers
-    # against the C++ reference
+    # against the reference fixture
     check_layout_against(L, EXPORT_INDEX["squares_pla_theta0"])
     @test K.svg_string(L) == fixture_text("squares_pla_theta0.svg")
     check_solid_against(solid, r, w, EXPORT_INDEX["squares_pla_solid"])
@@ -447,7 +447,7 @@ end
     @test entries[2].first == "dir/b.bin"
     @test ncodeunits(entries[2].second) == 1000
     broken = copy(bytes)
-    broken[36] ⊻= 0x7f  # corrupt the payload of the first entry (C++ byte 35)
+    broken[36] ⊻= 0x7f  # corrupt the payload of the first entry (0-based byte 35)
     @test_throws ErrorException K.zip_read(broken)
     @test K.crc32_of("123456789") == 0xCBF43926  # the standard CRC-32 check value
     @test_throws ErrorException K.zip_read(UInt8[])
@@ -489,8 +489,8 @@ end
 end
 
 @testset "SVG stays well formed on a deployed 3.4.3.12 patch with split cuts" begin
-    # TODO(generators): regenerate via tiling_3_4_3_12(disk(Vec2(0,0), 2.5)) +
-    # assign_orientation_relaxation(m, MT19937(12345)) once generators/orientation are ported.
+    # frozen from tiling_3_4_3_12(disk(Vec2(0,0), 2.5)) + assign_orientation_relaxation(m,
+    # MT19937(12345)).
     m = K.load_mesh_json(joinpath(EXPORT_FIXTURES, "t34312_disk2.5.json"))
     c = K.make_cut(m)
     @test K.n_hinge(c) == EXPORT_INDEX["t34312_n_hinge"]
@@ -511,7 +511,7 @@ end
 
 # Julia addition: every migrated export under REPO/export is regenerated from its own
 # input graph at the theta/profile/scale recorded in its report JSON and compared byte
-# for byte with the C++ files (SVG text, binary STL, 3MF archive and entries), plus the
+# for byte with the reference files (SVG text, binary STL, 3MF archive and entries), plus the
 # report's numbers.
 @testset "migrated hero / sample exports regenerate byte-identically" begin
     function resolve_input(inp)

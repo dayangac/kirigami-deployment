@@ -1,15 +1,15 @@
-# test_collision.jl -- port of code/tests/test_collision.cpp, case by case.
+# test_collision.jl -- polygon predicates, theta_max and the collision-aware optimiser,
+# case by case.
 #
-# The polygon-predicate cases are literal. The tiling cases read the meshes/sigmas the C++
-# drew from its case-local std::mt19937 and the C++ results (theta_max, min beta, the
+# The polygon-predicate cases are literal. The tiling cases read the meshes/sigmas drawn
+# from a case-local MT19937 and the reference results (theta_max, min beta, the
 # collision-sweep ladder) from CORPUS/reference_patterns/test_fixtures_collision.json
-# (frozen by data/corpus/reference_patterns/freeze_fixtures_2a.cpp).
+# (provenance in data/corpus/README.md).
 include("helpers.jl")
 
 const K = Kirigami
-# TODO(generators): the relaxation-dependent blocks (theta_max, velocity, collision_opt) are
-# read from the fixture; regenerate via the call in each block's "provenance" field once
-# assign_orientation_relaxation reproduces the C++ stream bit-exactly.
+# The relaxation-dependent blocks (theta_max, velocity, collision_opt) are read from the
+# fixture; the call that regenerates each is recorded in its "provenance" field.
 const COL_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_collision.json"))
 
 poly(pts...) = [K.Vec2(p[1], p[2]) for p in pts]
@@ -41,7 +41,7 @@ end
         tm = K.theta_max(c, X0, 90, 40)
         @test tm.theta_max_geometric <= tm.min_beta + 1e-4
         cases += 1
-        # the C++ numbers for this kind (e.g. hexagons: 2.0944 / 2.0944 / n_split 3)
+        # the reference numbers for this kind (e.g. hexagons: 2.0944 / 2.0944 / n_split 3)
         @test K.n_split(c) == fam["n_split"]
         @test isapprox(tm.theta_max_geometric, fam["theta_max_geometric"]; atol = 1e-9)
         @test isapprox(tm.min_beta, fam["min_beta"]; atol = 1e-12)
@@ -49,7 +49,7 @@ end
         @test maximum(abs.(tm.beta .- Float64.(fam["beta"]))) < 1e-12
     end
     @test cases >= 5
-    @test cases == 7  # the C++ ran all seven kinds
+    @test cases == 7  # the reference run covered all seven kinds
 end
 
 @testset "rotating squares: theta_max equals min_i beta_i = pi" begin
@@ -103,11 +103,12 @@ end
         sw = fam["sweep"]
         @test isapprox(r.theta_max_before, sw["theta_max_before"]; atol = 1e-9)
         # The optimizer's path (L-BFGS over a different null-space basis) is not expected
-        # to reproduce Eigen's iterates; the C++ outcome is reported for comparison only.
+        # to reproduce the reference iterates; the reference outcome is printed for
+        # comparison only (optimiser-path-dependent, see docs/NUMERICS.md).
         ladder = join(["($(g)->$(round(t; digits = 6)))" for (g, t) in r.ladder], " ")
         println(fam["kind"], ": theta_max ", r.theta_max_before, " -> ", r.theta_max_after,
                 " at gamma = ", r.gamma_used, "; ladder: ", ladder,
-                "\n    C++: -> ", sw["theta_max_after"], " at gamma = ", sw["gamma_used"],
+                "\n    reference: -> ", sw["theta_max_after"], " at gamma = ", sw["gamma_used"],
                 "; ladder: ", join(["($(g)->$(round(t; digits = 6)))" for (g, t) in sw["ladder"]], " "))
         r.theta_max_after > r.theta_max_before + 1e-6 && (improved += 1)
     end

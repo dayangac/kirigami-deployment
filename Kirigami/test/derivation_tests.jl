@@ -1,5 +1,4 @@
-# derivation_tests.jl -- port of code/tests/derivation_tests.cpp (Phase 7 Checker): the
-# INDEPENDENT adversarial verification of derivations/core.md and lemmas.md.
+# derivation_tests.jl -- the Phase 7 Checker's INDEPENDENT adversarial verification of derivations/core.md and lemmas.md.
 #
 # Everything the Deriver asserts algebraically is RE-DERIVED here from the code's own sign
 # convention (kinematics.jl) and compared against the library, never against the Deriver's
@@ -7,25 +6,25 @@
 # tau-quadratic, the T5.3 closed forms, the T6.2 gradient and the L2 covector d_tau are all
 # recomputed from scratch in this file.
 #
-# Inputs.  Every population the C++ builds (corpus(), the H-LOC patches, the T7(iv) tori,
+# Inputs.  Every population these cases use (corpus(), the H-LOC patches, the T7(iv) tori,
 # l1_corpus(), the L2 K7 population, the 110 fresh and the 2000 search Voronoi tori) is
-# frozen in CORPUS/reference_patterns/derivation_inputs{,_l2}.json by
-# freeze_derivation_inputs.cpp.  The Julia generators reproduce them (see the
+# frozen in CORPUS/reference_patterns/derivation_inputs{,_l2}.json (provenance in
+# data/corpus/README.md).  The generators reproduce them (see the
 # "generators reproduce the frozen inputs" testset for the exact tally: every sigma but
 # hexagons_auto, every random graph and all 2122 Voronoi tori are bit-identical; four
 # tilings differ by trig ulps and make_tiling_pattern differs for squares/kagome), so the
-# frozen copies are what the cases below run on -- the C++ numbers are then exactly the
-# reference.  Shape-space SAMPLES cannot be identical: Gaussian coefficients are drawn on
-# the port's null-space basis Phi, which spans the same space as Eigen's but with different
-# columns; the cases therefore carry the C++ X0 and Phi (frozen alongside the inputs, and
-# checked against the port's: same X0 to 1e-9, same projector Phi Phi^T to 1e-9), so every
-# Gaussian shape-space sample below IS the C++ sample and the sample tallies are asserted
-# equal to the C++ ones.  The only counts that are not asserted exactly are the
+# frozen copies are what the cases below run on -- the reference tallies are then exactly
+# the reference.  Shape-space SAMPLES depend on the null-space basis: Gaussian coefficients
+# are drawn on Phi, and a different SVD yields the same span with different columns; the
+# cases therefore carry the frozen X0 and Phi (stored alongside the inputs, and checked
+# against a fresh solve: same X0 to 1e-9, same projector Phi Phi^T to 1e-9), so every
+# Gaussian shape-space sample below IS the reference sample and the sample tallies are
+# asserted equal to the reference ones.  The only counts that are not asserted exactly are the
 # tie-sensitive ones (roots within 1e-9 of an interval endpoint, a rounding-noise
 # classification), which are checked to within a few units per million.
 #
-# Runtime.  C++ wall times (clang -O2, arm64) are quoted per case; the whole C++ run is
-# 42 s, of which R3 (the chart-free crossing truth) is 37.6 s.  The two largest cases are
+# Runtime.  The reference run's wall times (arm64) are quoted per case; the whole reference
+# run is 42 s, of which R3 (the chart-free crossing truth) is 37.6 s.  The two largest cases are
 # gated behind ENV["KIRIGAMI_FULL_DERIVATIONS"] == "1" (R3-c on all 16 corpus cases, the
 # 2000-draw L2 search); the default runs a documented subset (R3-c on 8 cases, 400 draws)
 # that keeps every property check meaningful.  Julia 1.12 arm64: default 1m12, full 1m40
@@ -59,7 +58,7 @@ end
 
 # ------------------------------------------------------------------ algebra ----
 Jm(v::K.Vec2) = K.Vec2(-v[2], v[1])   # rotation by +pi/2
-const det2 = K.det2                    # the fma-contracted form the C++ compiled to
+const det2 = K.det2                    # the fma-contracted form (docs/NUMERICS.md)
 sq(v::K.Vec2) = dot(v, v)
 
 # ------------------------------------------------------------------- corpus ----
@@ -75,8 +74,8 @@ mutable struct Case
     ok::Bool        # usable (deployable X0, connected Gamma)
 end
 
-# The C++ `sample` constructs a FRESH std::normal_distribution per call (no cached
-# second variate carries over), so a fresh NormalDist is made here too.
+# `sample` uses a FRESH normal distribution per call (no cached second variate carries
+# over); the reference tallies depend on it.
 function sample(cs::Case, rng::K.MT19937, scale::Float64)
     X = copy(cs.rep.X0)
     if cs.k > 0 && scale != 0.0
@@ -96,18 +95,19 @@ function from_T(cs::Case, T::Matrix{Float64})
     return K.matrix_to_points(X)
 end
 
-# `cpp` (a frozen corpus row) supplies the C++ solve_system X0 and null-space basis Phi:
-# the port's own X0 must agree to 1e-9 and its Phi span the same subspace, after which the
-# case carries the C++ pair so that every Gaussian shape-space sample below is the C++ one.
-function build_case(m::K.Mesh, name::String, cpp = nothing)
+# `ref` (a frozen corpus row) supplies the reference solve_system X0 and null-space basis
+# Phi: the fresh X0 must agree to 1e-9 and its Phi span the same subspace, after which the
+# case carries the frozen pair so that every Gaussian shape-space sample below is the
+# reference one.
+function build_case(m::K.Mesh, name::String, ref = nothing)
     c = K.make_cut(m)
     hs = K.holes_partition(c)
     sys = K.assemble_system(c, hs, m.X, K.Fixed)
     rep = K.solve_system(sys, m.X)
-    if cpp !== nothing
-        X0c = fixture_matrix(cpp["X0"])
-        Phic = fixture_matrix(cpp["Phi"])
-        @test rep.dim_null == cpp["k"]
+    if ref !== nothing
+        X0c = fixture_matrix(ref["X0"])
+        Phic = fixture_matrix(ref["Phi"])
+        @test rep.dim_null == ref["k"]
         @test maximum(abs, rep.X0 - X0c) < 1e-9
         if rep.dim_null > 0
             @test opnorm(Phic * Phic' - rep.Phi * rep.Phi') < 1e-9
@@ -121,11 +121,11 @@ function build_case(m::K.Mesh, name::String, cpp = nothing)
     return Case(name, m, c, hs, sys, rep, X0, rep.dim_null, ok)
 end
 
-# The whole corpus, built once, from the frozen C++ inputs (16 of 16 candidates are ok).
+# The whole corpus, built once, from the frozen inputs (16 of 16 candidates are ok).
 const CORPUS_CASES = Case[]
 function corpus()
     isempty(CORPUS_CASES) || return CORPUS_CASES
-    @testset "corpus X0/Phi agree with the C++" begin
+    @testset "corpus X0/Phi agree with the reference fixtures" begin
         for j in DERIV_INPUTS["corpus"]
             cs = build_case(fixture_mesh_raw(j["mesh"]), j["name"], j)
             cs.ok && push!(CORPUS_CASES, cs)
@@ -221,7 +221,7 @@ function my_roots(h::K.Harmonic, lo::Float64, hi::Float64, tol::Float64)
         abs(B) > 1e-14 * lead && push!(taus, -C / B)
         push!(out, Float64(pi))                        # root at theta = pi
     else
-        disc = fma(B, B, -(4 * A * C))                # = 4 (q^2 + r^2 - p^2); contracted as the C++
+        disc = fma(B, B, -(4 * A * C))                # = 4 (q^2 + r^2 - p^2); contracted (docs/NUMERICS.md)
         if disc >= 0
             sqd = sqrt(disc)
             push!(taus, (-B + sqd) / (2 * A))
@@ -302,7 +302,7 @@ all_faces_positive(m::K.Mesh, X::Vector{K.Vec2}) = all(f -> area2(m, X, f) > 0, 
         @test m.sigma == sig(j)             # the relaxation IS reproduced on all 16
         same_mesh_as_fixture(m, j) && (n_exact += 1)
     end
-    println("  corpus: $n_exact / 16 meshes bit-identical to the C++, 16 / 16 sigmas identical")
+    println("  corpus: $n_exact / 16 meshes bit-identical to the frozen inputs, 16 / 16 sigmas identical")
     for (i, R) in enumerate((1.6, 2.6, 3.6, 4.6, 5.6, 7.0))
         m = K.tiling_squares(K.disk(K.Vec2(0, 0), R))
         m.sigma = K.assign_orientation_relaxation(m, K.MT19937(5), 4, 300, 60).sigma
@@ -315,7 +315,7 @@ all_faces_positive(m::K.Mesh, X::Vector{K.Vec2}) = all(f -> area2(m, X, f) > 0, 
         @test same_mesh_as_fixture(m, j["mesh"]) && m.sigma == sig(j["mesh"])
     end
     # L1: the non-periodic reference cases and 53 make_graph populations.  On the native
-    # arm64 Julia (system libm = the C++'s) every sigma is reproduced; on the x86_64
+    # arm64 Julia (the corpus's libm) every sigma is reproduced; on the x86_64
     # (Rosetta) build hexagons_auto's relaxation lands on a different sigma (libm ulps).
     l1 = DERIV_INPUTS["l1_corpus"]
     i = 0
@@ -341,14 +341,14 @@ end
 # T1 -- trig-linear deployment
 # =============================================================================
 
-# C++: 0.030 s
+# reference run: 0.030 s
 @testset "T1 corpus is non-degenerate" begin
     C = corpus()
     println("corpus: $(length(C)) cases")
     for (cs, j) in zip(C, DERIV_INPUTS["corpus"])
         @printf("  %-18s F=%4d N=%4d hinge=%4d split=%3d H=%3d k=%3d\n", cs.name, K.n_faces(cs.m),
                 K.n_vertices(cs.m), K.n_hinge(cs.c), K.n_split(cs.c), K.n_interior_holes(cs.hs), cs.k)
-        # the C++ per-case statistics
+        # the reference per-case statistics
         @test j["ok"]
         @test cs.k == j["k"]
         @test K.n_interior_holes(cs.hs) == j["H"]
@@ -361,7 +361,7 @@ end
 
 # T1 Steps 2-8: Y_theta = cos(theta/2) C + sin(theta/2) S with C_(v,f) = x_v and
 # S_(v,f) = J(2 u_f - sigma_f x_v), u from MY independent BFS over (T1.3).
-# C++: 0.003 s
+# reference run: 0.003 s
 @testset "T1.5 closed form vs deploy() -- independent potential" begin
     rng = K.MT19937(7)
     ths = [0.0, 0.05, 0.3, 0.77, 1.2, 1.9, 2.6, 3.0, Float64(pi)]
@@ -389,7 +389,7 @@ end
 end
 
 # The code's DeployBasis (C = Y(0), S = 2 dY/dtheta|_0) must equal my algebraic C, S.
-# C++: 0.001 s
+# reference run: 0.001 s
 @testset "T1.5 my (C,S) == deploy_basis()" begin
     rng = K.MT19937(11)
     worst = 0.0; n = 0
@@ -409,7 +409,7 @@ end
 end
 
 # T1 Step 5/6: closure of the 1-form on Gamma <=> Eq. (2).  Tested BOTH ways.
-# C++: 0.002 s
+# reference run: 0.002 s
 @testset "T1 Step 5/6 closure of the potential <=> Eq. (2)" begin
     rng = K.MT19937(13)
     worst_in = 0.0; min_out = 1e300; worst_link = 0.0; n_in = 0; n_out = 0
@@ -440,12 +440,12 @@ end
     @test worst_in <= 1e-10
     @printf("  off-shape-space controls: %d samples, smallest closure defect %.3e\n", n_out, min_out)
     @test min_out > 1e-6
-    @test n_out == 192   # C++: 192 samples
+    @test n_out == 192   # reference run: 192 samples
     record("T1-d", "deploy() max_mismatch == 2|sin(th/2)| * closure defect (rel)", n_out, worst_link, 1e-9)
     @test worst_link <= 1e-9
 end
 
-# C++: 0.072 s
+# reference run: 0.072 s
 @testset "T1.A ellipse, T1.B split translate, T1.C hinge angle, T1.D rigid faces" begin
     rng = K.MT19937(17)
     ths = [0.13, 0.55, 1.0, 1.77, 2.4, 3.0]
@@ -521,7 +521,7 @@ end
 # T2 -- no locking:  A(Y_theta) sigma = 0 for every theta
 # =============================================================================
 
-# C++: 0.0003 s
+# reference run: 0.0003 s
 @testset "T2.2 pin equation (T2.1) with the explicit w of (T2.3)" begin
     rng = K.MT19937(23)
     worst = 0.0; scale_seen = 0.0; n = 0
@@ -553,7 +553,7 @@ end
     @test worst <= 1e-10
 end
 
-# C++: 0.004 s
+# reference run: 0.004 s
 @testset "T2 assembled A(theta) sigma = 0, and the pencil (T2.5)" begin
     rng = K.MT19937(29)
     worst_sigma = 0.0; worst_pencil = 0.0; n_sig = 0; n_pen = 0
@@ -591,7 +591,7 @@ end
 # T3 -- harmonic predicates
 # =============================================================================
 
-# C++: 0.001 s
+# reference run: 0.001 s
 @testset "T3.2-T3.4 coefficient formulas vs direct evaluation" begin
     rng = K.MT19937(31)
     e_or = 0.0; e_dt = 0.0; e_l2 = 0.0; e_lib = 0.0; n = 0
@@ -634,7 +634,7 @@ end
     @test e_or <= 1e-12; @test e_dt <= 1e-12; @test e_l2 <= 1e-12; @test e_lib <= 1e-10
 end
 
-# C++: 0.0003 s
+# reference run: 0.0003 s
 @testset "T3.3 intra-face triples have q = r = 0 and p = flat area" begin
     rng = K.MT19937(37)
     e_q = 0.0; e_r = 0.0; e_p = 0.0; e_q2 = 0.0; e_r2 = 0.0; n = 0
@@ -669,7 +669,7 @@ end
     @test max(e_q2, e_r2) <= 1e-12
 end
 
-# C++: 0.001 s
+# reference run: 0.001 s
 @testset "T3.4 tau-quadratic roots and the discriminant condition" begin
     rng = K.MT19937(41)
     e_root = 0.0; e_lib = 0.0; n = 0; n_disc_ok = 0; n_disc_bad = 0; n_near_pi = 0
@@ -696,7 +696,7 @@ end
                 h = my_orient(Cab, Sab, Caw, Saw)
                 sc = max(1e-12, hscale(h))
                 # real-root criterion p^2 <= q^2 + r^2   <=>   |p| <= amplitude
-                # (the C++ `q*q + r*r` is contracted to fma(q, q, r*r); it decides the
+                # (`q*q + r*r` is contracted to fma(q, q, r*r); it decides the
                 # exactly-degenerate double roots of the flat tilings)
                 has_real = h.p * h.p <= fma(h.q, h.q, h.r * h.r)
                 roots = my_roots(h, -Float64(pi), Float64(pi), 1e-14 * sc)
@@ -733,7 +733,7 @@ end
     record("T3-j", "my tau-quadratic roots == library harmonic_roots on (0,pi-1e-3]", n, e_lib, 1e-7)
     @printf("  (real-root criterion: %d with p^2<=q^2+r^2, %d without; %d cases with\n   |p-q| <= 1e-9*scale excluded)\n",
             n_disc_ok, n_disc_bad, n_near_pi)
-    @test (n_disc_ok, n_disc_bad, n_near_pi) == (2711, 971, 54)   # C++
+    @test (n_disc_ok, n_disc_bad, n_near_pi) == (2711, 971, 54)   # reference tally
     @test e_root <= 1e-9; @test e_lib <= 1e-7
 end
 
@@ -744,7 +744,7 @@ end
 # Independent confirmation of the graze: the hexagon pattern has a contact at
 # theta_1 but NO interior overlap until Theta_max.  The overlap probe here is my own
 # separating-axis test, not collision.jl's.
-# C++: 0.011 s
+# reference run: 0.011 s
 @testset "T4.2'' the graze: contact at theta_1 is not an overlap" begin
     checked = 0
     grazes = String[]
@@ -797,7 +797,7 @@ end
                 cs.name, length(cand), th1, Tm, n_clear, 199, Int(overlap_after))
         @test !any_overlap_before
         th1 < Tm - 1e-6 && push!(grazes, cs.name)
-        # the C++ numbers (deterministic: X0 only)
+        # the reference numbers (deterministic: X0 only)
         if cs.name == "hexagons"
             @test length(cand) == 3
             @test isapprox(th1, 1.047198; atol = 1e-6)
@@ -821,7 +821,7 @@ end
 
 # T4.4 -- beta_e = 2 pi - alpha_f - alpha_g, recomputed by hand, and Theta_max = min beta
 # on split-free patterns.
-# C++: 0.007 s
+# reference run: 0.007 s
 @testset "T4.4 the beta bound, recomputed independently" begin
     e_beta = 0.0; e_split_free = 0.0; n_beta = 0; n_sf = 0
     for cs in corpus()
@@ -872,7 +872,7 @@ end
 
 # T4.5b -- the swept radius.  THREE separate statements, only one of which is what
 # K2c and contact.jl actually use.
-# C++: 0.022 s
+# reference run: 0.022 s
 @testset "T4.5b swept radius: raw frame vs the face's own frame" begin
     e_exact_centroid = 0.0; e_rhomax_circum = 0.0; worst_ratio_raw = 0.0; e_sound = 0.0
     n_raw = 0; n_viol_raw = 0; n_c = 0
@@ -929,7 +929,7 @@ end
     @printf("  raw frame: max(|C|,|S|) exceeded on %d / %d copies (%.0f%%), worst ratio %.4f\n",
             n_viol_raw, n_raw, 100.0 * n_viol_raw / max(1, n_raw), worst_ratio_raw)
     @printf("  H-LOC (the version the O(n) count needs): worst |gamma_f(th) - c_f| / r_f = %.2f\n", worst_centroid_drift)
-    @test n_raw == 15132                       # C++: 9187 / 15132, ratio 1.4142, drift 51.05
+    @test n_raw == 15132                       # reference run: 9187 / 15132, ratio 1.4142, drift 51.05
     @test n_viol_raw == 9187
     @test isapprox(worst_ratio_raw, 1.4142; atol = 1e-4)
     @test isapprox(worst_centroid_drift, 51.05; atol = 0.01)
@@ -941,12 +941,12 @@ end
 
 # H-LOC, decisively: does the moving centroid stay within O(r_f) of the flat centroid
 # as the patch grows?  If it does not, the O(n) active-set argument of T4.5 fails.
-# C++: 0.023 s
+# reference run: 0.023 s
 @testset "H-LOC counterexample search: centroid drift vs patch size" begin
     println("  patch      F     diam   max|gamma_f(th)-c_f|/r_f   max rho_max/r_f")
     prev = 0.0
     grows = false
-    cpp_drift = Dict(1.6 => 3.601, 2.6 => 5.748, 3.6 => 8.053, 4.6 => 10.229, 5.6 => 12.404, 7.0 => 15.884)
+    ref_drift = Dict(1.6 => 3.601, 2.6 => 5.748, 3.6 => 8.053, 4.6 => 10.229, 5.6 => 12.404, 7.0 => 15.884)
     cpp_F = Dict(1.6 => 12, 2.6 => 24, 3.6 => 44, 4.6 => 68, 5.6 => 96, 7.0 => 156)
     for j in DERIV_INPUTS["hloc"]
         R = j["R"]
@@ -967,7 +967,7 @@ end
         end
         @printf("  R=%-5.1f %5d  %6.2f   %22.3f   %15.6f\n", R, K.n_faces(cs.m), 2 * diam, drift, rr)
         @test K.n_faces(cs.m) == cpp_F[R]
-        @test isapprox(drift, cpp_drift[R]; atol = 1e-3)
+        @test isapprox(drift, ref_drift[R]; atol = 1e-3)
         @test isapprox(rr, 1.0; atol = 1e-6)
         (drift > prev * 1.3 && prev > 0) && (grows = true)
         prev = drift
@@ -980,7 +980,7 @@ end
 # T5 -- the usable region
 # =============================================================================
 
-# C++: 0.149 s
+# reference run: 0.149 s
 @testset "T5.1 positive orientation is quadratic in t, and is NOT a validity certificate" begin
     rng = K.MT19937(53)
     e_quad = 0.0; n = 0; n_pos = 0; n_pos_zero_range = 0
@@ -1018,12 +1018,12 @@ end
     end
     record("T5-a", "A_f(X0 + Phi t) is exactly quadratic in t (3rd difference)", n, e_quad, 1e-9)
     println("  positive-orientation samples: $n_pos; of those Theta_max == 0 on $n_pos_zero_range")
-    @test (n_pos, n_pos_zero_range) == (70, 51)   # C++
+    @test (n_pos, n_pos_zero_range) == (70, 51)   # reference tally
     @test e_quad <= 1e-9
     @test n_pos_zero_range > 0  # T5.1's negative claim reproduced
 end
 
-# C++: 0.001 s
+# reference run: 0.001 s
 @testset "T5.3 closed forms for the split-edge separation harmonic" begin
     rng = K.MT19937(59)
     e_p = 0.0; e_q = 0.0; e_r = 0.0; e_pq = 0.0; e_tau = 0.0; n = 0; n_fn = 0
@@ -1066,7 +1066,7 @@ end
     record("T5-c", "(T5.2) q = -p  (so p + q = 0 identically)", n, max(e_q, e_pq), 1e-11)
     record("T5-d", "(T5.2) r = <d, du> = det(d, J du)", n, e_r, 1e-11)
     record("T5-e", "(T5.4) h(2 arctan(-r/p)) = 0", n, e_tau, 1e-9)
-    println("  Eq.(9) false-negative ALGEBRAIC precondition (r>0 and p<0): $n_fn / $n split-edge samples  (C++: 871 / 4300)")
+    println("  Eq.(9) false-negative ALGEBRAIC precondition (r>0 and p<0): $n_fn / $n split-edge samples  (reference: 871 / 4300)")
     @test n == 4300
     @test e_p <= 1e-11; @test max(e_q, e_pq) <= 1e-11; @test e_r <= 1e-11
     @test e_tau <= 1e-9
@@ -1074,7 +1074,7 @@ end
 end
 
 # T5.2b -- is the "conservative" description an INNER approximation of U(eps)?
-# C++: 0.709 s
+# reference run: 0.709 s
 @testset "T5.2b conservative region: inner approximation, and the missing theta=0 atom" begin
     rng = K.MT19937(61)
     n_tested = 0; n_no_root_but_zero_range = 0; n_no_root = 0; n_range_below = 0
@@ -1127,7 +1127,7 @@ end
     end
     @printf("  eps=%.3f (T=%.4f): %d positively-oriented samples; %d with no root in (0,eps);\n  %d with Theta_max < eps; %d satisfy BOTH (no root, yet range < eps)\n",
             eps, T, n_tested, n_no_root, n_range_below, n_no_root_but_zero_range)
-    @test (n_tested, n_no_root, n_range_below, n_no_root_but_zero_range) == (343, 3, 261, 0)   # C++
+    @test (n_tested, n_no_root, n_range_below, n_no_root_but_zero_range) == (343, 3, 261, 0)   # reference tally
     @test n_no_root > 0
     println("  => T5.2b is an inner approximation only after adding the theta=0+ embeddedness atom: ",
             n_no_root_but_zero_range > 0 ? "CONFIRMED GAP" : "no counterexample found")
@@ -1157,7 +1157,7 @@ function root_near(h::K.Harmonic, ref::Float64)
     return best
 end
 
-# C++: 0.029 s
+# reference run: 0.029 s
 @testset "T6.2 implicit-differentiation gradient vs central differences" begin
     rng = K.MT19937(67)
     worst_rel = 0.0; n = 0; graphs = 0
@@ -1235,7 +1235,7 @@ function rank_of(A::AbstractMatrix)
     return count(x -> x > t, s)
 end
 
-# C++: 0.002 s
+# reference run: 0.002 s
 @testset "T7 (i)-(iii) L = R D, rank(L) = H - dim Z, out-harmonic Z" begin
     e_RD = 0.0; e_harm = 0.0; n = 0; n_rank_ok = 0; n_rank_tot = 0
     for cs in corpus()
@@ -1292,7 +1292,7 @@ end
     @test n_rank_ok == n_rank_tot
 end
 
-# C++: 0.002 s
+# reference run: 0.002 s
 @testset "T7 (iv) boundary-free patches: 1^T L = 0 and rank(L) = H - 1" begin
     cases = 0
     cpp_H = [16, 24, 16]
@@ -1337,7 +1337,7 @@ end
     @test cases == 3
 end
 
-# C++: 0.0001 s
+# reference run: 0.0001 s
 @testset "T7 (vi) H = |E_hinge| - |F| + c(Gamma)" begin
     ok = 0; tot = 0
     for cs in corpus()
@@ -1408,7 +1408,7 @@ function step6_check(m::K.Mesh, c::K.CutStructure, hs::K.HoleSet, sys::K.LinearS
     return Step6(n_cycles, H, rG, rL, rJ, rG == rL && rL == rJ)
 end
 
-# C++: 0.005 s
+# reference run: 0.005 s
 @testset "T1 Step 6: Gamma cycle closure and Eq. (2) span the same rows (corpus)" begin
     ok = 0; tot = 0
     for cs in corpus()
@@ -1430,9 +1430,9 @@ end
 # COUNTEREXAMPLE SEARCH: random sigma, including connectivity-violating ones and
 # ones that create split-cut cycles.  Attacks F11, T1 Step 6, T7 and Def 4.2.
 # The 400 (graph, sigma) pairs are drawn from the Julia generators (bit-exact for the
-# random graphs; the tilings are RNG-free), so every tally equals the C++ one.
+# random graphs; the tilings are RNG-free), so every tally equals the reference one.
 # =============================================================================
-# C++: 0.067 s
+# reference run: 0.067 s
 @testset "Counterexample search: random sigma, split-cut cycles, disconnected Gamma" begin
     rng = K.MT19937(97)
     n_total = 0; n_split_cycle = 0; n_gamma_disc = 0; n_mprime_disc = 0
@@ -1542,7 +1542,7 @@ end
     @test n_total > 100
     @test worst_pot < 1e-9
     @test n_pot_tested > 100
-    # the C++ tallies (the whole population is reproduced bit-exactly)
+    # the reference tallies (the whole population is reproduced bit-exactly)
     @test n_total == 398
     @test n_split_cycle == 210
     @test n_gamma_disc == 334
@@ -1563,7 +1563,7 @@ end
 #   (i)  the moving-centroid test of (T4.2)/(T4.3), which is what core.md derives;
 #   (ii) contact.jl's `use_static` option, which uses the FLAT centroids.
 # =============================================================================
-# C++: 0.396 s
+# reference run: 0.396 s
 @testset "T4.5a broad phase: moving-centroid pruning is sound, flat-centroid is not" begin
     n_moving_bad = 0; n_static_bad = 0; cases = 0
     n_flat_unsound = 0
@@ -1608,7 +1608,7 @@ end
             tot_all, tot_mov, 100.0 * tot_mov / max(1, tot_all), tot_st, 100.0 * tot_st / max(1, tot_all))
     @printf("  flat-centroid test discards %d pairs the SOUND moving test keeps; worst gap %.3f\n", n_flat_unsound, worst_flat_gap)
     println("  moving-centroid pruning wrong on $n_moving_bad/$cases samples; flat-centroid on $n_static_bad/$cases")
-    @test (tot_all, tot_mov, tot_st, n_flat_unsound) == (102534, 27463, 23817, 3646)   # C++
+    @test (tot_all, tot_mov, tot_st, n_flat_unsound) == (102534, 27463, 23817, 3646)   # reference tally
     @test isapprox(worst_flat_gap, 6.022; atol = 1e-3)
     @test n_static_bad == 0
     @test cases == 96
@@ -1619,7 +1619,7 @@ end
 # T7 (v) -- boundary-touching (notch) preimages contribute no row of L, and the
 # corrected row-sum identity holds while the naive one does not.
 # =============================================================================
-# C++: 0.0001 s
+# reference run: 0.0001 s
 @testset "T7 (v) notches: corrected row-sum identity, naive one fails" begin
     ok_corrected = 0; ok_naive = 0; tot = 0; with_notch = 0
     for cs in corpus()
@@ -1642,7 +1642,7 @@ end
 
 # Lemma T4.5b' : in the FACE'S OWN frame the swept radius is exact, and in fact
 # the distance to the moving centroid is CONSTANT in theta.
-# C++: 0.013 s
+# reference run: 0.013 s
 @testset "R2 T4.5b' exact swept radius in the face frame (randomized)" begin
     rng = K.MT19937(90210)
     n = 0
@@ -1720,10 +1720,10 @@ end
 # (T5.1d): the deflated clause, used when g(0) = 0.
 noroot_deflated(A, B, C, T) = !((A * B < 0) && (-A * B - A * A * T < 0))
 
-# C++: 0.377 s (1.8M harmonics per eps; the Julia loop runs the same population)
+# reference run: 0.377 s (1.8M harmonics per eps; the Julia loop runs the same population)
 @testset "R2 tau=0 deflation (T5.1d): spurious roots with and without it" begin
     rng = K.MT19937(777)
-    cpp = Dict(0.2 => (1817732, 74540, 9460, 2176, 61201), 0.02 => (1817748, 74556, 9444, 2176, 62310),
+    ref = Dict(0.2 => (1817732, 74540, 9460, 2176, 61201), 0.02 => (1817748, 74556, 9444, 2176, 62310),
                0.001 => (1817705, 74513, 9487, 2176, 62327))
     for eps in (0.2, 0.02, 0.001)
         T = tan(eps / 2)
@@ -1782,11 +1782,11 @@ noroot_deflated(A, B, C, T) = !((A * B < 0) && (-A * B - A * A * T < 0))
         @printf("    (T5.1c) as printed : mismatches %d  (spurious roots %d, missed %d); %d of them have g(0)=0\n",
                 mm_printed, spur_printed, miss_printed, mm_printed_g0)
         @printf("    (T5.1c)+(T5.1d)    : mismatches %d  (spurious roots %d, missed %d)\n", mm_defl, spur_defl, miss_defl)
-        c = cpp[eps]
-        println("    C++: harmonics=$(c[1]) g(0)=0 on $(c[2]) ambiguous=$(c[3]) double=$(c[4]) printed mismatches=$(c[5])")
+        c = ref[eps]
+        println("    reference: harmonics=$(c[1]) g(0)=0 on $(c[2]) ambiguous=$(c[3]) double=$(c[4]) printed mismatches=$(c[5])")
         record("R2-h", "deflated atom list (T5.1c)+(T5.1d) == direct root finding", n, mm_defl, 0.0)
         # the ambiguous/decided split is tie-sensitive (roots within 1e-9 of 0 or eps decided
-        # by the last bits of atan/sqrt): the port differs from the C++ by < 20 of 1.8M
+        # by the last bits of atan/sqrt): the run differs from the reference by < 20 of 1.8M
         @test abs(n - c[1]) <= 20
         @test abs(ambiguous - c[3]) <= 20
         @test n_dbl == c[4]
@@ -1805,8 +1805,8 @@ end
 # =============================================================================
 
 # h(theta) = p + q cos + r sin, rewritten in amplitude/phase form (core.md T3.4 /
-# T3.H.4).  This is the ONLY root finder used below.  (The C++ `long double` is the
-# 64-bit double on the reference platform; libm hypot/atan2/acos/cos as in the C++.)
+# T3.H.4).  This is the ONLY root finder used below.  (Plain Float64 throughout; libm
+# hypot/atan2/acos/cos, docs/NUMERICS.md.)
 struct AmpPhase
     p::Float64; R::Float64; phi::Float64
 end
@@ -1947,9 +1947,9 @@ function r3c_scan(cases::Vector{Case}, eps::Float64)
             mm3_conservative)
 end
 
-# C++: 37.6 s -- the largest case.  R3-a/R3-b are synthetic and always run; R3-c (the
+# reference run: 37.6 s -- the largest case.  R3-a/R3-b are synthetic and always run; R3-c (the
 # corpus scan, ~1.8M harmonics per eps) runs on the first 8 corpus cases by default and
-# on all 16 (with the C++ tallies asserted) under KIRIGAMI_FULL_DERIVATIONS=1.
+# on all 16 (with the reference tallies asserted) under KIRIGAMI_FULL_DERIVATIONS=1.
 @testset "R3 Lemma T5.1e and the three-class atom list (randomized, chart-free truth)" begin
     rng = K.MT19937(30903)
 
@@ -1999,7 +1999,7 @@ end
         end
         record("R3-b1", "class 3 (C=B=0) is exactly h(th) = p (1 - cos th)", n, worst_id, 1e-15)
         record("R3-b2", "T5.1e: sign h = sign p on (0,pi), no zero, no sign change", n, worst_sign + sign_changes + zeros_inside, 0.0)
-        @test n == 19989   # C++
+        @test n == 19989   # reference tally
         @test worst_id <= 1e-15
         @test sign_changes == 0
         @test zeros_inside == 0
@@ -2008,7 +2008,7 @@ end
     # ---- R3-c: the three-class atom list vs the chart-free crossing truth, on the
     #      real corpus.  Also the round-2 two-class list, which must be WRONG somewhere.
     r3_cases = FULL ? corpus() : corpus()[1:8]
-    FULL || println("  R3-c: default subset = first 8 corpus cases (KIRIGAMI_FULL_DERIVATIONS=1 runs all 16; C++ 37.6 s)")
+    FULL || println("  R3-c: default subset = first 8 corpus cases (KIRIGAMI_FULL_DERIVATIONS=1 runs all 16; reference run 37.6 s)")
     for eps in (0.2, 0.02)
         (tested, ambiguous, ident_zero, ident_zero_in_class3, nclass, mm3, mm2, mm3_by, mm2_by,
          mm3_conservative) = r3c_scan(r3_cases, eps)
@@ -2017,7 +2017,7 @@ end
                 mm3, mm3_by[1], mm3_by[2], mm3_by[3], mm3_conservative, mm2, mm2_by[1], mm2_by[2], mm2_by[3])
         record("R3-c" * (eps > 0.1 ? "1" : "2"), "3-class atom list == chart-free crossing truth", tested, mm3, 0.0)
         if FULL
-            # C++ (both eps): decided 1829226, ambiguous 142, classes 1745368/81500/2500,
+            # reference (both eps): decided 1829226, ambiguous 142, classes 1745368/81500/2500,
             # identically zero 14928 (all class 3), two-class mismatches 393 (all class 3)
             @test tested > 100000
             @test abs(tested - 1829226) <= 20
@@ -2034,7 +2034,7 @@ end
     end
 end
 
-# C++: 0.091 s
+# reference run: 0.091 s
 @testset "R3 certificate POS ^ NOOVERLAP(eps/2) ^ NOROOT implies Theta_max >= eps (randomized)" begin
     rng = K.MT19937(31003)
     eps = 0.006; T = tan(eps / 2); th1 = eps / 2
@@ -2111,7 +2111,7 @@ end
             eps, n_convex_cases, n_samples, n_noroot, n_cert, n_violation, n_status_nonconstant)
     record("R3-e", "POS ^ NOOVERLAP(eps/2) ^ NOROOT => no overlap on (0,eps)", n_cert, n_violation, 0.0)
     record("R3-f", "NOROOT => overlap status constant on (0,eps) (clopen step)", n_noroot, n_status_nonconstant, 0.0)
-    @test (n_convex_cases, n_samples, n_noroot, n_cert) == (10, 280, 176, 175)   # C++
+    @test (n_convex_cases, n_samples, n_noroot, n_cert) == (10, 280, 176, 175)   # reference tally
     @test n_cert > 0                 # the hypothesis must have content
     @test n_violation == 0
     @test n_status_nonconstant == 0
@@ -2198,7 +2198,7 @@ function interior_angle(vs::Vector{Int}, X::Vector{K.Vec2}, v::Int)
     return t
 end
 
-# (idx of v in vs, idx of the FAR endpoint of the far-side edge at v), the C++ far_of
+# (idx of v in vs, idx of the FAR endpoint of the far-side edge at v)
 function far_of(vs::Vector{Int}, v::Int, dst::Int)
     n = length(vs)
     idx = findlast(==(v), vs)
@@ -2209,7 +2209,7 @@ function far_of(vs::Vector{Int}, v::Int, dst::Int)
     return (idx, fi === nothing ? 0 : fi)
 end
 
-# C++: 0.093 s
+# reference run: 0.093 s
 @testset "R4 Sub-lemma T5.2b'' Case A: local overlap at the hinge <=> theta > beta_e" begin
     rng = K.MT19937(40041)
     delta = 0.05          # stay clear of the transition angle beta_e
@@ -2356,7 +2356,7 @@ end
     record("R4-b", "Case B is vacuous: no face pair shares two M'-vertices", n_face_pairs, n_pairs_two_shared, 0.0)
     record("R4-c1", "beta_e collinearity pair is NOT identically zero", n_beta_pairs, n_beta_degenerate, 0.0)
     record("R4-c2", "its orientation harmonic vanishes at theta = beta_e", n_beta_pairs, e_beta_root, 1e-9)
-    # C++: 1306 samples, 5548 local tests (1731 above, 3817 below), 99 non-simple,
+    # reference run: 1306 samples, 5548 local tests (1731 above, 3817 below), 99 non-simple,
     # 933 face pairs, 3819 beta pairs
     @test (n_samples, n_local_tests, n_above, n_below) == (1306, 5548, 1731, 3817)
     @test n_nonsimple == 99
@@ -2442,7 +2442,7 @@ function r5_synthetic_roots(r2::K.MT19937)
             n_pred_change_at_shift, e_root)
 end
 
-# C++: 0.469 s
+# reference run: 0.469 s
 @testset "R5 same-sigma pairs: pure relative translation, constant local predicate; and the zero set of h_o,pi' in (0,pi)" begin
     rng = K.MT19937(50051)
     NTH = 13                       # theta grid inside (0, pi]
@@ -2595,7 +2595,7 @@ end
     record("R5-c2", "beta in (0,pi) => that root IS beta", n_beta_in_range, n_beta_in_range - n_root_is_beta, 0.0)
     record("R5-c3", "'theta > beta_e' does not change value at beta_e +- pi", n_beta, n_pred_change_at_shift, 0.0)
     record("R5-d", "(T5.2b''-1b) h = +- L L' sin(beta_e - theta) on the corpus", n_form, e_form, 1e-9)
-    # C++: 14496 same / 17208 opposite (5303 flips), 5038 beta in range, 5008 enum
+    # reference run: 14496 same / 17208 opposite (5303 flips), 5038 beta in range, 5008 enum
     # failures, 894 corpus pairs
     @test (n_same, n_opp, n_pred_opp_flip) == (14496, 17208, 5303)
     @test (n_beta_in_range, n_enum_fail, n_form) == (5038, 5008, 894)
@@ -2615,7 +2615,7 @@ end
 # ============================================================================
 # R6 -- the amended NOROOT (admissible roots only).
 # ============================================================================
-# C++: 0.073 s
+# reference run: 0.073 s
 @testset "R6 amended NOROOT: Case A's substitute root is admissible; completeness is false" begin
     rng = K.MT19937(60061)
     n_pairs = 0; n_bad = 0; n_degen = 0; n_strict = 0; n_equal = 0
@@ -2702,7 +2702,7 @@ end
     record("R6-a2", "its projection ratio <w-a,b-a>/|b-a|^2 equals L'/L", n_pairs, e_ratio, 1e-9)
     record("R6-a3", "h_o,pi' vanishes at beta_e (round-5 claim, re-run here)", n_pairs, e_root, 1e-9)
     record("R6-b", "COMPLETENESS is false: a graze with Theta_max >= eps is not certified", n_grazes, n_counterex == 0, 0.0)
-    # C++: 9642 pairs, 0 degenerate, ratio in [0.007307, 1], 9062 strict / 580 equal, 1 graze
+    # reference run: 9642 pairs, 0 degenerate, ratio in [0.007307, 1], 9062 strict / 580 equal, 1 graze
     @test (n_pairs, n_degen, n_strict, n_equal, n_grazes) == (9642, 0, 9062, 580, 1)
     @test isapprox(lo_ratio, 0.007307; atol = 1e-6)
     @test n_pairs >= 100
@@ -2717,7 +2717,7 @@ end
 
 # R6-c -- the B4 `voronoi_93` scan-vs-referee disagreement: the F34 fix makes
 # polygons_overlap agree with the dense probe at every tolerance.
-# C++: 0.010 s
+# reference run: 0.010 s
 @testset "R6-c B4 voronoi_93: polygons_overlap misfires at a shared hinge vertex" begin
     P1 = K.Vec2[(35.522612034574969, 2.8976170473256473), (35.919893509036022, 3.1484087335745494),
                 (36.013918812893856, 3.6292236769982966), (35.070313922385914, 3.0868107146716834),
@@ -2782,7 +2782,7 @@ end
             nA, nB, nAB, aF, aG, beta, misfires, length(shrinks))
     record("R6-c1", "voronoi_93 faces (94,184): interiors are DISJOINT (dense probe)", (G + 1) * (G + 1), nAB, 0.0)
     record("R6-c2", "polygons_overlap agrees with the dense probe at every tolerance (F34 fixed)", length(shrinks), 0.0, 0.0)
-    @test (nA, nB) == (73735, 342350)   # C++
+    @test (nA, nB) == (73735, 342350)   # reference tally
     @test nA > 1000
     @test nB > 1000
     @test nAB == 0                       # ground truth: no interior overlap
@@ -2797,12 +2797,12 @@ end
 
 # The wider L1 corpus: the 7 non-periodic Phase-2 reference tilings plus the
 # kill_common population make_graph(id, 18, 46, 220), id = 0 ... , until >= 60 graphs
-# are usable.  Built once, from the frozen C++ inputs (see the generator testset: all but
-# hexagons_auto's sigma are reproduced by kill_common.jl), with the C++ X0/Phi.
+# are usable.  Built once, from the frozen inputs (see the generator testset: all but
+# hexagons_auto's sigma are reproduced by kill_common.jl), with the frozen X0/Phi.
 const L1_CASES = Case[]
 function l1_corpus()
     isempty(L1_CASES) || return L1_CASES
-    @testset "L1 corpus X0/Phi agree with the C++" begin
+    @testset "L1 corpus X0/Phi agree with the reference fixtures" begin
         for j in DERIV_INPUTS["l1_corpus"]
             length(L1_CASES) >= 60 && break
             cs = build_case(fixture_mesh_raw(j["mesh"]), j["name"], j)
@@ -2823,7 +2823,7 @@ function lclass(A, B, C, tol)
     return LK_C3
 end
 
-# C++: 0.336 s (24.5M candidate harmonics)
+# reference run: 0.336 s (24.5M candidate harmonics)
 @testset "L1 (lemmas.md) class prediction from the combinatorics vs the numeric class" begin
     C = l1_corpus()
     println("L1 corpus: $(length(C)) graphs")
@@ -3023,11 +3023,11 @@ end
     record("L1-k2", "L1.1(iii) accidental set (C = 0 at some samples, not all)", pers_accidental, 0.0, 0.0)
     record("L1-k3", "L1.1(ii) type-(d) as printed: f,g share an edge NOT at v_w", shared, cc_edge_not_at_vw, 0.0)
 
-    # C++ tallies: triples 1080, candidates 24460884, classes 223848/23119218/1097596/20222,
+    # reference tallies: triples 1080, candidates 24460884, classes 223848/23119218/1097596/20222,
     # coincident 835272 (hinge 447696, split 98352, none 289224), NOT coincident C==0 506394
     # (accidental 1120 / structural 505274), persistence 7624 / 1116 / 20447, class-3 hinge 1472.
-    # hexagons_auto is the ONE L1 graph whose sigma differs from the C++ (see the
-    # generators testset) -- but it is loaded from the frozen C++ input here, so the tallies
+    # hexagons_auto is the ONE L1 graph whose sigma differs from the frozen input (see the
+    # generators testset) -- but it is loaded from the frozen input here, so the tallies
     # are exactly comparable; the class-tolerance counts are tie-sensitive at the 1e-11 level.
     @test (n_triples, n_cand) == (1080, 24460884)
     @test shared == 835272
@@ -3053,7 +3053,7 @@ end
     @test pers_structural > 0
 end
 
-# C++: 0.086 s
+# reference run: 0.086 s
 @testset "L1.2a class-3 harmonics: constant sign on (0, pi], theta = pi included" begin
     rng = K.MT19937(51003)
     n = 0; sign_wrong = 0; zeros_ = 0; pi_zero = 0
@@ -3097,17 +3097,17 @@ end
 # L2 -- derivations/lemmas.md Part L2 (Checker-L, mission 2 / WP1)
 #
 # The population, quotient pipeline and achievable() below are COPIED from
-# code/apps/kill_k7.cpp / kill_b3.cpp so that the numbers compare directly with
+# apps/kill_k7.jl / kill_b3.jl so that the numbers compare directly with
 # results/kill/k7/k7_main.csv.  The genuinely INDEPENDENT part is `dtau_covector`.
 # =============================================================================
 const DERIV_L2 = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "derivation_inputs_l2.json"))
 
-# Eigen's Vector2d::dot is an UNFUSED a0*b0 + a1*b1 (a redux over separate statements, so
-# clang's -ffp-contract=on does not touch it); StaticArrays' `dot` is a muladd that becomes
-# an fma on aarch64.  The plain form is what reproduces the C++ cells bit for bit.
+# The reference dot product is an UNFUSED a0*b0 + a1*b1; StaticArrays' `dot` is a muladd
+# that becomes an fma on aarch64.  The plain form is what reproduces the reference cells
+# bit for bit (docs/NUMERICS.md).
 dot2(a::K.Vec2, b::K.Vec2) = a[1] * b[1] + a[2] * b[2]
 
-# ---- copied from kill_k7.cpp (population); bit-identical to the C++ on all 2122 tori
+# ---- copied from kill_k7.jl (population); bit-identical to the frozen file on all 2122 tori
 function l2_voronoi_pattern(inst::Int, nsites::Int, L::Float64, rng::K.MT19937)
     P = K.PeriodicPattern()
     P.family = "voronoi_torus"
@@ -3185,10 +3185,10 @@ same_pattern(P::K.PeriodicPattern, j) =
     P.ok == j["ok"] && (!P.ok || (same_mesh_as_fixture(P.cell, j["cell"]) && P.cell.sigma == Int[s for s in j["cell"]["orientation"]]))
 
 # The K7 population: 7 families x {2x2, 3x2, 3x3} tiling patterns + 12 Voronoi tori.
-# The tiling patterns come from the frozen C++ file: make_tiling_pattern reproduces the
-# C++ cell for triangles/hexagons/trunc_square_488/t3_4_3_12, differs by trig ulps for
+# The tiling patterns come from the frozen file: make_tiling_pattern reproduces the
+# frozen cell for triangles/hexagons/trunc_square_488/t3_4_3_12, differs by trig ulps for
 # snub_square and is NOT the same cell for squares (translated) and kagome (different
-# vertex/face layout) -- reported to the method port.  The Voronoi tori are rebuilt here
+# vertex/face layout) -- a recorded deviation.  The Voronoi tori are rebuilt here
 # and checked bit-identical.
 function l2_k7_population()
     out = K.PeriodicPattern[]
@@ -3205,7 +3205,7 @@ function l2_k7_population()
     return out
 end
 
-# ---- copied from kill_b3.cpp (PState / shape_point / prepare / K_at / achievable) --
+# ---- copied from kill_b3.jl (PState / shape_point / prepare / K_at / achievable) --
 mutable struct L2State
     ok::Bool
     err::String
@@ -3327,11 +3327,11 @@ function dtau_covector(q::K.Quotient, tau::K.Vec2i, reverse_edge_order::Bool = f
     return true, coef
 end
 
-# C++: 0.916 s
+# reference run: 0.916 s
 @testset "L2 (lemmas.md) dim K = 2 rank(D), the (L2.8) generators, and an INDEPENDENT D" begin
     pats = l2_k7_population()
     n_k7 = length(pats)
-    # >= 100 fresh random Voronoi tori with random sigma (rebuilt; bit-identical to the C++)
+    # >= 100 fresh random Voronoi tori with random sigma (rebuilt; bit-identical to the frozen file)
     for i in 0:109
         rng = K.MT19937(4400011 + 7717 * i)
         n = K.uniform_int(rng, 12, 45)
@@ -3491,7 +3491,7 @@ end
     record("L2-h", "L2.0c path-independence holds ON ker[L;e_pin]", n_path, e_path, 1e-9)
     record("L2-i", "L2.2(c) rank([L;d_h;d_v]) - rank(L) == rank(D)", covec_ok + covec_mismatch, covec_mismatch, 0.0)
 
-    # C++: 143 patterns (33 K7), rank(D) 8/1/134, 142 with rank(D) == min(2,k), 134 D
+    # reference run: 143 patterns (33 K7), rank(D) 8/1/134, 142 with rank(D) == min(2,k), 134 D
     # rebuilt, 2 inconsistent, 26 c(Gamma_super) > 1, 4 copies split, 2 Dind mismatches,
     # 134 path patterns of which 120 differ off ker, 108 ok covector ranks
     @test (n_ok, n_k7_ok) == (143, 33)
@@ -3523,8 +3523,8 @@ end
     @test sq33_K21 > 0
 end
 
-# C++: 1.185 s (2000 draws).  Default: the first 400 draws; the full 2000 under
-# KIRIGAMI_FULL_DERIVATIONS=1 (with the C++ tally 1999 built, rank(D) 0/0/1999).
+# reference run: 1.185 s (2000 draws).  Default: the first 400 draws; the full 2000 under
+# KIRIGAMI_FULL_DERIVATIONS=1 (with the reference tally 1999 built, rank(D) 0/0/1999).
 @testset "L2 counterexample search: 2000 random (torus, sigma) draws" begin
     ndraw = FULL ? 2000 : 400
     drawn = 0; built = 0; fail_eq = 0; fail_parity = 0

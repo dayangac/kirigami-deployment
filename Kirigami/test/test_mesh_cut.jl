@@ -1,16 +1,14 @@
-# test_mesh_cut.jl -- port of code/tests/test_mesh_cut.cpp, case by case.
+# test_mesh_cut.jl -- mesh topology and the cut structure, case by case.
 #
-# The C++ cases build their meshes with generators.hpp + std::mt19937 random sigmas.
-# Those sequences were frozen by replaying the C++ tests exactly (same seeds, same
-# call order) into CORPUS/reference_patterns/test_fixtures_mesh_cut.json; the checks
-# below are the C++ CHECKs applied to the frozen meshes.
+# The cases build their meshes with the generators + MT19937 random sigmas. Those
+# sequences are frozen in CORPUS/reference_patterns/test_fixtures_mesh_cut.json; the
+# checks below are applied to the frozen meshes.
 include("helpers.jl")
 import JSON
 
 const K = Kirigami
-# TODO(generators): regenerate via generators.jl once MT19937 + generators are ported; each
-# fixture block carries a "provenance" record (test case, generator call + args, seed, sigma
-# method) describing the exact C++ sequence to replay. See data/corpus/README.md.
+# Each fixture block carries a "provenance" record (test case, generator call + args,
+# seed, sigma method) describing the exact sequence to replay. See data/corpus/README.md.
 const MESH_CUT_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_mesh_cut.json"))
 
 # a mesh JSON object (0-based file format) -> Mesh, and a frozen sigma array
@@ -19,7 +17,7 @@ fixture_sigma(s) = Int[x for x in s]
 
 @testset "half-edge direction follows sigma (2026 Fig. 4)" begin
     # Two unit squares sharing the edge (1,0)-(1,1); vertex/face layout as welded by
-    # the C++ mesh_from_polygons (vertices in order of first appearance).
+    # mesh_from_polygons (vertices in order of first appearance).
     function two_squares()
         m = K.Mesh([K.Vec2(0, 0), K.Vec2(1, 0), K.Vec2(1, 1), K.Vec2(0, 1), K.Vec2(2, 0), K.Vec2(2, 1)],
                    [[1, 2, 3, 4], [2, 5, 6, 3]])
@@ -77,7 +75,7 @@ end
 end
 
 @testset "Remark A.1: in-degree == out-degree at every interior vertex" begin
-    # TODO(generators): rng = MT19937(12345); generate(kind, [4.0], rng) + 30 x random_sigma;
+    # frozen from: rng = MT19937(12345); generate(kind, [4.0], rng) + 30 x random_sigma;
     # then 40 x delaunay_of_random_points(30 + trial, 10.0, rng) + random_sigma.
     fx = MESH_CUT_FIXTURES["remark_A1"]
     checked = 0
@@ -105,7 +103,7 @@ end
 @testset "M' vertex count matches the Remark A.2 / A.3 bookkeeping" begin
     # At an interior vertex with k hinge edges in (and k out) and s split edges,
     # the number of duplicated copies is k + s.
-    # TODO(generators): rng = MT19937(7); generate("kagome", [4.0], rng) + 20 x random_sigma.
+    # frozen from: rng = MT19937(7); generate("kagome", [4.0], rng) + 20 x random_sigma.
     fx = MESH_CUT_FIXTURES["A2A3_kagome"]
     g = fixture_mesh(fx["mesh"])
     for s in fx["sigmas"]
@@ -123,8 +121,8 @@ end
     end
 end
 
-# Julia addition (no C++ counterpart): I/O boundary and geometry helpers are exercised
-# implicitly by the C++ suite through the generators; here they need a direct check.
+# I/O boundary and geometry helpers are exercised implicitly by the other suites through
+# the generators; here they get a direct check.
 @testset "JSON round trip keeps the 0-based file format (Julia addition)" begin
     fx = MESH_CUT_FIXTURES["A2A3_kagome"]
     g = fixture_mesh(fx["mesh"])

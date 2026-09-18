@@ -1,9 +1,8 @@
-# test_method_2.jl -- port of the TEST_CASEs of code/tests/test_method.cpp that exercise
-# method/zero_plus and method/convex_embed, case by case (the other cases of that file
-# live in test_method.jl).
+# test_method_2.jl -- method/zero_plus and method/convex_embed, case by case (the
+# related method cases live in test_method_1.jl and test_method_3.jl).
 #
-# The C++ cases build their meshes with generators + assign_orientation_relaxation on
-# std::mt19937(2026); the Julia generators reproduce those meshes on MT19937(2026).
+# The cases build their meshes with generators + assign_orientation_relaxation on
+# MT19937(2026), which reproduces the frozen meshes.
 include("helpers.jl")
 
 const K2 = Kirigami
@@ -77,12 +76,12 @@ end
 det2(u, v) = u[1] * v[2] - u[2] * v[1]
 ctr = K2.Vec2(0.13, 0.07)
 
-# The C++ reference numbers (mesh, X0, Phi, exact quantities, objective values, solves)
-# frozen from tests/test_method.cpp's cases: data/corpus/method_fixtures/README.md.
+# The reference numbers (mesh, X0, Phi, exact quantities, objective values, solves) are
+# frozen in data/corpus/method_fixtures/test_method_2.json (provenance in the README there).
 const METHOD2_FIXTURES = let d = JSON.parsefile(joinpath(CORPUS, "method_fixtures", "test_method_2.json"))
     Dict(c["name"] => c for c in d["cases"])
 end
-# The MCase of a frozen entry: the C++ mesh (with its sigma) and make_case's X.
+# The MCase of a frozen entry: the frozen mesh (with its sigma) and make_case's X.
 function fixture_case(fx)
     m = fixture_mesh_raw(fx["mesh"])
     c = K2.make_cut(m)
@@ -162,9 +161,9 @@ end
     # until some copy does move into a neighbouring face: the point-in-polygon test on
     # WELL-CONDITIONED corners, and "some margin < 0  =>  the structure collides at 0+",
     # which uses collision.jl rather than any part of the corner calculus.
-    # The Gaussian walk is in null-space COORDINATES, and the Julia SVD null basis spans
-    # the same space as Eigen's with different columns, so this block replays the C++ on
-    # the frozen C++ Phi (data/corpus/method_fixtures/test_method_2.json) and reproduces
+    # The Gaussian walk is in null-space COORDINATES, and a fresh SVD null basis spans the
+    # same space as the frozen one with different columns, so this block replays the walk
+    # on the frozen Phi (data/corpus/method_fixtures/test_method_2.json) and reproduces
     # its tallies exactly: 60 states, 3 with an inward corner, 6/6 entering, 3 collisions.
     let
         fx = METHOD2_FIXTURES["hexagons_3.0"]
@@ -206,7 +205,7 @@ end
         @test n_in > 5               # the negative branch is actually exercised
         @test n_neg_states > 0
         @test n_coll == n_neg_states  # a negative margin always means a 0+ collision
-        @test n_states == 60          # the C++ MESSAGE tallies on the same Phi
+        @test n_states == 60          # the reference tallies on the same Phi
         @test n_neg_states == 3
         @test n_coll == 3
     end
@@ -240,7 +239,7 @@ end
             fp, _ = K2.zero_plus_objective(cs.c, cs.X, Phi, med, opt, tp)
             fm, _ = K2.zero_plus_objective(cs.c, cs.X, Phi, med, opt, tm)
             fd = (fp - fm) / (2h)
-            # doctest Approx(fd).epsilon(1e-5).scale(1e-6): |g - fd| <= 1e-5 * (1e-6 + |fd|)
+            # |g - fd| <= 1e-5 * (1e-6 + |fd|)
             @test abs(g[i] - fd) <= 1e-5 * (1e-6 + abs(fd))
         end
     end
@@ -595,15 +594,15 @@ end
 end
 
 # ---------------------------------------------------------------------------
-# The frozen C++ numbers themselves: the acceptance criterion of the port.
+# The frozen reference numbers themselves: the acceptance criterion.
 
-@testset "zero_plus / convex_embed reproduce the frozen C++ reference numbers" begin
+@testset "zero_plus / convex_embed reproduce the frozen reference numbers" begin
     relerr(a, b) = isempty(b) ? 0.0 : maximum(abs.(a .- b)) / max(1e-300, maximum(abs.(b)))
     for name in ("hexagons_3.0", "snub_square_3.2", "truncated_square_4.0", "truncated_square_3.0",
                  "3_4_3_12_4.2", "kagome_2.5_checker")
         fx = METHOD2_FIXTURES[name]
         cs = fixture_case(fx)
-        # The Julia generator + orientation reproduces the C++ mesh and sigma.
+        # The generator + orientation reproduce the frozen mesh and sigma.
         mg = name == "hexagons_3.0" ? K2.tiling_hexagons(K2.disk(ctr, 3.0)) :
              name == "snub_square_3.2" ? K2.tiling_snub_square(K2.disk(ctr, 3.2)) :
              name == "truncated_square_4.0" ? K2.tiling_truncated_square(K2.disk(ctr, 4.0)) :
@@ -647,7 +646,7 @@ end
             @test relerr(g, Float64.(fx[k * "_grad_at_probe"])) < 1e-12
         end
         # The solves: same verdicts and stage counts; the numbers agree to the L-BFGS
-        # rounding-path level (the C++ and Julia paths diverge at ~1e-8 relative).
+        # rounding-path level (the reference and fresh paths diverge at ~1e-8 relative).
         s = fx["convex_embed_solve"]
         r = K2.convex_embed(cs.c, cs.X, Phic, cs.X, med,
                             K2.ConvexEmbedOptions(delta_rel = 1e-3, split_delta_rel = 1e-3, n_random = 1,

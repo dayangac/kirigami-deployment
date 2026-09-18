@@ -1,16 +1,15 @@
-# test_kinematics.jl -- port of code/tests/test_kinematics.cpp, case by case.
+# test_kinematics.jl -- forward kinematics of M', case by case.
 #
 # Inputs (meshes, sigmas, the shuffled face orders and the theta samples drawn from the
-# case-local std::mt19937) and the C++ inline results (Eq. (6) embeddings X, mismatches,
-# the finite-difference tally) were frozen by replaying the C++ test bodies
-# (data/corpus/reference_patterns/freeze_fixtures_2a.cpp) into
-# CORPUS/reference_patterns/test_fixtures_kinematics.json.
+# case-local MT19937) and the reference results (Eq. (6) embeddings X, mismatches, the
+# finite-difference tally) are frozen in
+# CORPUS/reference_patterns/test_fixtures_kinematics.json (provenance in
+# data/corpus/README.md).
 include("helpers.jl")
 
 const K = Kirigami
-# TODO(generators): regenerate each block via the call in its "provenance" field
-# (generate(kind, {R}, rng) + assign_orientation_relaxation / random_sigma with the stated
-# seed) once generators.jl + orientation.jl reproduce the C++ streams.
+# Each block regenerates via the call in its "provenance" field (generate(kind, {R}, rng)
+# + assign_orientation_relaxation / random_sigma with the stated seed).
 const KIN_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_kinematics.json"))
 
 # A deployable embedding of `g` with the given sigma (projection of Eq. 6).
@@ -29,7 +28,7 @@ signed_angle(a::K.Vec2, b::K.Vec2) = atan(a[1] * b[2] - a[2] * b[1], dot(a, b))
         hs = K.holes_partition(c)
         X = deployable_embedding(g, c, hs)
         @test K.hole_residuals(c, X, hs).max_norm < 1e-9
-        # the port's Eq. (6) projection equals the C++ one
+        # the Eq. (6) projection equals the frozen one
         @test maximum(norm.(X .- fixture_points(fam["X"]))) < 1e-9
         for (ti, th) in enumerate((0.1, 0.5, 1.0))
             d = K.deploy(c, X, th)
@@ -60,11 +59,11 @@ end
         @test K.hole_residuals(c, X, hs).max_norm < 1e-9
         ref = K.deploy(c, X, 0.7, 1)
         @test maximum(norm.(ref.Y .- fixture_points(fam["Y_ref"]))) < 1e-9
-        # from the C++ X the port's deploy() is BIT-exact (FMA-contracted 2x2 mat-vec, Apple
+        # from the frozen X, deploy() is BIT-exact (FMA-contracted 2x2 mat-vec, Apple
         # __sincos_stret for the rotation entries)
         @test K.deploy(c, fixture_points(fam["X"]), 0.7, 1).Y == fixture_points(fam["Y_ref"])
         for (trial, order0) in enumerate(fam["orders"])
-            order = [Int(f) + 1 for f in order0]  # 0-based C++ face order -> 1-based
+            order = [Int(f) + 1 for f in order0]  # 0-based fixture face order -> 1-based
             alt = K.deploy_with_order(c, X, 0.7, order)
             @test alt.max_mismatch < 1e-9
             @test K.rigid_align_residual(alt.Y, ref.Y) < 1e-9
@@ -118,7 +117,7 @@ end
     end
     @test samples >= 1000
     @test worst_rel < 1e-6
-    # C++: 20532 samples, worst relative error 1.08751e-09 (finite-difference noise level)
+    # reference: 20532 samples, worst relative error 1.08751e-09 (finite-difference noise level)
     @test samples == fx["samples"]
     @test worst_rel < 10 * fx["worst_rel"]
 end
@@ -152,5 +151,5 @@ end
         end
     end
     @test edges_checked > 0
-    @test edges_checked == fx["edges_checked"]  # C++: 76 (split edge, theta) pairs
+    @test edges_checked == fx["edges_checked"]  # reference: 76 (split edge, theta) pairs
 end

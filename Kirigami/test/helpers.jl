@@ -43,7 +43,7 @@ function same_mesh_as_fixture(m::Kirigami.Mesh, j)
     return m.faces == [[Int(i) + 1 for i in f] for f in j["faces"]]
 end
 
-# --- the sigma helpers of code/tests/helpers.hpp ---------------------------------------
+# --- sigma helpers ---------------------------------------------------------------------
 
 # Checkerboard sigma on a mesh whose dual is bipartite (else falls back to DFS
 # 2-colouring, leaving some monochromatic dual edges = split cuts).
@@ -67,7 +67,7 @@ function checkerboard_sigma(m::Kirigami.Mesh)
     return sig
 end
 
-# std::bernoulli_distribution(0.5) per face, true -> +1 (libc++: uniform_real(0,1) < p)
+# bernoulli(0.5) per face, true -> +1 (libc++ semantics: uniform_real(0,1) < p)
 random_sigma(m::Kirigami.Mesh, rng::Kirigami.MT19937) =
     [Kirigami.uniform_real(rng, 0.0, 1.0) < 0.5 ? 1 : -1 for _ in 1:Kirigami.n_faces(m)]
 end

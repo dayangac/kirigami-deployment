@@ -1,20 +1,20 @@
-# test_method_3.jl -- port of the tests/test_method.cpp cases that exercise
-# method/periodic_jacobian, method/budget and method/expansive_cone, case by case.
+# test_method_3.jl -- method/periodic_jacobian, method/budget and method/expansive_cone,
+# case by case.
 #
-# Inputs are built the way the C++ builds them (generators + MT19937 + orientation /
-# quotient_sigma). data/corpus/method_fixtures/method_3_reference.json holds the C++
-# numbers of the same calls (produced by the scratchpad freezer described in its
-# "provenance" field); the last testset compares against them, so a mismatch there
-# separates "the port disagrees with the C++" from "the self-consistency identity fails".
+# Inputs are built in place (generators + MT19937 + orientation / quotient_sigma).
+# data/corpus/method_fixtures/method_3_reference.json holds the reference numbers of the
+# same calls (provenance in its "provenance" field); the last testset compares against
+# them, so a mismatch there separates "the run disagrees with the reference fixtures" from
+# "the self-consistency identity fails".
 include("helpers.jl")
 import JSON
 
 const K = Kirigami
 const M3_REF = JSON.parsefile(joinpath(CORPUS, "method_fixtures", "method_3_reference.json"))
 
-# ---------------------------------------------------------------- helpers (C++ test fixtures)
+# ---------------------------------------------------------------- helpers (test fixtures)
 
-# tests/helpers.hpp checkerboard_sigma: BFS 2-colouring of the dual graph.
+# checkerboard_sigma: BFS 2-colouring of the dual graph.
 function m3_checkerboard_sigma(m::K.Mesh)
     adj = K.dual_graph(m)
     sig = zeros(Int, K.n_faces(m))
@@ -261,8 +261,8 @@ end
         # Orthonormal columns.
         G = fb.N' * fb.N
         @test maximum(abs, G - I) < 1e-10
-        # Against an independent dense rank of the rigidity matrix (the C++ uses
-        # ColPivHouseholderQR with threshold 1e-10 on R / max|R|).
+        # Against an independent dense rank of the rigidity matrix (column-pivoted QR
+        # with threshold 1e-10 on R / max|R|).
         R = K.build_rigidity(g, pins)
         Rs = R / maximum(abs, R)
         qrR = qr(Rs, ColumnNorm())
@@ -326,7 +326,7 @@ end
 @testset "cone_lp finds a small positive margin in a many-row, high-dimension system" begin
     # 1200 rows in 60 dimensions, all inside a narrow cone about e_1: strictly feasible
     # but only by a small margin; z = e_1 is an explicit witness. Deterministic seed and
-    # the libc++ uniform_real stream (mt19937.jl), so A is the C++ matrix.
+    # the libc++-compatible uniform_real stream (mt19937.jl), so A is the reference matrix.
     m, n = 1200, 60
     rng = K.MT19937(20260904)
     A = zeros(m, n)
@@ -502,14 +502,14 @@ end
     @test n == 5
 end
 
-# ---------------------------------------------------------------- frozen C++ reference
+# ---------------------------------------------------------------- frozen reference
 #
-# The same calls as above compared with the numbers the C++ produced. detect_lattice's
+# The same calls as above compared with the frozen reference numbers. detect_lattice's
 # candidate order comes from an unstable libc++ std::sort, so the lattice basis is compared
 # up to the symmetries that leave the downstream cell equivalent (same |det|, same lengths);
 # everything after it (sigma from quotient_sigma, K, theta_c, budgets) must agree.
 
-@testset "frozen C++ reference: lattices, C4, periodic budget, patch budget, cone" begin
+@testset "frozen reference fixtures: lattices, C4, periodic budget, patch budget, cone" begin
     bigs = Dict(
         "squares" => K.tiling_squares(K.rect(K.Vec2(0, 0), 6.5, 6.5)),
         "triangles" => K.tiling_triangles(K.disk(K.Vec2(0.05, 0.03), 7.0)),
@@ -545,13 +545,13 @@ end
         @test isapprox(det(C.J.K), det(Kr); rtol = 1e-9)
         @test isapprox(abs(det(C.J.P0)), abs(det(fixture_matrix(ref["P0"]))); rtol = 1e-12)
         @test isapprox(C.face_area, ref["face_area"]; rtol = 1e-12)
-        # sigma of the cell, when the lattice representative agreed with the C++
+        # sigma of the cell, when the lattice representative agreed with the fixture
         cell_ref = fixture_mesh_raw(ref["cell"])
         if K.n_vertices(C.q.cell) == K.n_vertices(cell_ref) &&
            isapprox(C.q.cell.X, cell_ref.X; atol = 1e-12)
             @test C.q.cell.sigma == cell_ref.sigma
         else
-            @info "C4 $(ref["family"]): lattice representative differs from the C++ (libc++ sort tie); cell compared through K only"
+            @info "C4 $(ref["family"]): lattice representative differs from the fixture (libc++ sort tie); cell compared through K only"
         end
     end
     for ref in M3_REF["periodic_budget"]
@@ -583,7 +583,7 @@ end
         mref = fixture_mesh_raw(ref["mesh"])
         same_input = bc.m.sigma == mref.sigma && isapprox(bc.m.X, mref.X; atol = 1e-12)
         @test same_input
-        # With the C++ inputs (frozen mesh + sigma + X) the budget numbers must agree.
+        # With the frozen inputs (mesh + sigma + X) the budget numbers must agree.
         cr = K.make_cut(mref)
         Xr = fixture_points(ref["X"])
         u, clo = K.face_potential(cr, Xr)
@@ -600,8 +600,8 @@ end
                        rtol = 1e-10, atol = 1e-12)
     end
     for ref in M3_REF["cone"]
-        # Run on the frozen C++ input (mesh + sigma + X), so the comparison isolates
-        # flex_basis / cone_system / cone_lp from the generator and orientation ports.
+        # Run on the frozen input (mesh + sigma + X), so the comparison isolates
+        # flex_basis / cone_system / cone_lp from the generators and the orientation.
         mref = fixture_mesh_raw(ref["mesh"])
         cr = K.make_cut(mref)
         Xr = fixture_points(ref["X"])
@@ -621,17 +621,18 @@ end
         @test rep.passes == ref["passes"]
         @test rep.sigma_in_cone == ref["sigma_in_cone"]
         @test isapprox(rep.sigma_chart_margin, ref["sigma_chart_margin"]; rtol = 1e-8)
-        # nlohmann-json writes +inf (no split edges) as null.
+        # the fixture stores +inf (no split edges) as null.
         m3_inf(x) = x === nothing ? Inf : Float64(x)
         @test isapprox(rep.sigma_min_q, m3_inf(ref["sigma_min_q"]); rtol = 1e-8, atol = 1e-12)
         @test isapprox(rep.sigma_min_mu, m3_inf(ref["sigma_min_mu"]); rtol = 1e-8, atol = 1e-12)
-        # C++ FRAGILITY (replicated, not fixed): rows of A N whose exact value is zero on
-        # the flex space (a corner incidence whose two copies never separate) come out as
-        # ~1e-16 rounding noise, and `normalise_rows` only skips rows of norm <= 0, so they
-        # are scaled to unit rows of pure noise. The LP value then depends on the rounding
-        # of the flex basis (Eigen Householder vs LAPACK): squares_checker (80 of 160 rows)
-        # and truncated_square (16 of 55) are not reproducible and their margin is not
-        # compared; the counts were measured on the C++ N itself. Where no such row exists
+        # Deliberate FRAGILITY (documented in expansive_cone.jl `normalise_rows!`): rows of
+        # A N whose exact value is zero on the flex space (a corner incidence whose two
+        # copies never separate) come out as ~1e-16 rounding noise, and `normalise_rows`
+        # only skips rows of norm <= 0, so they are scaled to unit rows of pure noise. The
+        # LP value then depends on the rounding of the flex basis (QR implementation):
+        # squares_checker (80 of 160 rows) and truncated_square (16 of 55) are not
+        # reproducible and their margin is not compared; the counts were measured on the
+        # reference N itself. Where no such row exists
         # the LP value is a well-defined number and the closed brackets must agree.
         M0 = Matrix(sys.A * fb.N)
         n_noise = count(i -> norm(@view M0[i, :]) < 1e-12, 1:size(M0, 1))
@@ -641,7 +642,7 @@ end
             @test isapprox(rep.margin_l2, ref["margin_l2"]; atol = 2e-6)
             @test isapprox(rep.dual_bound, ref["dual_bound"]; atol = 2e-6)
         end
-        # And the generator + orientation ports reproduce the C++ input itself.
+        # And the generators + orientation reproduce the frozen input itself.
         cs = ref["name"] == "squares_checker" ? m3_case_squares() :
              ref["name"] == "hexagons" ? m3_case_hexagons() :
              ref["name"] == "truncated_square" ? m3_case_trunc() :

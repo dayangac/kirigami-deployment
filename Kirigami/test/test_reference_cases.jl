@@ -1,13 +1,12 @@
-# test_reference_cases.jl -- port of code/tests/test_reference_cases.cpp, case by case.
+# test_reference_cases.jl -- the eight Phase-2 reference cases, case by case.
 #
 # Each of the eight Phase-2 reference cases is regenerated with the SAME generator calls,
-# in the SAME order, off the SAME seeded rng as kiri_reference.cpp (`Kirigami.reference_cases`
-# = kill_common.hpp::reference_cases, byte-for-byte the C++ test's build_reference_cases),
+# in the SAME order, off the SAME seeded rng as kiri_reference.jl (`Kirigami.reference_cases`),
 # then run through make_cut / holes_partition / assemble_system / solve_system and
 # compared against the stored results/core_validation/reference_cases.json (frozen copy in
 # CORPUS/reference_patterns/).
 #
-# WHAT IS PINNED AGAINST THE JSON, AND WHAT IS NOT (from the C++ test):
+# WHAT IS PINNED AGAINST THE JSON, AND WHAT IS NOT:
 #   * F, n_split and dim_null are combinatorial and are asserted exactly against the JSON.
 #   * The JSON's `theta_max` column is a Gate-2 artefact of the pre-F34 collision code plus
 #     bisection; it disagrees with today's exact T4.2'' value by ~2e-6 on the split
@@ -29,7 +28,7 @@ const REFERENCE_JSON = joinpath(CORPUS, "reference_patterns", "reference_cases.j
 
 # The one split-BOUND reference case: its first contact is a split duplicate, so
 # Theta_max sits far below min beta (3.3839) and no hinge-local bound predicts it.
-# Value measured with the C++ exact T4.2'' code (method::characterize).
+# Value measured with the exact T4.2'' code (`characterize`).
 const kSnubThetaMaxT4 = 1.646135970500460
 
 @testset "reference cases: reference_cases.json is present and complete" begin

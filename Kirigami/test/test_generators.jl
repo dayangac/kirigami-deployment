@@ -1,9 +1,9 @@
-# test_generators.jl -- Julia addition (no C++ counterpart): the generators regenerate the
+# test_generators.jl -- the generators regenerate the
 # frozen corpora. For the first 10 ids of every `make_graph` population, the reference
 # cases and the scaling cells, the Julia mesh must equal the frozen one: vertex coordinates
 # with `==` (bit-exact) for the random generators, which involve no libm transcendental,
 # and `isapprox(atol = 1e-12)` for the tilings (`==` as well when the system libm is the
-# arm64 Apple libm the C++ was linked against, see generators.jl); face lists and the
+# arm64 Apple libm the corpora were produced with, see generators.jl); face lists and the
 # checkerboard sigma exactly. On the first divergence the message names the id, the
 # vertex and both values.
 include("helpers.jl")

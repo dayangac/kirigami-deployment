@@ -1,20 +1,19 @@
-# test_rank_checks.jl -- port of code/tests/test_rank_checks.cpp, case by case.
+# test_rank_checks.jl -- core/rank_checks, case by case.
 # Three structural measurements on L that the paper never states:
 #   1. the row sum 1^T L,
 #   2. the factorization L = R D and the out-harmonic left null space,
 #   3. the hinge graph Gamma and the Euler-type hole count.
 #
-# The 12 bounded and 3 torus cases (meshes + sigma) and every report field the C++
-# computed for them are frozen in CORPUS/reference_patterns/test_fixtures_rank_checks.json
-# (data/corpus/reference_patterns/freeze_fixtures_2a.cpp). Torus faces are loaded AS
+# The 12 bounded and 3 torus cases (meshes + sigma) and every report field of the
+# reference run are frozen in CORPUS/reference_patterns/test_fixtures_rank_checks.json
+# (provenance in data/corpus/README.md). Torus faces are loaded AS
 # STORED (fixture_mesh_raw): their wrap-around faces are geometrically degenerate.
 include("helpers.jl")
 
 const K = Kirigami
-# TODO(generators): the 4 relaxation cases and the 4 delaunay + random_sigma cases are read
-# from the fixture; regenerate via bounded_cases() of the C++ test (one mt19937(20260903)
-# shared over the relaxation + delaunay calls in file order; see the fixture's
-# "provenance") once assign_orientation_relaxation reproduces the C++ stream bit-exactly.
+# The 4 relaxation cases and the 4 delaunay + random_sigma cases are read from the
+# fixture; they regenerate from one MT19937(20260903) shared over the relaxation + delaunay
+# calls in file order (see the fixture's "provenance").
 const RANK_FIXTURES = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "test_fixtures_rank_checks.json"))
 
 struct RankCase
@@ -22,10 +21,10 @@ struct RankCase
     mesh::K.Mesh
     mode::K.BoundaryMode
     boundary_free::Bool  # torus: every vertex interior
-    fx::Any              # the frozen C++ reports
+    fx::Any              # the frozen reference reports
 end
-# The RNG-free cases are built by the Julia generators (checked bit-identical to the frozen
-# C++ mesh, checkerboard sigma recomputed and compared); the relaxation / random-sigma
+# The RNG-free cases are built by the generators (checked bit-identical to the frozen
+# mesh, checkerboard sigma recomputed and compared); the relaxation / random-sigma
 # cases come from the fixture.
 const GENERATED_CASES = Dict(
     "rotating_squares" => () -> K.tiling_squares(K.rect(K.Vec2(2.5, 2.5), 2.51, 2.51)),
@@ -39,7 +38,7 @@ const GENERATED_CASES = Dict(
 function case_mesh(j)
     haskey(GENERATED_CASES, j["name"]) || return fixture_mesh_raw(j["mesh"])
     g = GENERATED_CASES[j["name"]]()
-    same_mesh_as_fixture(g, j["mesh"]) || error("generator mesh differs from the frozen C++ mesh: $(j["name"])")
+    same_mesh_as_fixture(g, j["mesh"]) || error("generator mesh differs from the frozen mesh: $(j["name"])")
     g.sigma = checkerboard_sigma(g)
     g.sigma == Int[s for s in j["mesh"]["orientation"]] || error("checkerboard sigma differs from the frozen one: $(j["name"])")
     return g
@@ -63,7 +62,7 @@ function build(g::K.Mesh, mode::K.BoundaryMode)
     return Bundle(c, hs, K.assemble_system(c, hs, g.X, mode))
 end
 
-# every scalar field of the frozen C++ report equals the port's
+# every scalar field of the frozen reference report equals the fresh one
 function check_fields(rep, fx, fields; float_atol = 1e-12)
     for f in fields
         v = getfield(rep, Symbol(f))
@@ -111,7 +110,7 @@ const HINGE_FIELDS = ["n_faces", "n_hinge", "c_gamma", "H", "H_all", "n_notches"
         end
     end
     @test total == 12
-    @test naive_ok == 0  # C++: naive identity holds on 0 / 12 bounded patches
+    @test naive_ok == 0  # reference: naive identity holds on 0 / 12 bounded patches
 end
 
 @testset "check 1: the torus patches are boundary free, so r == 0 and rank(L) == H - 1" begin
