@@ -34,3 +34,15 @@ export in `export/samples/cat_*`): the max-cut orientation, the Eq. (6) projecti
 `θ = 0.35` with the 22 penetrating faces in red (`Θ_max = 0`, split-inward), the
 range-maximising embedding flat, and deployed at `θ = 0.70` (`Θ_max = 2.57` rad, certified).
 Rendered by `Kirigami/scripts/plot_teaser.py`.
+
+## Headline figures for the papers
+
+`Kirigami/scripts/plot_headline.py` draws, with large type for column width:
+
+- `fig_yield_all.{png,pdf}` — fraction with exact `Θ_max > 0` against `|F|` from 24 to 793
+  faces: the paper-regime population (`results/regime/regime.csv`, 200 designs) and the K9c
+  population (`results/experiments/k9c/k9c.csv`, 400 designs), Wilson 95 % intervals; the
+  least-norm projection, the published pipeline with its own colouring where it completed
+  (52 cells, all at the small sizes), and the range-maximising embedding, pooled and per family.
+- `fig_eps_all.{png,pdf}` — certified `ε_max` over the 400 K9c designs against K9, with the
+  medians (0.160 / 0.249 rad) and the teaser design marked.
