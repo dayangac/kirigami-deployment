@@ -118,7 +118,7 @@ end
 end
 
 # ============================================================================
-# F34 -- the hinge-vertex referee artefact (results/kill/b4 voronoi_93, faces 94/184;
+# F34 -- the hinge-vertex referee artefact (results/experiments/b4 voronoi_93, faces 94/184;
 # K9 delaunay ids 13, 40, 103, 190).  Two deployed prime faces that share exactly one
 # M'-vertex (the hinge pin) and whose interiors are disjoint.  The predicate must report
 # NO overlap here, at every tolerance, and must not depend on the tolerance value at all

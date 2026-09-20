@@ -2,16 +2,16 @@
 # wrapper, the K9 constrained embedding, the Eq. (6) baseline, the K9c range-maximising
 # construction and the argument checks, case by case.
 #
-# The two "named designs" are rows of results/kill/k9/k9.csv, the run STATE.md F36
+# The two "named designs" are rows of results/experiments/k9/k9.csv, the run STATE.md F36
 # reports. They are the regression lock on the whole constructive half: if a change to
 # convex_embed, zero_plus, contact or the Eq. (6) solve moves a number, one of these
 # fails. Both are the id-148 / id-79 graphs of the K9 population under the Eq. (1)
 # orientation.
 include("helpers.jl")
-include(joinpath(@__DIR__, "..", "apps", "kill_common.jl"))
+include(joinpath(@__DIR__, "..", "apps", "exp_common.jl"))
 import JSON
 
-# The K9 population, exactly as apps/kill_k9.jl builds it: `make_graph` (bit-exact
+# The K9 population, exactly as apps/exp_k9_convex_embedding.jl builds it: `make_graph` (bit-exact
 # against data/corpus/k1a_200.json, checked below) with X_ini = mesh.X and K9's seed
 # 9000 + 7 * id + which, which = 0 for sigma_mc.
 function k9_design(id::Int)
@@ -323,7 +323,7 @@ end
 # ---------------------------------------------------------------------------
 # (D) design_range_max -- the K9c method, and the regression lock on its CSV.
 #
-# These four rows are results/kill/k9c/k9c.csv under the Eq. (1) orientation, the run
+# These four rows are results/experiments/k9c/k9c.csv under the Eq. (1) orientation, the run
 # STATE.md F37 reports. They cover every way the answer can be reached:
 #   delaunay_130  the stage-A t = 0 start wins, stage B then opens it fully (Theta = pi).
 #   delaunay_148  the K9 proximity arm wins outright.
@@ -336,7 +336,7 @@ end
     @test isapprox(o.delta_convex, 1e-3)
     @test isapprox(o.delta_split, 1e-3)
     @test isapprox(o.delta_wide, 1e-2)
-    @test o.stages == 6            # apps/kill_k9c.jl is run with --stages 6
+    @test o.stages == 6            # apps/exp_k9c_range_embedding.jl is run with --stages 6
     @test o.iter_per_stage == 120  # ... and --stage-iters 120
     @test o.max_iter == 600
     @test o.arm_proximity

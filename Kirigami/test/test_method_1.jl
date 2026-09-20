@@ -66,7 +66,7 @@ end
 
 # Bisection on the true polygon overlap. collision.jl's default shrink of 1e-6
 # reports first contact up to ~5e-5 PAST the true angle on the
-# 4.8.8 pattern -- measured, see results/kill/KILL_REPORT.md K2a -- so the reference
+# 4.8.8 pattern -- measured, see results/experiments/EXPERIMENTS.md K2a -- so the reference
 # used here shrinks by 1e-12 instead.
 function bisect_theta_max(c::K.CutStructure, X::Vector{K.Vec2}, shrink::Float64)
     col(th) = K.has_collision(c, K.deploy(c, X, th).Y, shrink)
@@ -819,7 +819,7 @@ end
 # The C-list of Corollary T4.2' also demands 0 <= <w-a, b-a> <= |b-a|^2 -- the vertex on
 # the SEGMENT -- and only such a root can change the overlap status. Without that filter
 # the certificate rejected 1622 of 1859 jittered authored designs whose exact Theta_max
-# was 1.0-2.4 rad (results/kill/jitter/cert_diagnosis.md); on the five rows diagnosed
+# was 1.0-2.4 rad (results/experiments/jitter/cert_diagnosis.md); on the five rows diagnosed
 # there, ALL 168 roots reported in (0, eps) had the vertex off the segment.
 #
 # The three cases below are the authored reference tilings that fail: 4.8.8, snub square
@@ -856,7 +856,7 @@ end
         @info "F32 $name: Theta_max = $theta_max, NOROOT($eps) = $(cert.noroot), off-segment roots removed = $(cert.n_roots_inadmissible)"
     end
     # The 4.8.8 case gets its sigma from this file's own relaxation stream, which differs
-    # from kill_common's, and does not always clear 1 rad; the other two always do.
+    # from exp_common's, and does not always clear 1 rad; the other two always do.
     @test checked >= 2
     @test inadmissible_total > 0  # without the interval test these would be rejections
 end
@@ -864,7 +864,7 @@ end
 # ---------------------------------------------------------------------------
 # Regression (K6): ValidityCertificate::first_root must be the SMALLEST admissible
 # deflated root over EVERY candidate, not the first one the pair loop happens to hit.
-# Callers (kill_k6) use it as the supremum of the eps for which NOROOT(eps) holds --
+# Callers (exp_k6_zero_plus_repair) use it as the supremum of the eps for which NOROOT(eps) holds --
 # taking a later root there certifies a range the structure does not have.
 
 @testset "harmonic roots are returned in ascending order" begin

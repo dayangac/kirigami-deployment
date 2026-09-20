@@ -2796,9 +2796,9 @@ end
 # =============================================================================
 
 # The wider L1 corpus: the 7 non-periodic Phase-2 reference tilings plus the
-# kill_common population make_graph(id, 18, 46, 220), id = 0 ... , until >= 60 graphs
+# exp_common population make_graph(id, 18, 46, 220), id = 0 ... , until >= 60 graphs
 # are usable.  Built once, from the frozen inputs (see the generator testset: all but
-# hexagons_auto's sigma are reproduced by kill_common.jl), with the frozen X0/Phi.
+# hexagons_auto's sigma are reproduced by exp_common.jl), with the frozen X0/Phi.
 const L1_CASES = Case[]
 function l1_corpus()
     isempty(L1_CASES) || return L1_CASES
@@ -3097,8 +3097,8 @@ end
 # L2 -- derivations/lemmas.md Part L2 (Checker-L, mission 2 / WP1)
 #
 # The population, quotient pipeline and achievable() below are COPIED from
-# apps/kill_k7.jl / kill_b3.jl so that the numbers compare directly with
-# results/kill/k7/k7_main.csv.  The genuinely INDEPENDENT part is `dtau_covector`.
+# apps/exp_k7_periodic_jacobian.jl / exp_b3_expansion_budget.jl so that the numbers compare directly with
+# results/experiments/k7/k7_main.csv.  The genuinely INDEPENDENT part is `dtau_covector`.
 # =============================================================================
 const DERIV_L2 = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "derivation_inputs_l2.json"))
 
@@ -3107,7 +3107,7 @@ const DERIV_L2 = JSON.parsefile(joinpath(CORPUS, "reference_patterns", "derivati
 # bit for bit (docs/NUMERICS.md).
 dot2(a::K.Vec2, b::K.Vec2) = a[1] * b[1] + a[2] * b[2]
 
-# ---- copied from kill_k7.jl (population); bit-identical to the frozen file on all 2122 tori
+# ---- copied from exp_k7_periodic_jacobian.jl (population); bit-identical to the frozen file on all 2122 tori
 function l2_voronoi_pattern(inst::Int, nsites::Int, L::Float64, rng::K.MT19937)
     P = K.PeriodicPattern()
     P.family = "voronoi_torus"
@@ -3205,7 +3205,7 @@ function l2_k7_population()
     return out
 end
 
-# ---- copied from kill_b3.jl (PState / shape_point / prepare / K_at / achievable) --
+# ---- copied from exp_b3_expansion_budget.jl (PState / shape_point / prepare / K_at / achievable) --
 mutable struct L2State
     ok::Bool
     err::String
@@ -3245,7 +3245,7 @@ function l2_K_at(S::L2State, Xq::Vector{K.Vec2})
     return K.periodic_jacobian(S.sp, S.q, S.cut, B)
 end
 
-# JacobiSVD rank with the kill_b3 rule: sv > max(1e-10 * s_max, 1e-13)
+# JacobiSVD rank with the exp_b3_expansion_budget rule: sv > max(1e-10 * s_max, 1e-13)
 function l2_rank(M::AbstractMatrix)
     s = svdvals(M)
     isempty(s) && return 0
