@@ -1,14 +1,14 @@
 # The bisection referee's collision predicate: the F34 hinge-vertex artefact, fixed
 
 Scope: `Kirigami/src/core/collision.jl` -- `polygons_overlap` / `has_collision`, the
-primitive under every `theta_bisect` column in the kill runs and under `theta_max()`.
+primitive under every `theta_bisect` column in the experiments and under `theta_max()`.
 All numbers below come from a full re-run of K2a, K5, K6 and K9 against a matched
 reverted-predicate build of the same source tree; nothing is quoted from the recorded runs.
 
-## 1. The defect (F34, checker round 6 R6-c; K9 post-hoc audit)
+## 1. The defect (F34, derivation check R6-c; K9 post-hoc audit)
 
 The old predicate shrank each polygon toward its OWN centroid by a fixed relative amount
-(`shrink`, 1e-12 at every kill call site) and then ran a STRICT segment-crossing test on
+(`shrink`, 1e-12 at every experiment call site) and then ran a STRICT segment-crossing test on
 the shrunk copies.
 
 Two faces incident to the same hinge edge share the pin vertex: both read the same
@@ -86,7 +86,7 @@ New, in `Kirigami/test/test_collision.jl` (written first, failing against the ol
   the K5 `voronoi_75` pair verbatim, at five tolerances and in both orders, plus a
   translation invariance check. This is the regression test for the second defect above.
 
-`derivation_tests.jl` R6-c, the pinned reproduction from checker round 6, is INVERTED:
+`derivation_tests.jl` R6-c, the pinned reproduction from derivation-check round 6, is INVERTED:
 `R6-c2` now asserts that `polygons_overlap` agrees with the dense probe at every tolerance
 (0 misfires of 6 values, both orders), and its comment records the fix.
 
@@ -104,7 +104,7 @@ Every "before" number here was produced by a REVERTED-PREDICATE BUILD: the curre
 tree with only `Kirigami/src/core/collision.jl` reverted to `HEAD`, run from a copy in
 the scratchpad, so the comparison isolates this fix from the round-6 corrections other
 agents made to `contact.jl` / `zero_plus.jl` in the same working tree. The baseline K5 run
-reproduces `results/kill/k5/summary.txt` line for line (only the wall time differs), which
+reproduces `results/experiments/k5/summary.txt` line for line (only the wall time differs), which
 checks that control.
 
 Outputs live in `results/core_validation/referee_fix/{k2a,pre_k2a,k5,pre_k5,k6,pre_k6,k9,pre_k9}`.
@@ -171,9 +171,9 @@ The two designs are `voronoi 12 / sigma_def` (`Theta_max = 0.002937`) and
 probe, `contact.jl`), not only in the referee: the same hinge artefact was rejecting the
 first interval. Both are still uncertified (`cert_noroot = 0`), and 2 / 400 = 0.5 % is far
 under K6's 20 % bar, so the verdict does not move -- but the sentence "`Theta_max = 0` on all
-400" is no longer true and is corrected in `KILL_REPORT.md`.
+400" is no longer true and is corrected in `EXPERIMENTS.md`.
 
-Control: the reverted-predicate build reproduces `results/kill/k6/k6_final.csv` on every column
+Control: the reverted-predicate build reproduces `results/experiments/k6/k6_final.csv` on every column
 except `sec_eps_max` on 15 rows, which is another agent's round-6 change to
 `method/zero_plus.jl` in the same working tree, not this fix.
 
@@ -196,7 +196,7 @@ any row differs.
 
 ## 5. Verdicts that move
 
-**None.** Every kill-test verdict is unchanged: K2a PASS with the T4.2" scan (187 / 187),
+**None.** Every experiment verdict is unchanged: K2a PASS with the T4.2" scan (187 / 187),
 K5 PASS on its own bar, K6 FAIL (2 / 400 = 0.5 % against a 20 % bar), K9 FAIL (36 / 400 =
 9.0 % against a 10 % bar), B4 unchanged (`voronoi_93` was already reported at the scan's
 0.2484; only the referee column moves).

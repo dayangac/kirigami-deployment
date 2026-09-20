@@ -50,7 +50,7 @@ instances by `Pkg.test()` (see `test/test_holes.jl`).
 
 Worst dense solve time in the sweep: 2382.611 ms.
 
-## Orchestrator checks (added)
+## Additional checks
 
 Three measurements on the hole-constraint matrix `L` that nothing else in the
 pipeline needed: the row sum `1^T L`, the factorization `L = R D`, and the
@@ -161,7 +161,7 @@ wherever it had content -- the three torus patches, `dim Z == 1`, residuals `<= 
 and was vacuous everywhere else, since `dim Z == 0` on all 27 dense sweep graphs and all 8
 reference cases. No counterexample to the factorization or to the out-harmonic
 characterization was found, but the out-harmonic characterization has been exercised on
-three patches only, and that is the honest strength of the evidence for it.
+three patches only; that is the strength of the evidence for it.
 
 Counterexamples saved (graph JSON, loadable by `Kirigami/apps/kiri_analyze.jl`):
 
