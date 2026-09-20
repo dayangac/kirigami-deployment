@@ -1,4 +1,4 @@
-# WP2 — why the K9c yield is not scale-free
+# Why the K9c yield is not scale-free
 
 **Verdict: FAIL against the pre-registered bar.** Best held-out AUC on the fresh graphs is
 **0.751** (two-feature model `n_incid` + `n_constraints_0plus`), against a bar of 0.85. The
@@ -6,7 +6,7 @@ yield half of the bar is met: that model predicts a fresh yield of 0.785 against
 157/200 = 0.785, Wilson 95 % [0.723, 0.836]. The AUC half is not.
 
 The outcome columns of `features.csv` are K9c's, and K9c's endpoints are optimiser-path
-dependent (`results/kill/KILL_REPORT.md` §K9c): the labels of about 5 % of the 400 designs
+dependent (`results/experiments/EXPERIMENTS.md` §K9c): the labels of about 5 % of the 400 designs
 and the exact AUC values and selected feature pairs below move between floating-point
 environments (an earlier pass of the same analysis, on an earlier K9c pass with 307
 positives, selected `log_F` + `hole_size_mean` at a held-out AUC of 0.739). The verdict, the
@@ -18,7 +18,7 @@ Every number below is reproduced by
 
 ## What was measured
 
-`Kirigami/apps/kill_yield.jl` (added to `Kirigami/Project.toml`) computes, per design, 45 raw
+`Kirigami/apps/exp_yield_features.jl` (added to `Kirigami/Project.toml`) computes, per design, 45 raw
 features (52 candidate columns after `analyse.py` adds the log transforms) that depend only on the input — the graph, the orientation σ, the input embedding
 `X_ini`, and the cut structure derived from them — plus a separately labelled group of
 **projection-side** quantities produced by the Eq. (6) solve (`proj_*`). No feature is a
@@ -26,14 +26,14 @@ K9c solver output; the solver outputs sit in the outcome columns and are exclude
 bar.
 
 - `results/yield/features.csv` — **400 rows**, the K9c population (ids 0..199, both σ),
-  same graphs and same σ as `Kirigami/apps/kill_k9c.jl`, the Eq. (6) projection read from the
-  `results/kill/k6/cache` shape cache, outcomes joined from `results/kill/k9c/k9c.csv` on
+  same graphs and same σ as `Kirigami/apps/exp_k9c_range_embedding.jl`, the Eq. (6) projection read from the
+  `results/experiments/k6/cache` shape cache, outcomes joined from `results/experiments/k9c/k9c.csv` on
   (id, kind, sigma). `N`, `F`, `n_split`, `dim_null`, `n_corner`, `med_edge` and
   `nonconvex0` were checked to agree with `k9c.csv` on all 400 rows. K9c was not rerun.
 - `results/yield/fresh.csv` — **200 rows**, held out: ids 1000..1099, σ_mc from
   `make_graph` and σ_def from `orientation_defect` (cap 20|F|, seed 7000+id, K5's
   rule), solved by `design_range_max` (`Kirigami/src/method/design.jl`) at the run defaults with seed
-  9300 + 7·id + which. `kill_yield.jl --mode check` records 0 fingerprint collisions
+  9300 + 7·id + which. `exp_yield_features.jl --mode check` records 0 fingerprint collisions
   with the 200 K9 graphs.
 - `results/yield/analyse.py` — AUC, Spearman, Wilson and the logistic fit implemented on
   numpy; scikit-learn is not installed and is not used.
@@ -240,7 +240,7 @@ constraint/DOF budget — but the input alone does not determine the outcome at 
 the bar demanded. Roughly a quarter of the ranking information is missing from every
 input-side and projection-side quantity measured. The remaining candidate named in
 REPORT.md "Next steps" 7 is the solver's basin — whether the same design flips outcome
-under a different seed or start set; `results/yield/BASIN.md` (WP2b) tests it and finds
+under a different seed or start set; `results/yield/BASIN.md` tests it and finds
 the failure set predominantly geometric.
 
 ## Features that did **not** predict (AUC within 0.05 of 0.5, on the 400)
@@ -256,7 +256,7 @@ repair.
 
 | file | what |
 |---|---|
-| `Kirigami/apps/kill_yield.jl` | feature extractor, three modes (`k9c`, `fresh`, `check`) |
+| `Kirigami/apps/exp_yield_features.jl` | feature extractor, three modes (`k9c`, `fresh`, `check`) |
 | `results/yield/features.csv` | 400 rows, features + joined K9c outcomes |
 | `results/yield/fresh.csv` | 200 held-out rows, features + new outcomes |
 | `results/yield/fresh_sigma/` | the 100 held-out `σ_def` orientations, one JSON per graph |

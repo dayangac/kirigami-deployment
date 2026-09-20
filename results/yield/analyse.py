@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """WP2 -- why the K9c yield is not scale-free.
 
-Reads only CSVs written by Kirigami/apps/kill_yield.jl:
+Reads only CSVs written by Kirigami/apps/exp_yield_features.jl:
   results/yield/features.csv  400 K9c designs, input-side features + the K9c outcomes
-                              joined from results/kill/k9c/k9c.csv
+                              joined from results/experiments/k9c/k9c.csv
   results/yield/fresh.csv     held-out designs (ids 1000..), features and outcomes both
                               produced by the same binary via method::design_range_max
 

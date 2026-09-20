@@ -1,12 +1,12 @@
-# WP2b — is the K9c failure set a solver basin, or is it geometry?
+# Is the K9c failure set a solver basin, or is it geometry?
 
-**STATUS: COMPLETE.** Every number below is copied from `results/yield/basin_stats.txt`,
-which `Kirigami/apps/kill_basin_agg.jl --nshards 6` derives from `results/yield/basin.csv`
+Every number below is copied from `results/yield/basin_stats.txt`,
+which `Kirigami/apps/exp_basin_agg.jl --nshards 6` derives from `results/yield/basin.csv`
 (1,107 rows = 123 designs × 9 seeds). Nothing here is estimated by hand.
 
 ## The question
 
-`results/yield/YIELD.md` (WP2) could not predict K9c's 93 failures from input-side features
+`results/yield/YIELD.md` could not predict K9c's 93 failures from input-side features
 (best held-out AUC 0.739 against a 0.85 bar) and left untested whether those failures are
 basins of the non-convex two-stage search rather than properties of the geometry. K9b
 already answered the analogous question for the **proximity** objective — a 4× budget made
@@ -16,13 +16,13 @@ exactly that.
 
 ## What was run
 
-- Driver `Kirigami/apps/kill_basin.jl`; aggregator `Kirigami/apps/kill_basin_agg.jl`; figure
-  `results/yield/plot_basin.py`. Nothing under `Kirigami/src` and nothing under `results/kill`
+- Driver `Kirigami/apps/exp_basin.jl`; aggregator `Kirigami/apps/exp_basin_agg.jl`; figure
+  `results/yield/plot_basin.py`. Nothing under `Kirigami/src` and nothing under `results/experiments`
   was modified.
 - **Population, 123 designs.** The 93 rows of the K9c pass that was current when this
   experiment was specified (`theta_exact ≤ 1e-9`), plus 30 successes drawn deterministically
   as every 10th success in row order (the 10th, 20th, …, 300th of its 307). The canonical
-  `results/kill/k9c/k9c.csv` is a later pass of the same driver and, K9c's endpoints being
+  `results/experiments/k9c/k9c.csv` is a later pass of the same driver and, K9c's endpoints being
   optimiser-path dependent, has 88 failures: 75 of them are in this file's 93, and 18 of
   the 93 deploy in the canonical pass. The `k = 0` column below is the archived answer of the
   pass the population was drawn from, so that the flip statistics are internally
@@ -31,8 +31,8 @@ exactly that.
   `seed = 9300 + 7·id + which + 1000·k` for `k = 1…8`. The archived K9c answer is copied
   out of `k9c.csv` and recorded as `k = 0`, so nine seeds sit in one file and `k = 0` is
   never a recomputation.
-- **Designs are regenerated exactly as K9c and WP2 build them**: `make_graph(id, 100, 800,
-  1400)`, `sigma_mc = mesh.sigma`, `sigma_def` read from `results/kill/k5/sigma`,
+- **Designs are regenerated exactly as K9c and `YIELD.md` build them**: `make_graph(id, 100, 800,
+  1400)`, `sigma_mc = mesh.sigma`, `sigma_def` read from `results/experiments/k5/sigma`,
   `X_ini = mesh.X`.
 - **Instrument.** `characterize` — the exact T4.2″ `Θ_max`, the binding
   classification, and the largest certified `ε_max`. The independent bisection referee (at
@@ -69,7 +69,7 @@ exactly that.
   point on every `k ≥ 1` row), so the seed is not a lever at all. What the 7 flips measure is
   therefore the difference between the archived `k = 0` endpoint and the current solver's
   endpoint on the same design — the optimiser-path dependence K9c already documents
-  (`results/kill/KILL_REPORT.md` §K9c) — not a seed-selected basin. Indeed 4 of the 7 also
+  (`results/experiments/EXPERIMENTS.md` §K9c) — not a seed-selected basin. Indeed 4 of the 7 also
   deploy in the canonical `k9c.csv`, at comparable values (0.0066, 0.100, 0.222 and 0.032
   rad); the other 3 are at `Θ_max = 0` there.
 

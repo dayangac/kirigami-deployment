@@ -1,5 +1,5 @@
-# WP2b figure. Reads results/yield/basin.csv (written by Kirigami/apps/kill_basin.jl and
-# merged by Kirigami/apps/kill_basin_agg.jl) and writes results/yield/fig_basin.png.
+# WP2b figure. Reads results/yield/basin.csv (written by Kirigami/apps/exp_basin.jl and
+# merged by Kirigami/apps/exp_basin_agg.jl) and writes results/yield/fig_basin.png.
 # Run as: arch -arm64 /usr/local/bin/python3 results/yield/plot_basin.py
 # Plotting only -- every number quoted in BASIN.md comes from basin_stats.txt.
 import csv
