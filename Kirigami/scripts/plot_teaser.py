@@ -23,6 +23,11 @@ PINK, BLUE = "#f4b6c9", "#b9d4ef"      # the two orientations, as in the 2026 pa
 FACE, EDGE = "#c9a9b3", "#2b2b2b"
 OURS = "#a9c8b8"
 RED = "#c8102e"
+EYE, NOSE = "#1b2a4a", "#d9607a"          # the face features, kept in every panel
+FEAT = {v - 1: (EYE if k.startswith("eye") else NOSE) for k, v in d.get("features", {}).items()}
+
+def with_features(cols):
+    return [FEAT.get(i, c) for i, c in enumerate(cols)]
 
 def draw(ax, polys, colors, lw=0.6, alpha=1.0, ec=EDGE):
     for p, c in zip(polys, colors):
@@ -40,7 +45,7 @@ sig = d["sigma"]
 
 # (a) the planar graph with its orientation
 ax = axs[0]
-draw(ax, d["faces_M"], [PINK if s > 0 else BLUE for s in sig])
+draw(ax, d["faces_M"], with_features([PINK if s > 0 else BLUE for s in sig]))
 frame(ax, d["faces_M"])
 ax.set_title(r"graph $M$, orientations $\sigma$" if WIDE else r"planar graph $M$, orientations $\sigma$", fontsize=T, style="italic")
 ax.text(0.5, -0.02, f"{d['n_faces']} faces, {d['n_split']} split cuts,\nshape space of dim. {d['dim_null']}",
@@ -49,7 +54,7 @@ ax.text(0.5, -0.02, f"{d['n_faces']} faces, {d['n_split']} split cuts,\nshape sp
 # (b) the Eq. (6) projection, opened: faces penetrate
 ax = axs[1]
 bad = set(d["X0_overlapping"])
-cols = [RED if i + 1 in bad else FACE for i in range(len(d["X0_deployed"]))]
+cols = with_features([RED if i + 1 in bad else FACE for i in range(len(d["X0_deployed"]))])
 order = sorted(range(len(cols)), key=lambda i: cols[i] == RED)   # red on top
 draw(ax, [d["X0_deployed"][i] for i in order], [cols[i] for i in order], lw=0.5, alpha=0.95)
 frame(ax, d["X0_deployed"])
@@ -61,7 +66,7 @@ ax.text(0.5, -0.02, r"$\Theta_{\max}=0$: %d faces penetrate;" % len(bad)
 
 # (c) our embedding, flat
 ax = axs[2]
-draw(ax, d["ours_flat"], [PINK if s > 0 else BLUE for s in sig])
+draw(ax, d["ours_flat"], with_features([PINK if s > 0 else BLUE for s in sig]))
 frame(ax, d["ours_flat"])
 ax.set_title(r"our embedding $X$, $\theta=0$" if WIDE else r"range-maximising embedding $X$, $\theta=0$", fontsize=T, style="italic")
 ax.text(0.5, -0.02, "same null space; every corner convex,\nevery split cut opens outward",
@@ -69,7 +74,7 @@ ax.text(0.5, -0.02, "same null space; every corner convex,\nevery split cut open
 
 # (d) ours, opened
 ax = axs[3]
-draw(ax, d["ours_deployed"], [OURS] * len(d["ours_deployed"]), lw=0.5)
+draw(ax, d["ours_deployed"], with_features([OURS] * len(d["ours_deployed"])), lw=0.5)
 frame(ax, d["ours_deployed"])
 ax.set_title(r"deployed, $\theta=%.2f$" % d["theta_half"], fontsize=T, style="italic")
 ax.text(0.5, -0.02, r"exact $\Theta_{\max}=%.2f$ rad," % d["ours_theta_max"]

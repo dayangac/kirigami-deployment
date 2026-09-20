@@ -80,12 +80,24 @@ function sample_points(P::Vector{Vec2}, h::Float64, rng::K.MT19937)
     return pts
 end
 
+# the face: two almond eyes and a nose, each a single convex face of the graph
+const FEATURES = Dict(
+    "eye_l" => [Vec2(-0.40, 0.30) + Vec2(0.17cos(a), 0.11sin(a)) for a in range(0, 2pi; length = 7)[1:6]],
+    "eye_r" => [Vec2( 0.40, 0.30) + Vec2(0.17cos(a), 0.11sin(a)) for a in range(0, 2pi; length = 7)[1:6]],
+    "nose"  => [Vec2(-0.13, -0.08), Vec2(0.13, -0.08), Vec2(0.0, -0.26)])
+
 function cat_mesh(seed::Int; h::Float64 = 0.2)
     rng = K.MT19937(seed)
     P = cat_outline()
     pts = sample_points(P, h, rng)
+    # drop sampled points inside or too close to a feature, then add the feature corners
+    feat = collect(values(FEATURES))
+    near(q) = any(point_in_poly(f, q) || minimum(norm(q - v) for v in f) < 0.6h for f in feat)
+    pts = [q for q in pts if !near(q)]
+    append!(pts, vcat(feat...))
     tris = K.delaunay_triangles(pts)
-    keep = [t for t in tris if point_in_poly(P, (pts[t[1]] + pts[t[2]] + pts[t[3]]) / 3)]
+    inside(q) = point_in_poly(P, q) && !any(point_in_poly(f, q) for f in feat)
+    keep = [t for t in tris if inside((pts[t[1]] + pts[t[2]] + pts[t[3]]) / 3)]
     # greedy quad merging across shuffled interior edges when the union is convex
     tri = K.largest_component(K.mesh_from_polygons([[pts[t[1]], pts[t[2]], pts[t[3]]] for t in keep]))
     used = falses(K.n_faces(tri))
@@ -107,7 +119,18 @@ function cat_mesh(seed::Int; h::Float64 = 0.2)
     for f in 1:K.n_faces(tri)
         used[f] || push!(polys, [tri.X[v] for v in tri.faces[f]])
     end
+    append!(polys, feat)
     return K.largest_component(K.mesh_from_polygons(polys))
+end
+
+# face index of each feature: the face whose vertex set is the feature polygon
+function feature_faces(m)
+    out = Dict{String,Int}()
+    for (name, poly) in FEATURES, (i, f) in enumerate(m.faces)
+        length(f) == length(poly) || continue
+        all(minimum(norm(m.X[v] - q) for q in poly) < 1e-9 for v in f) && (out[name] = i)
+    end
+    return out
 end
 
 # ---- run ------------------------------------------------------------------------------
@@ -158,6 +181,12 @@ out = Dict(
     "ours_deployed" => polys_at(d.X, θd), "theta_half" => θd,
     "ours_theta_max" => d.ch.theta_max, "ours_eps_max" => d.ch.eps_max,
     "ours_certified" => d.ch.certified, "n_faces" => K.n_faces(m), "n_split" => K.n_split(c),
-    "dim_null" => d.dim_null, "seed" => seed)
+    "dim_null" => d.dim_null, "seed" => seed, "features" => feature_faces(m))
 open(joinpath(outdir, "teaser_cat.json"), "w") do io; JSON.print(io, out); end
 println("wrote ", joinpath(outdir, "teaser_cat.json"))
+let g = K.Mesh(m.X, m.faces); g.sigma = sigma; K.build_topology!(g)
+    K.save_mesh_json(g, joinpath(outdir, "cat_input.json"))
+    g2 = K.Mesh(d.X, m.faces); g2.sigma = sigma; K.build_topology!(g2)
+    K.save_mesh_json(g2, joinpath(outdir, "cat_graph.json"))   # kiri_export reads this
+    println("wrote cat_input.json, cat_graph.json")
+end
