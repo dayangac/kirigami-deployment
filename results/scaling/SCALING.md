@@ -1,16 +1,16 @@
-# WP7b — the scaling benchmark
+# Scaling benchmark
 
-**Status: COMPLETE.** Every number is a function of `results/scaling/scaling.csv` (165
+Every number is a function of `results/scaling/scaling.csv` (165
 rows, one per graph × routine) and of `results/scaling/fits.csv` (the least-squares
 exponents written by `Kirigami/scripts/plot_scaling.jl`, which also draws
 `results/scaling/fig_scaling.png`); `results/scaling/capped.csv` lists the cells the wall
-cap killed.
+cap stopped.
 
 ## What was run
 
-`Kirigami/apps/kill_scaling.jl` (driven by `Kirigami/scripts/run_scaling.sh`): random
+`Kirigami/apps/exp_scaling.jl` (driven by `Kirigami/scripts/run_scaling.sh`): random
 Delaunay and Voronoi graphs at site counts landing near target |F| ∈ {50, 100, 200, 500,
-1000, 2000, 5000}, three seeds each, the kill population's orientation rule, one process per
+1000, 2000, 5000}, three seeds each, the experiments' orientation rule, one process per
 (graph, routine) so that the peak resident set is the routine's own. The measured |F| runs
 from 40 to 5,000. Four routines per graph, each under a 1,800 s wall cap:
 
@@ -48,7 +48,7 @@ Deployability along the way (`theta_max > 0` after `design_range_max`, 3 seeds p
 1,971, Voronoi 2/3 at 200 and 500, 3/3 at 1,000, 2/3 at 2,000); 1/3 at |F| ≈ 5,000
 (Delaunay). The `characterize` rows report `Θ_max = 0` on every graph, since they are
 evaluated at the raw Eq. (6) projection `X0` — the K1a/K6 result at every scale measured.
-The optimiser's endpoints are path dependent (`results/kill/KILL_REPORT.md` §K9c), so the
+The optimiser's endpoints are path dependent (`results/experiments/EXPERIMENTS.md` §K9c), so the
 per-cell deployable counts are indicative; the wall-time exponents are not sensitive to
 them.
 
