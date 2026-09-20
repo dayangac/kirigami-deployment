@@ -107,12 +107,12 @@ that must break only the inner one is written as explicitly nested `for` blocks
 
 - Every input population is read from `data/corpus/` by default (provenance per file in
   `data/corpus/README.md`). Drivers accept `--regenerate`, which rebuilds the population
-  through the generators and the bit-exact RNG (`apps/kill_common.jl`: `population`,
+  through the generators and the bit-exact RNG (`apps/exp_common.jl`: `population`,
   `reference_cases`, `deployable_population`); on the reference platform `make_graph`
   regenerates all 200 graphs of `k1a_200.json` vertex for vertex. The frozen file remains
   the definition of the population.
 - A run never rewrites the corpus. Apps write to the canonical `results/` tree
-  (`results/kill/<x>/`, `results/final/e1/`, `results/{regime,scaling,yield}/`);
+  (`results/experiments/<x>/`, `results/final/e1/`, `results/{regime,scaling,yield}/`);
   compare a rerun against the committed copy with `git diff`.
 - Deliberate quirks the corpora depend on are marked `deliberate` in the code (welder cell
   overwrite, `generate_canonical` reaching 1.0, DSU without second-argument path
