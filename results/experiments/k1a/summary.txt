@@ -1,0 +1,13 @@
+K1a: 200 graphs, F in [101,793]
+n_inv(X_ini) > 0 (must be 0)      : 0
+n_inv(X0) > 0                     : 142/200
+n_inv(X0) == 0                    : 58/200
+mean inverted fraction of X0      : 0.0410, max 0.1655
+p_valid > 0                       : 66/200
+p_valid == 0                      : 134/200
+any trust-region radius valid     : 69/200
+X_ini injective (control)         : 200/200
+X0 injective (no face overlap)    : 0/200
+some sample injective             : 1/200
+some sample with theta_max > 0    : 0/200
+wall 60.6 s

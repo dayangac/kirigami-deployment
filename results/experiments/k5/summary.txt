@@ -1,0 +1,33 @@
+K5: 200 graphs (R5, the orientation objective)
+sigma_def = greedy flip search on the deployability defect D(sigma), 4 starts,
+            cap 20*|F| attempts, c(Gamma)=1 enforced
+graphs where the search could not keep Gamma connected : 0
+--- the headline: overlap-free X0 at theta = 0 ---
+sigma_mc  gives an overlap-free X0 : 0/200
+sigma_def gives an overlap-free X0 : 125/200
+graphs where sigma_mc FAILS        : 200
+  ... and sigma_def SUCCEEDS       : 125 (62.50 %)   [PASS needs >= 20 %]
+graphs where sigma_def breaks one sigma_mc solved : 0
+--- THE PASS PREDICATE: certificate POS /\ NOOVERLAP(eps/2) /\ NOROOT, eps = 0.300 ---
+sigma_mc  valid X0 : 0/200   (POS 58, NOOVERLAP 0, NOROOT 0)
+sigma_def valid X0 : 0/200   (POS 186, NOOVERLAP 0, NOROOT 0)
+certified Theta_max > 0, sigma_mc / sigma_def : 0 / 0  (of 200)
+sigma_def: smallest ladder angle with an interior overlap, worst over graphs : 1.000e-10
+    (so 'Theta_max = 0' does not rest on a single probe)
+--- the defect and the split count ---
+median D(sigma_mc) / D(sigma_def)   : 2.245e+03 / 1.840e+01
+correlation of D with |E_split|, sigma_mc  : -0.6446
+correlation of D with |E_split|, sigma_def : -0.0346
+--- the Eq. (6) projection distance ||X0 - X_ini||_inf / median edge ---
+median, sigma_mc  : 1.5870
+median, sigma_def : 0.3343
+--- verdicts ---
+FINAL RULE  : sigma_def gives a VALID X0 (certificate POS /\ NOOVERLAP(eps/2)
+              /\ NOROOT, eps = 0.300) on 0.00 % of graphs; needs >= 20 %
+VERDICT (FINAL RULE): FAIL
+EARLIER RULE: sigma_def gives an overlap-free X0 (the WITHDRAWN theta = 0 test)
+              on 62.50 % of the graphs where sigma_mc fails
+VERDICT (earlier rule, withdrawn predicate): PASS
+Range optimiser vs the authors' native prevent from sigma_def's X0: NOT RUN -- gated on the final rule passing,
+  and there is nothing to optimise: every start has Theta_max = 0.
+wall 152.4 s

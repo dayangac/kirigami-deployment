@@ -1,0 +1,24 @@
+F23: forward-kinematics path independence of OUR X0
+(if FK is path independent then no extra closure row is needed, and the
+ authors' boundary-component row is over-constraint)
+
+hexagons_auto: F=10 n_split=5 n_hinge=13 H=4 rank(L)=4 dim_null=5
+  hole-closure residual of our X0 (Eq. (2)) : 2.483e-16
+  theta=0.30: seeds=10 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 2.245e-15, worst over BFS orders = 1.778e-15, worst hinge-angle error = 3.886e-16, worst non-tree BFS mismatch = 5.551e-16, worst split-duplicate parallel error = 3.377e-16
+  theta=0.70: seeds=10 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 2.667e-15, worst over BFS orders = 8.882e-16, worst hinge-angle error = 4.441e-16, worst non-tree BFS mismatch = 4.965e-16, worst split-duplicate parallel error = 3.331e-16
+  theta=1.20: seeds=10 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 1.807e-15, worst over BFS orders = 8.882e-16, worst hinge-angle error = 6.661e-16, worst non-tree BFS mismatch = 1.110e-15, worst split-duplicate parallel error = 2.483e-16
+  theta=2.00: seeds=10 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 1.691e-15, worst over BFS orders = 8.889e-16, worst hinge-angle error = 6.661e-16, worst non-tree BFS mismatch = 1.897e-15, worst split-duplicate parallel error = 4.578e-16
+
+snub_square_33434: F=53 n_split=13 n_hinge=64 H=12 rank(L)=12 dim_null=13
+  hole-closure residual of our X0 (Eq. (2)) : 1.351e-15
+  theta=0.30: seeds=53 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 3.560e-15, worst over BFS orders = 1.986e-15, worst hinge-angle error = 8.327e-16, worst non-tree BFS mismatch = 2.674e-15, worst split-duplicate parallel error = 5.097e-16
+  theta=0.70: seeds=53 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 4.572e-15, worst over BFS orders = 8.882e-16, worst hinge-angle error = 1.554e-15, worst non-tree BFS mismatch = 3.202e-15, worst split-duplicate parallel error = 6.184e-16
+  theta=1.20: seeds=53 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 5.348e-15, worst over BFS orders = 2.220e-15, worst hinge-angle error = 2.442e-15, worst non-tree BFS mismatch = 5.348e-15, worst split-duplicate parallel error = 4.647e-16
+  theta=2.00: seeds=53 orders=20  worst |Y(seed s) - Y(seed 0)| after rigid align = 6.242e-15, worst over BFS orders = 1.332e-15, worst hinge-angle error = 3.109e-15, worst non-tree BFS mismatch = 5.329e-15, worst split-duplicate parallel error = 1.768e-15
+
+worst seed/order disagreement over both patterns : 6.242e-15
+worst hinge-angle error                          : 3.109e-15
+worst split-duplicate parallel error             : 1.768e-15
+VERDICT (path independent to 1e-9): PASS
+=> the authors' extra boundary-component row is OVER-CONSTRAINT: our X0 already closes every hole and deploys
+   path-independently without it, so the row only removes designs.

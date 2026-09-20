@@ -1,0 +1,23 @@
+K3a recheck: the 15 identity violations, dense vs SparseQR rank
+identity: dim ker A == |F \ core2| + dim ker A|core2
+
+  id 40 (delaunay, F=2569): skipped, dense QR of 2569 columns too large
+  id 43 (delaunay, F=2094): skipped, dense QR of 2094 columns too large
+  id 88 (delaunay, F=1644): skipped, dense QR of 1644 columns too large
+  id 247 (delaunay, F=3103): skipped, dense QR of 3103 columns too large
+  id 257 (quad_random, F=1396, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 5.913e-05 full, 5.913e-05 core]
+  id 266 (quad_random, F=1079, X=X0): SparseQR defect -2 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 1.886e-04 full, 1.586e-04 core]
+  id 299 (quad_random, F=3370): skipped, dense QR of 3370 columns too large
+  id 320 (quad_random, F=1358, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 6.678e-04 full, 6.678e-04 core]
+  id 343 (delaunay, F=1913): skipped, dense QR of 1913 columns too large
+  id 425 (quad_random, F=1428, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 5.869e-05 full, 5.869e-05 core]
+  id 445 (delaunay, F=1138, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 1.698e-03 full, 1.698e-03 core]
+  id 455 (quad_random, F=4293): skipped, dense QR of 4293 columns too large
+  id 467 (quad_random, F=911, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 6.131e-05 full, 6.131e-05 core]
+  id 476 (quad_random, F=4902): skipped, dense QR of 4902 columns too large
+  id 494 (quad_random, F=879, X=X0): SparseQR defect 0 -> dense defect 0  IDENTITY HOLDS  [smallest kept sigma / sigma_0 = 2.632e-04 full, 2.632e-04 core]
+
+violators rechecked with dense QR : 7
+  identity restored                : 7
+  still violated                   : 0
+  skipped (too large for dense QR) : 8
