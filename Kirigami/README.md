@@ -1,10 +1,10 @@
-# Kirigami.jl -- package tour
+# Kirigami.jl
 
 One module, `Kirigami`, that `include`s one file per unit (`src/Kirigami.jl` lists the
 order). Nothing is exported: call `Kirigami.f(...)`. Function and field names are the
 ones used in `derivations/`, `results/` and the papers, so every equation, theorem and
-experiment reference resolves (`derivations/` and `ideas/` cited below are the working notes
-in the sibling folder `../../notes/`, outside the repository); the API conventions are listed at the end. Numerical
+experiment reference resolves (`derivations/` cited below is the working notes
+folder `../../notes/derivations/`, outside the repository); the API conventions are listed at the end. Numerical
 conventions are in `../docs/NUMERICS.md`; tests run with
 `julia --project=Kirigami -e 'using Pkg; Pkg.test()'` (187 test sets / 176,692 assertions (23 marked broken), 0 failures).
 
@@ -74,9 +74,9 @@ theorem T7 / the 2026 Sec. 4.4 erratum: `check_row_sum` (1ᵀL and the notch-res
 degree identity), `check_factorization` (L = R·D and the out-harmonic left null space),
 `check_hinge_graph` (H = |E_hinge| - |F| + c(Γ)).
 
-**`kill_common.jl`** -- the graph populations: `make_graph(id, min_faces, max_faces,
-n_cap)` (the kill experiments' population, id-deterministic through `MT19937`),
-`checkerboard`, `reference_cases()` (the eight Phase-2 cases).
+**`populations.jl`** -- the graph populations shared by the experiments: `make_graph(id,
+min_faces, max_faces, n_cap)` (id-deterministic through `MT19937`), `checkerboard`,
+`reference_cases()` (the eight reference tilings of `results/core_validation/`).
 
 ## `src/method/` -- this project's theory and algorithms
 
@@ -136,8 +136,8 @@ point, `farkas_residual` dual certificate) that decides it, experiment K8a; `fle
 `sigma_flex`, `euler_step`.
 
 **`budget.jl`** -- `face_potential`, `budget_terms`, `periodic_cell_edges`: the
-expansion-budget identity of `ideas/round2_theorist_b.md` (B1/B3), the first-order
-hole-opening rate as a border functional split into hinge and split parts.
+expansion-budget identity (experiment B3): the first-order hole-opening rate as a border
+functional split into hinge and split parts.
 
 ## `src/export/` -- fabrication
 
@@ -167,7 +167,7 @@ in `../data/corpus/method_fixtures/`).
 
 ## Judgement calls and deviations from the published pipeline
 
-The tech report, `results/kill/KILL_REPORT.md`, `baseline/parity.md` and `derivations/`
+The tech report, `results/experiments/EXPERIMENTS.md`, `baseline/parity.md` and `derivations/`
 cite the implementation's judgement calls by number ("judgement call 8", "deviation 2").
 The numbering is the original implementation-notes list of sixteen; the entries the
 documents actually cite are recorded here, in the numbering they use, with the source that
@@ -176,11 +176,11 @@ states each in full. Numbers not listed were not cited anywhere.
 | # | decision | where it is stated and measured |
 |---|---|---|
 | 1 | Algorithm 1 line 10 of the 2026 paper is incomplete (it tests only the candidate hinge, never `e'`); the prose rule is implemented instead, and the hole preimages are the split-forest components plus the hinge edges pointing into them (`src/core/holes.jl`, `STATE.md` F11) | techreport Sec. "Holes", Prop. F11; `derivations/check.md` CE-a |
-| 2 | Hole preimages that touch the mesh boundary are notches open to the exterior and contribute no row of `L`; the authors' code adds a row for them (their extra boundary-component row, F23) | techreport "Judgement call 2"; `baseline/parity.md` (Deviation 2); KILL_REPORT §F23 |
-| 6/7 | Our Eq. (9) reimplementation (`optimize_collision_sweep`, `src/core/collision.jl`) uses a softplus barrier on a different argument than the authors' `trace_hole` sign and sweeps a `gamma` ladder; it is weaker than their `prevent` and is never quoted as a baseline | `baseline/parity.md` (Deviation 6/7); KILL_REPORT §K2b, §K1c |
+| 2 | Hole preimages that touch the mesh boundary are notches open to the exterior and contribute no row of `L`; the authors' code adds a row for them (their extra boundary-component row, F23) | techreport "Judgement call 2"; `baseline/parity.md` (Deviation 2); EXPERIMENTS.md §F23 |
+| 6/7 | Our Eq. (9) reimplementation (`optimize_collision_sweep`, `src/core/collision.jl`) uses a softplus barrier on a different argument than the authors' `trace_hole` sign and sweeps a `gamma` ladder; it is weaker than their `prevent` and is never quoted as a baseline | `baseline/parity.md` (Deviation 6/7); EXPERIMENTS.md §K2b, §K1c |
 | 8 | The Eq. (1) orientation relaxation's rounding is unspecified in the paper; we run projected gradient descent on the unit circle with restarts, then take the best of 180 diameters ranked by the component count of `M'` and then by the split count, with two repairs per candidate (`src/core/orientation.jl`) | techreport "Judgement call 8" |
 | 9 | The deployment angle is searched over `theta in (0, pi]`; the bisection referee compares to the closed form at `1e-5` (`src/core/collision.jl`) | `derivations/core.md` (deviation 9), lemma hypothesis H6 |
-| 11 | Periodic patterns are handled on a finite patch with the identifications as linear constraints (`BoundaryMode.Periodic`), which by call 2 drops the wrap-around rows; K7 therefore builds the genuine quotient in `src/method/periodic_jacobian.jl` | techreport "Why a genuine quotient, not a finite patch"; KILL_REPORT §K7 |
+| 11 | Periodic patterns are handled on a finite patch with the identifications as linear constraints (`BoundaryMode.Periodic`), which by call 2 drops the wrap-around rows; K7 therefore builds the genuine quotient in `src/method/periodic_jacobian.jl` | techreport "Why a genuine quotient, not a finite patch"; EXPERIMENTS.md §K7 |
 | 13 | `kiri_design` reports `feasible` and `Theta_max` as separate facts and ranks designs by `Theta_max`, never by margin feasibility (`src/method/design.jl`) | techreport §K9, "Feasibility is not necessary for deployment" |
 
 ## API conventions
@@ -198,4 +198,4 @@ states each in full. Numbers not listed were not cited anywhere.
 | shape-space coefficients `t`; the projection `X0` (N x 2) | `Vector{Float64}`; `SolveReport.X0` is `Matrix{Float64}` N x 2, converted with `matrix_to_points` | `tutte_auxetic.jl` |
 | `CutStructure` and its mesh | `CutStructure.mesh::Mesh` (a reference to the same object; the mesh must not be mutated after `make_cut`) | `cut.jl` |
 | `CollisionSweepResult` extends `CollisionOptResult` | one flat struct with all fields | `collision.jl` |
-| app-side helpers (`Shape` cache, `deployable_population`, `sci`/`fx`, `Timer`) | `apps/kill_common.jl` (an included file, not part of the module), reading `data/corpus/` by default | `apps/` |
+| app-side helpers (`Shape` cache, `deployable_population`, `sci`/`fx`, `Timer`) | `apps/exp_common.jl` (an included file, not part of the module), reading `data/corpus/` by default | `apps/` |
