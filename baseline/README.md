@@ -1,4 +1,27 @@
-# `baseline/` — native build of the authors' published tuttekiri code
+# `baseline/` — the authors' published code this project builds on
+
+This folder holds the reference implementations that the rest of the repository is
+measured against. It is third-party code; nothing in it was written here.
+
+| folder | upstream | what it is |
+|---|---|---|
+| `tuttekiri/` | github.com/segaviv/tuttekiri | Segall, Ren, Sorkine-Hornung, *Uniformly Deployable Kirigami on Arbitrary Planar Graphs*, ACM TOG (SIGGRAPH) 2026. C++ core (`code/cpp/`), the web UI sources (`code/src/`, kept because `state.js` holds the `prevent` defaults quoted in `parity.md`), and the pattern data (`code/data/`). |
+| `kirigami_tessellations/` | github.com/segaviv/kirigami_tessellations | Segall, Ren, Padilla, Sorkine-Hornung, *Kirigami Tessellations*, SIGGRAPH Asia 2025. C++ core (`code/cpp/`), JS sources (`code/js/`), pattern data (`code/data/`) and the five fabrication SVGs (`fabrication_patterns/`, read by `apps/kill_regime.jl`). |
+| `native/` | ours | a CMake harness that compiles the tuttekiri C++ natively and adds a CLI (below). |
+| `parity.md` | ours | the measured 1:1 comparison of our `Kirigami/src/core` against their code. |
+
+The two upstream trees are **copies, trimmed to source and data**: their figures, demo
+videos, the compiled `.wasm`/`.js` bundle and web-page boilerplate were removed, so the
+image links in their own `README.md` files are dead. No source or data file was
+modified; the two upstream defects found while building (listed at the end of this file)
+are worked around in `native/`, never patched in place. For the full repositories,
+licences and the web demos, go to the upstream links above.
+
+The rest of this file documents the native build.
+
+---
+
+## Native build of the authors' tuttekiri code
 
 A referee baseline: the **authors' own C++**, compiled natively on arm64 macOS with
 Apple clang, driven on **our** JSON graphs and writing **our** JSON conventions, so that
