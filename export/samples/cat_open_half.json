@@ -1,0 +1,35 @@
+{
+  "3mf": "export/samples/cat_open_half.3mf",
+  "bbox_mm": [
+    138.70707737545155,
+    162.76975558055457
+  ],
+  "faces": 134,
+  "hinge": "living-hinge-neck",
+  "hinge_sites": 184,
+  "input": "results/final/figures/cat_graph.json",
+  "profile": "felt_laser",
+  "scale_mm_per_unit": 40.0,
+  "solid": {
+    "boundary_edges": 0,
+    "closed": true,
+    "components": 134,
+    "consistently_oriented": true,
+    "nonmanifold_edges": 0,
+    "objects": 1,
+    "triangles": 7384,
+    "volume_mm3": 10725.038971651755,
+    "warnings": [
+      "face 0: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 42: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 46: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 50: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)",
+      "face 133: ear clipping stalled; the remaining ring was closed with a fan (possibly degenerate triangles, but still a closed solid)"
+    ]
+  },
+  "split_edges": 35,
+  "stl": "export/samples/cat_open_half.stl",
+  "svg": "export/samples/cat_open_half.svg",
+  "theta": 1.2843922347172594,
+  "warnings": []
+}
