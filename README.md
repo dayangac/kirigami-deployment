@@ -40,7 +40,7 @@ population deployable and certified (`../paper/REPORT.md` C7-C9, `results/kill/K
 | `export/` | fabrication samples: `hero/`, `hero2/` (JSON/SVG/STL/3MF/PNG of the two hero designs, with READMEs), `samples/`, `render_svg.py` |
 | `baseline/` | the authors' 2025/2026 code (third-party, untouched) and the thin harness `baseline/native/` used as the parity referee (`baseline/parity.md`) |
 
-Not in the repository: the LaTeX sources (`paper/siggraph/`, `paper/techreport/`, `paper/poster/`, with `REPORT.md`) and the working notes (`notes/`: `derivations/` with the theory `core.md`, `lemmas.md`, `check.md` and its `scratch/check_*.jl` programs, `ideas/`, `review/`, `specs/`, `reading/`, `STATE.md`, `IDEA.md`) live in the sibling folders `../paper/` and `../notes/` next to this checkout; the papers read figures from `results/` and `export/` here via `\graphicspath`, and the scratch programs load this package via `--project=code/Kirigami`.
+Not in the repository: the LaTeX sources (`paper/siggraph-poster/`, `paper/techreport/`, `paper/siggraph-poster/`, with `REPORT.md`) and the working notes (`notes/`: `derivations/` with the theory `core.md`, `lemmas.md`, `check.md` and its `scratch/check_*.jl` programs, `ideas/`, `review/`, `specs/`, `reading/`, `STATE.md`, `IDEA.md`) live in the sibling folders `../paper/` and `../notes/` next to this checkout; the papers read figures from `results/` and `export/` here via `\graphicspath`, and the scratch programs load this package via `--project=code/Kirigami`.
 
 ## How to run
 
