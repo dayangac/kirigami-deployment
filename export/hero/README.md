@@ -1,6 +1,6 @@
 # Hero example: K9 Delaunay graph id 148, sigma_mc
 
-The hero design chosen by the orchestrator: K9's population graph id 148
+K9's population graph id 148
 (`delaunay` kind), the Eq. (1) max-cut orientation (`sigma_mc`), constrained
 embedding. This is one of K9's 36/400 positives (the smallest of the two
 regression-locked in `Kirigami/test/test_design.jl`), certified valid with the
@@ -37,9 +37,9 @@ requested 1e-4 tolerance.
 ## Reproduction
 
 1. **Dump the exact K9-population graph** (topology + `assign_orientation_relaxation`
-   sigma + `X_ini`, bit-identical to what `apps/kill_k9.jl` and
+   sigma + `X_ini`, bit-identical to what `apps/exp_k9_convex_embedding.jl` and
    `test/test_design.jl`'s `k9_design(148)` build — this matters because
-   `results/kill/k5/sigma/delaunay_148.json` on disk holds K5's *sigma_def*
+   `results/experiments/k5/sigma/delaunay_148.json` on disk holds K5's *sigma_def*
    orientation, not sigma_mc, and `kiri_design --sigma mc`'s own
    `orientation_maxcut` uses a different RNG seed than `make_graph`'s internal
    one, so neither reproduces the locked value on its own). A throwaway app
@@ -152,4 +152,4 @@ export/hero/
 `dump_hero_graph.jl` (the throwaway graph-dump utility from step 1) was
 run from the scratch directory, not added to the repository or
 the package — it is a 20-line wrapper around
-`make_graph` (`Kirigami/src/core/kill_common.jl`) + `save_mesh_json`, not a deliverable.
+`make_graph` (`Kirigami/src/core/populations.jl`) + `save_mesh_json`, not a deliverable.
