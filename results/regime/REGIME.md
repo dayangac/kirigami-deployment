@@ -1,8 +1,8 @@
-# WP7a — the paper-regime population
+# The paper-regime population
 
-**Status: COMPLETE.** Everything here is a function of `results/regime/regime.csv` (213
+Everything here is a function of `results/regime/regime.csv` (213
 design rows), via `results/regime/summary.txt`, which
-`julia --project=Kirigami Kirigami/apps/kill_regime.jl --mode aggregate --out results/regime`
+`julia --project=Kirigami Kirigami/apps/exp_regime.jl --mode aggregate --out results/regime`
 derives from that CSV and from nothing held in memory. The native cells are the authors'
 unchanged binary (`baseline/native/`), run with a 600 s cap per cell.
 
@@ -57,5 +57,5 @@ published projection deploys 1 of 200 random designs, the authors' full pipeline
 designs it was dispatched on with their colouring (48 completed, 4 timed out; every positive
 has 28–31 faces), and the range
 objective 192 of 200 with a median certified opening of 0.86 rad. The K9c endpoints are
-optimiser-path dependent (`results/kill/KILL_REPORT.md` §K9c); the baseline and native
+optimiser-path dependent (`results/experiments/EXPERIMENTS.md` §K9c); the baseline and native
 columns are not. Figure: `results/regime/fig_regime.png`.
