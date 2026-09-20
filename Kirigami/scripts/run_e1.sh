@@ -1,6 +1,6 @@
 #!/bin/bash
 # Runs E1 (results/final/e1) 12-way sharded, then merges the shard CSVs.
-# Drives Kirigami/apps/kill_e1.jl.
+# Drives Kirigami/apps/exp_e1_thetamax_validation.jl.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 export PATH=$HOME/.juliaup/bin:$PATH
@@ -10,7 +10,7 @@ NSHARDS=12
 NRANDOM=${1:-900}
 
 seq 0 $((NSHARDS-1)) | xargs -P "$NSHARDS" -I{} \
-  julia --project=Kirigami Kirigami/apps/kill_e1.jl --shard {} --nshards $NSHARDS --n-random "$NRANDOM" --out "$OUT/shards"
+  julia --project=Kirigami Kirigami/apps/exp_e1_thetamax_validation.jl --shard {} --nshards $NSHARDS --n-random "$NRANDOM" --out "$OUT/shards"
 
 # merge: one header, then all data rows
 head -n1 "$OUT/shards/e1_0.csv" > "$OUT/e1.csv"

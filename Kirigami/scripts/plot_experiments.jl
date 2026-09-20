@@ -1,9 +1,9 @@
 #!/usr/bin/env julia
-# Figures for results/kill/. Reads only CSV dumped by the experiment drivers (directive D3).
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_kill.jl
+# Figures for results/experiments/. Reads only CSV dumped by the experiment drivers (directive D3).
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_experiments.jl
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-const K = joinpath(ROOT, "results", "kill")
+const K = joinpath(ROOT, "results", "experiments")
 const BLUE = "#2b6cb0"
 const RED = "#c53030"
 

@@ -2,10 +2,10 @@
 # K9c figures.
 #   k9c_gallery.png -- the 20 best designs by certified eps_max, closed and at Theta_max/2.
 #   k9c_hist.png    -- certified eps_max distribution + per-solver counts.
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k9c.jl [results/kill/k9c]
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k9c.jl [results/experiments/k9c]
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-D = length(ARGS) >= 1 ? ARGS[1] : "results/kill/k9c"
+D = length(ARGS) >= 1 ? ARGS[1] : "results/experiments/k9c"
 G = joinpath(D, "gallery")
 
 const CLOSED = "#BDD2FD"

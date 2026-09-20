@@ -1,10 +1,10 @@
 #!/usr/bin/env julia
 # K7 figures: Poisson-ratio curves (predicted vs measured), the
 # achievable-K dimension histogram, the C4 area-fit deviation and the C3 outcome bars.
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k7.jl [results/kill/k7]
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k7.jl [results/experiments/k7]
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-D = length(ARGS) >= 1 ? ARGS[1] : "results/kill/k7"
+D = length(ARGS) >= 1 ? ARGS[1] : "results/experiments/k7"
 
 function nu_figure()
     names = ["hexagons_2x2", "snub_square_2x2", "t3_4_3_12_2x2", "voronoi_torus_0_n20"]

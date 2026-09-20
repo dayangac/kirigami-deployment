@@ -55,7 +55,7 @@ end
 # ---- K6 baseline (Eq. (6) + repairs) --------------------------------------------------
 # The headline K6 rule: a design counts as deployable when the best of the four repair variants
 # (primary, split-only secondary, lambda ladder, stage 2) has a refereed range > 0.
-const K6_BASELINE_CSV = "results/kill/k6/k6.csv"
+const K6_BASELINE_CSV = "results/experiments/k6/k6.csv"
 const K6_THETA_COLS = ["theta_exact", "sec_theta_bisect", "lad_theta_bisect", "s2_theta_bisect"]
 k6_best_theta(r::Row) = maximum(fnum(r, c, 0.0) for c in K6_THETA_COLS)
 "number of K6 designs deployable under the best-of-four rule (17 of 400 in the committed run)"

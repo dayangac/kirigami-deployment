@@ -1,12 +1,12 @@
 #!/usr/bin/env julia
-# Summarise results/kill/k8a/k8a.csv (written by Kirigami/apps/kill_k8a.jl).
+# Summarise results/experiments/k8a/k8a.csv (written by Kirigami/apps/exp_k8a_expansive_cone.jl).
 # A text reduction of the merged CSV, printed to stdout so the
 # caller can tee it into summary.txt.
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/summarise_k8a.jl results/kill/k8a
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/summarise_k8a.jl results/experiments/k8a
 using CSV, DataFrames, Printf
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-d = length(ARGS) >= 1 ? ARGS[1] : "results/kill/k8a"
+d = length(ARGS) >= 1 ? ARGS[1] : "results/experiments/k8a"
 R = rows(d * "/k8a.csv")
 f(r, k) = fnum(r, k)
 med(v) = sorted_mid(v)
@@ -29,7 +29,7 @@ end
         sum(inum(r, "sigma_in_cone") for r in ref; init = 0), length(ref),
         count(r -> f(r, "margin_l2") > 1e-8, ref), length(ref))
 
-println("\n-- DEPLOYABLE POPULATION (kill_common::deployable_population)")
+println("\n-- DEPLOYABLE POPULATION (exp_common::deployable_population)")
 @printf("   configs %d ; sigma in P(X) %d ; LP margin > 0 %d ; Euler step tested %d, collision-free %d\n",
         length(dep), sum(inum(r, "sigma_in_cone") for r in dep; init = 0),
         count(r -> f(r, "margin_l2") > 1e-8, dep),

@@ -1,12 +1,12 @@
 #!/usr/bin/env julia
 # K9b figures.
 #   k9b_gallery.png -- >= 20 deployed random graphs, each shown closed (theta = 0) and at
-#                      theta = Theta_max / 2, from the JSON dumped by kill_k9b.
+#                      theta = Theta_max / 2, from the JSON dumped by exp_k9b_convex_embedding_search.
 #   k9b_hist.png    -- the certified eps_max distribution of K9b against the baselines.
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k9b.jl [results/kill/k9b]
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k9b.jl [results/experiments/k9b]
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-D = length(ARGS) >= 1 ? ARGS[1] : "results/kill/k9b"
+D = length(ARGS) >= 1 ? ARGS[1] : "results/experiments/k9b"
 G = joinpath(D, "gallery")
 
 const CLOSED = "#BDD2FD"
@@ -73,7 +73,7 @@ end
 # positives under the same certificate on the same 400 designs, so the per-design maximum is a
 # legitimate multi-start count -- reported next to the two runs, never in place of either.
 function union_positives(R)
-    path = "results/kill/k9/k9.csv"
+    path = "results/experiments/k9/k9.csv"
     isfile(path) || return count(r -> fnum(r, "theta_ref9") > 1e-9, R)
     K = Dict((r["kind"], r["id"], r["sigma"]) => r for r in rows(path))
     n = 0

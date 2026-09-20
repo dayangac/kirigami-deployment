@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # Final paper figures: baseline (Eq. (6) + the K6 repairs) vs. the three constrained-embedding
 # arms (K9 proximity, K9b, K9c range-maximising), plus E1's exact-vs-referee agreement.
-# The baseline arm is read from results/kill/k6/k6.csv as the best of K6's four repair
+# The baseline arm is read from results/experiments/k6/k6.csv as the best of K6's four repair
 # variants per design (primary, split-only secondary, lambda ladder, stage 2): exact
 # Theta_max = max of the variants' refereed ranges, eps_max = max of their certificates.
 # Figures -> results/final/figures/:
@@ -10,9 +10,9 @@
 # Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_final.jl
 include(joinpath(@__DIR__, "plot_common.jl"))
 
-const K9C_DIR = "results/kill/k9c"
+const K9C_DIR = "results/experiments/k9c"
 const GALLERY = joinpath(K9C_DIR, "gallery")
-const K6_CSV = "results/kill/k6/k6.csv"
+const K6_CSV = "results/experiments/k6/k6.csv"
 const E1_CSV = "results/final/e1/e1.csv"
 const OUT_DIR = "results/final/figures"
 mkpath(OUT_DIR)
@@ -317,10 +317,10 @@ re-run any solver).
 
 | figure | what it shows | data source(s) |
 |---|---|---|
-| `fig_yield.png` | Yield vs. face count \\|F\\| in 3 bins, per family (Delaunay/Voronoi/quad) and per sigma rule, 4 arms (baseline Eq.(6)+repairs, K9 proximity, K9b, K9c range-maximising), Wilson 95% CIs, two rows: exact Theta_max>0 and certified eps_max>=0.1 rad. | `results/kill/k9c/shard_*.csv` merged by (kind,id,sigma), N=$n rows at merge time; the baseline arm is the best of K6's four repair variants per design from `results/kill/k6/k6.csv` ($base_dep of $n deploy). |
+| `fig_yield.png` | Yield vs. face count \\|F\\| in 3 bins, per family (Delaunay/Voronoi/quad) and per sigma rule, 4 arms (baseline Eq.(6)+repairs, K9 proximity, K9b, K9c range-maximising), Wilson 95% CIs, two rows: exact Theta_max>0 and certified eps_max>=0.1 rad. | `results/experiments/k9c/shard_*.csv` merged by (kind,id,sigma), N=$n rows at merge time; the baseline arm is the best of K6's four repair variants per design from `results/experiments/k6/k6.csv` ($base_dep of $n deploy). |
 | `fig_eps_hist.png` | eps_max distribution (log-x) for K9c vs. K9 proximity, plus a bar of the zero-eps_max count per arm. | same K9c merge. |
 | `fig_feasible_vs_deployable.png` | Scatter of best 0+ margin (convex+split feasibility slack) vs. exact Theta_max for every row, colored by family, with margin-feasible-but-Theta_max=0 designs ringed. | same K9c merge. |
-| `fig_gallery_full.png` | ALL K9c-deployable designs (Theta_max>0), sorted by certified eps_max descending, shown closed and at Theta_max/2; the baseline's $base_dep deployable designs are not rendered. | `results/kill/k9c/gallery/*.json` (per-design geometry dumps) + the same merged CSV for sort order. |
+| `fig_gallery_full.png` | ALL K9c-deployable designs (Theta_max>0), sorted by certified eps_max descending, shown closed and at Theta_max/2; the baseline's $base_dep deployable designs are not rendered. | `results/experiments/k9c/gallery/*.json` (per-design geometry dumps) + the same merged CSV for sort order. |
 | `fig_e1_agreement.png` | E1's \\|exact - bisection referee\\| histogram (log-y) and the certificate's confusion counts (TP=$tp, FP=$fp, FN=$fn, TN=$tn against Theta_max>=eps=0.006). | `results/final/e1/e1.csv`, N=$e1_n rows. |
 | `summary_table.md` | Headline table: arms x {N, deployable, certified, eps_max>=0.1 rad, median eps_max, max eps_max}, computed directly from the CSVs above. | same. |
 
@@ -328,11 +328,11 @@ re-run any solver).
 
 - This script merges the live `shard_*.csv` files rather than reading `k9c.csv`; the two
   agree row for row (N=$n of the 400-design target, 200 graphs x 2 sigma).
-- The baseline arm (Eq. (6) + the K6 repairs) is read from `results/kill/k6/k6.csv` as the
+- The baseline arm (Eq. (6) + the K6 repairs) is read from `results/experiments/k6/k6.csv` as the
   best of the four repair variants per design: $base_dep of $n deploy, all by leaving the
-  projection's neighbourhood (KILL_REPORT.md section K6).
+  projection's neighbourhood (EXPERIMENTS.md section K6).
 - The K9c arm's endpoints are optimiser-path dependent at the +-2 % level
-  (KILL_REPORT.md section K9c); every count here is that of the canonical CSVs.
+  (EXPERIMENTS.md section K9c); every count here is that of the canonical CSVs.
 - `fig_gallery_full.png` intentionally renders every deployable design, not a curated
   subset (review/constructive_review.md section 5, item 1) -- it is a large image, one
   row per 6 designs.

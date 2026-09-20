@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # K6 figure: inward split edges at t = 0, and the certified Theta_max distributions.
-# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k6.jl results/kill/k6/k6.csv \
-#          -o results/kill/k6/k6_zero_plus.png
+# Run: julia --project=Kirigami/scripts Kirigami/scripts/plot_k6.jl results/experiments/k6/k6.csv \
+#          -o results/experiments/k6/k6_zero_plus.png
 include(joinpath(@__DIR__, "plot_common.jl"))
 using Random
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env julia
 # fig_regime.png -- deployment yield against |F| from 20 to 800, three arms.
 # Joins the paper-regime population (results/regime/regime.csv, |F| in [20,100]) with the
-# population every earlier kill experiment used (|F| in [101,793]), so the two halves of the
+# population every earlier experiment used (|F| in [101,793]), so the two halves of the
 # face-count axis are read off one figure:
 #
-#   Eq. (6) baseline   regime.csv base_theta                 | results/kill/k1a/k1a.csv
+#   Eq. (6) baseline   regime.csv base_theta                 | results/experiments/k1a/k1a.csv
 #                                                              theta_max_X0 (the Eq. (6)
 #                                                              projection, one row per graph)
-#   native pipeline    regime.csv natour_theta / natcol_theta | results/kill/native200/
+#   native pipeline    regime.csv natour_theta / natcol_theta | results/experiments/native200/
 #                                                              native200_final.csv our_theta_exact,
 #                                                              completed cells only
-#   k9c range-max      regime.csv k9c_theta                   | results/kill/k9c/k9c.csv
+#   k9c range-max      regime.csv k9c_theta                   | results/experiments/k9c/k9c.csv
 #                                                              k9c_theta
 #
 # Every column above is the same exact scan; a design counts as deployable when the exact
@@ -36,15 +36,15 @@ function collect_arms()
                 push!(arms["authors' native pipeline"], (F, fnum(r, pre * "_theta") > 1e-9))
         end
     end
-    k1a = joinpath(ROOT, "results", "kill", "k1a", "k1a.csv")
+    k1a = joinpath(ROOT, "results", "experiments", "k1a", "k1a.csv")
     isfile(k1a) && for r in rows(k1a)
         push!(arms["Eq. (6) baseline"], (inum(r, "F"), fnum(r, "theta_max_X0") > 1e-9))
     end
-    k9c = joinpath(ROOT, "results", "kill", "k9c", "k9c.csv")
+    k9c = joinpath(ROOT, "results", "experiments", "k9c", "k9c.csv")
     isfile(k9c) && for r in rows(k9c)
         push!(arms["k9c range-max"], (inum(r, "F"), fnum(r, "k9c_theta") > 1e-9))
     end
-    nat = joinpath(ROOT, "results", "kill", "native200", "native200_final.csv")
+    nat = joinpath(ROOT, "results", "experiments", "native200", "native200_final.csv")
     isfile(nat) && for r in rows(nat)
         r["status"] == "completed" && r["embedding_ok"] == "1" &&
             push!(arms["authors' native pipeline"], (inum(r, "F"), fnum(r, "our_theta_exact") > 1e-9))
@@ -79,7 +79,7 @@ function main()
                       label = "$name (n=$(sum(ns)))")
     end
     vlines!(ax, [100]; color = GREY(0.6), linestyle = :dash, linewidth = 1)
-    text!(ax, 103, 52; text = "WP7a population  |  earlier kill population", fontsize = 10,
+    text!(ax, 103, 52; text = "paper-regime population  |  earlier experiment population", fontsize = 10,
           color = GREY(0.35), rotation = pi / 2, align = (:center, :bottom))
     ylims!(ax, -4, 104)
     xlims!(ax, 18, 900)
