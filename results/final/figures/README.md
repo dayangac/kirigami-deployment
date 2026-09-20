@@ -25,3 +25,11 @@ re-run any solver).
 - `fig_gallery_full.png` intentionally renders every deployable design, not a curated
   subset (review/constructive_review.md section 5, item 1) -- it is a large image, one
   row per 6 designs.
+
+## Teaser (tech report head figure)
+
+`fig_teaser.{png,pdf}` — a 138-face cat-head planar graph (`Kirigami/scripts/teaser_cat.jl --seed 7`,
+geometry in `teaser_cat.json`): the max-cut orientation, the Eq. (6) projection opened to
+`θ = 0.35` with the 20 penetrating faces in red (`Θ_max = 0`, split-inward), the
+range-maximising embedding flat, and deployed at `θ = 0.70` (`Θ_max = 2.34` rad, certified).
+Rendered by `Kirigami/scripts/plot_teaser.py`.
