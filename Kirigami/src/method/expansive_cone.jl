@@ -1,5 +1,5 @@
 # method/expansive_cone.jl -- the expansive cone of a cut structure and the linear program
-# that decides it (ideas/round2_adversary.md A1, ideas/ranking_r2.md X1 / kill_k8a).
+# that decides it (ideas/round2_adversary.md A1, ideas/ranking_r2.md X1 / exp_k8a_expansive_cone).
 #
 # 1-based indices throughout; a flex vector stacks (omega_f, w_fx, w_fy) at positions
 # 3(f-1)+1..3(f-1)+3. Secondary outputs are extra return values (`farkas_residual`
@@ -84,7 +84,7 @@
 # two-sided bracket and never has to be trusted. A lambda with a small upper bound is an
 # approximate Farkas certificate: sum_i lambda_i a_i ~ 0 with lambda >= 0, sum = 1.
 #
-# THE SOLVER (rewritten; see results/kill/k8a/recheck.md). The dual problem is the
+# THE SOLVER (rewritten; see results/experiments/k8a/recheck.md). The dual problem is the
 # MINIMUM-NORM POINT of the convex hull of the rows,  w* = argmin { ||w|| : w in
 # conv{a_i} },  and the primal witness is NOT a separate object: at the minimum-norm
 # point the supporting-hyperplane inequality  a_i . w* >= ||w*||^2  holds for every i
@@ -102,7 +102,7 @@
 # improve together. The smoothing loop is kept only as an extra source of witnesses; the
 # reported margin is the best of the two. No external LP library is used.
 #
-# DEVIATION FROM THE SPEC. ideas/ranking_r2.md's kill_k8a asks for the normalisation
+# DEVIATION FROM THE SPEC. ideas/ranking_r2.md's exp_k8a_expansive_cone asks for the normalisation
 # ||z||_inf <= 1 and multiplicative weights on the l1 dual. The cone is homogeneous, so
 # the two normalisations are positive iff each other; the l2 game is better conditioned
 # and its dual bound comes free from the same softmax weights. `margin_inf` reports the
@@ -734,7 +734,7 @@ function expansive_cone(c::CutStructure, X::Vector{Vec2},
     # The uniform ray evaluated on ITS OWN branch chart, with no solver in the loop: a
     # rigorous lower bound on that chart's LP value. If sigma is inside P(X) this must be
     # positive, and the solver's margin on pass 1 must be at least this. Used by the K8a
-    # recheck as ground truth (results/kill/k8a/recheck.md).
+    # recheck as ground truth (results/experiments/k8a/recheck.md).
     if length(a_sigma) == rep.n_rows && norm(z_sigma) > 0
         ks = branch_from(a_sigma)
         mn = Inf

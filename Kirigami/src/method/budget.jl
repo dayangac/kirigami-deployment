@@ -54,7 +54,7 @@
 # That threshold is B3.  NOTE what (B.5) does to it: tr K - tau* = R / det(P_0) exactly,
 # so the "budget gap" is the total split budget rescaled and is a QUADRATIC function of
 # the design, not an affine one -- tr K >= tau* is not a linear constraint on the
-# achievable set.  kill_b3 measures both halves of that.
+# achievable set.  exp_b3_expansion_budget measures both halves of that.
 
 # _det2 lives in core/mesh.jl (shared).
 

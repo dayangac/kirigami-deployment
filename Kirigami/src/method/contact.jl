@@ -362,7 +362,7 @@ end
 #                     SEGMENT, not merely on its infinite line. Without them NOROOT is
 #                     not the C-list of Corollary T4.2' but a strictly larger root set,
 #                     and it rejected 87.3% of designs with exact Theta_max >= 1 rad
-#                     (F32, results/kill/jitter/cert_diagnosis.md).
+#                     (F32, results/experiments/jitter/cert_diagnosis.md).
 #
 # Together these imply Theta_max >= eps (Proposition T5.2b'): NOROOT makes the overlap
 # status constant on (0, eps) by a connectedness argument (the status can change only at

@@ -1,6 +1,6 @@
 # method/mobility.jl -- the hinge graph Gamma = (F, E_hinge), its cycle space, the
 # angular-velocity matrix A (2 b_1(Gamma) x |F|), its 2-core, and the mobility
-# identity of kill experiment K3a:
+# identity of experiment K3a:
 #
 #     dim ker A  ==  |F \ core2(Gamma)|  +  dim ker A|core2 .
 #

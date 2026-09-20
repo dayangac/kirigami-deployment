@@ -28,7 +28,7 @@ include("core/mt19937.jl")
 include("core/orientation.jl")
 include("core/generators.jl")
 include("core/import_soup.jl")
-include("core/kill_common.jl")
+include("core/populations.jl")
 include("core/optimize.jl")
 include("core/rank_checks.jl")
 

@@ -1,6 +1,6 @@
-# core/kill_common.jl -- the graph populations shared by the Phase-5 kill experiments and
+# core/populations.jl -- the graph populations shared by the experiments and
 # the eight Phase-2 reference cases (the parts that define INPUTS; the shape-space cache
-# helpers live app-side in apps/kill_common.jl).
+# helpers live app-side in apps/exp_common.jl).
 #
 # Everything is a deterministic function of the graph id through the bit-exact `MT19937`,
 # so `make_graph(id, ...)` regenerates the frozen populations in data/corpus.

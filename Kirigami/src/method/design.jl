@@ -19,11 +19,11 @@
 #     projection and nothing else, i.e. t = 0, characterized by exactly the same code.
 #
 # (D) RANGE-MAXIMISING CONSTRUCTION -- `design_range_max` runs EXACTLY the per-design
-#     pipeline of apps/kill_k9c.jl (arms k9, k9b, stage A from each start, stage B on
+#     pipeline of apps/exp_k9c_range_embedding.jl (arms k9, k9b, stage A from each start, stage B on
 #     the stage-A winner, best-of-three by exact Theta_max), with no wall-clock gating.
 #
 # DEFAULTS ARE K9'S / K9c's, so that with the runs' seeds these functions reproduce
-# results/kill/k9/k9.csv and results/kill/k9c/k9c.csv row for row (test/test_design.jl).
+# results/experiments/k9/k9.csv and results/experiments/k9c/k9c.csv row for row (test/test_design.jl).
 #
 # Shape-space coefficients `t` are plain `Vector{Float64}` of length 2 * dim_null; an
 # empty vector stands for t = 0 (no coefficients).
@@ -201,7 +201,7 @@ RangeMaxResult() = RangeMaxResult(DesignResult(), "", false, 0.0, RangeMaxArm[])
 # Internals.
 
 # The scale every area-valued quantity here is measured in: the upper median of the edge
-# lengths (element at index length/2 of the sorted list), as apps/kill_common.jl defines it.
+# lengths (element at index length/2 of the sorted list), as apps/exp_common.jl defines it.
 function median_edge_length(m::Mesh)
     L = [norm(m.X[e.key.a] - m.X[e.key.b]) for e in m.edges]
     isempty(L) && return 1.0
@@ -509,7 +509,7 @@ function design_constrained(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec
     # --- K9 variant (b), verbatim ---------------------------------------------
     # Variant (a) (convexity only) and K6's split-only repair are both RELAXATIONS of
     # (b), so their minimisers are strictly better starts than the origin. They are
-    # computed only when the cold solve fails, exactly as apps/kill_k9.jl does.
+    # computed only when the cold solve fails, exactly as apps/exp_k9_convex_embedding.jl does.
     ra = nothing
     sp = nothing
     if opt.warm_starts
@@ -584,7 +584,7 @@ function design_baseline(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec2},
 end
 
 # ---------------------------------------------------------------------------
-# (D) The range-maximising construction (K9c), as apps/kill_k9c.jl runs it.
+# (D) The range-maximising construction (K9c), as apps/exp_k9c_range_embedding.jl runs it.
 
 # One scored candidate point of design_range_max. `delta` is the arm's OWN margin: the
 # k9b arm is solved (and judged) at 1e-2, every other arm at 1e-3, exactly as in K9c.
@@ -602,7 +602,7 @@ end
 RangeCand() = RangeCand(false, "", Vec2[], Float64[], false, 0.0, 0.0, 0.0, Characterization())
 
 # K9c's ordering of candidates: exact Theta_max first, the certified eps_max as the
-# tie-break. Identical to the `best` loop of apps/kill_k9c.jl.
+# tie-break. Identical to the `best` loop of apps/exp_k9c_range_embedding.jl.
 function beats(a::RangeCand, b::RangeCand)
     !b.have && return true
     a.theta_max > b.theta_max + 1e-12 && return true
@@ -616,7 +616,7 @@ The K9c range-maximising construction: arms "k9" and "k9b" (proximity points), s
 (`range_embed` from each available start, in the order k9, k9b, t = 0), stage B
 (`maximize_margin_range` from the stage-A winner, kept only if the exact Theta_max
 strictly improved), and the best of {k9, k9b, stage-A/B winner} by exact Theta_max, ties
-broken by eps_max. With seed 9300 + 7 * id + which this reproduces results/kill/k9c/k9c.csv.
+broken by eps_max. With seed 9300 + 7 * id + which this reproduces results/experiments/k9c/k9c.csv.
 """
 function design_range_max(mesh::Mesh, sigma::Vector{Int}, X_ini_in::Vector{Vec2},
                           opt::RangeMaxOptions = RangeMaxOptions())

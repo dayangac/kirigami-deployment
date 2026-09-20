@@ -18,7 +18,7 @@
 # lattice offset), and hole rows carrying the integer offset sum on the right-hand
 # side.
 #
-# THE RESULT (derived here, verified by kill_k7):
+# THE RESULT (derived here, verified by exp_k7_periodic_jacobian):
 #   Let u be the face potential of T1 (u_g - u_f = sigma_g x_src(e) across a hinge
 #   edge).  Translating the whole picture by a period t gives
 #        u_{f+t} = u_f + w_t + sigma_f t / 2 ,        w_t constant over faces,
