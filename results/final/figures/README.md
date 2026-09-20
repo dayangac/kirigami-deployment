@@ -28,8 +28,9 @@ re-run any solver).
 
 ## Teaser (tech report head figure)
 
-`fig_teaser.{png,pdf}` — a 138-face cat-head planar graph (`Kirigami/scripts/teaser_cat.jl --seed 7`,
-geometry in `teaser_cat.json`): the max-cut orientation, the Eq. (6) projection opened to
-`θ = 0.35` with the 20 penetrating faces in red (`Θ_max = 0`, split-inward), the
-range-maximising embedding flat, and deployed at `θ = 0.70` (`Θ_max = 2.34` rad, certified).
+`fig_teaser.{png,pdf}`, `fig_teaser_wide.{png,pdf}` (larger type, for the two-column abstract) — a 134-face cat-head planar graph (eyes and nose are single faces) (`Kirigami/scripts/teaser_cat.jl --seed 7`,
+geometry in `teaser_cat.json`, graphs in `cat_input.json` / `cat_graph.json`, fabrication
+export in `export/samples/cat_*`): the max-cut orientation, the Eq. (6) projection opened to
+`θ = 0.35` with the 22 penetrating faces in red (`Θ_max = 0`, split-inward), the
+range-maximising embedding flat, and deployed at `θ = 0.70` (`Θ_max = 2.57` rad, certified).
 Rendered by `Kirigami/scripts/plot_teaser.py`.
