@@ -1,0 +1,6 @@
+native200 crashfix3600 -- progress at 2026-09-08 22:45:44
+cells in this run: 39 (the 39 that segfaulted at 600 s), timeout 3600s, 2-way, CLI baseline/native/build_fixed/tuttekiri_cli
+done 26 / 39   completed 22   timed_out 2   crashed 2
+  shard 0: 12/19   last: id=131 sigma_def F=320 -> crashed (23.46s)
+  shard 1: 14/20   last: id=172 sigma_mc F=340 -> timed_out (3711.3s)
+last cell finished (any shard): id=172 kind=delaunay variant=sigma_mc F=340 status=timed_out secs=3711.3
