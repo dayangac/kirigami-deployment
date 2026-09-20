@@ -1,6 +1,6 @@
 # reference_patterns/ -- stored pattern files the tests and reference apps read
 
-Archived outputs of `kiri_reference` (Phase 2, Gate 2, 2026-09-03) and of one derivation
+Archived outputs of `kiri_reference` (2026-09-03) and of one derivation
 test, kept verbatim (same basenames). None of these is a `make_graph` population.
 
 | File | Origin | Consumed by | What it pins |
