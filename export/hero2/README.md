@@ -1,7 +1,7 @@
 # Hero example 2: K9c Delaunay graph id 130, sigma_mc
 
-Replacement/addition hero picked from K9c's top-10 by ε_max (`results/kill/k9c/k9c.csv`),
-restricted to the three geometrically-comparable candidates the orchestrator named:
+Replacement/addition hero picked from K9c's top-10 by ε_max (`results/experiments/k9c/k9c.csv`),
+restricted to three geometrically comparable candidates:
 `delaunay_130` (F=130), `delaunay_28` (F=124), `delaunay_55` (F=120), all `sigma_mc`, all
 with `k9c_eps = π` (fully open, `eps_max` capped at π). Selection rule: among candidates
 with `eps_max >= 2.5 rad`, pick the one with the largest minimum face-corner angle at the
@@ -29,7 +29,7 @@ three designs (`best_src = k9c/x0+B` in `k9c.csv`) instead comes from `range_emb
 objective, so `kiri_design` cannot be relied on to land in the same basin.
 
 This was checked empirically, not just argued: a throwaway program
-(`dump_k9c_graph.jl`, not committed) that replicates `kill_k9c.jl`'s exact per-graph
+(`dump_k9c_graph.jl`, not committed) that replicates `exp_k9c_range_embedding.jl`'s exact per-graph
 pipeline line-for-line (same `convex_embed`/`range_embed`/`maximize_margin_range` calls,
 same seed formula `9300 + 7*id + which`) was run standalone on `delaunay_130
 sigma_mc`. It did **not** reproduce the archived point: it found `theta_exact = 2.68985`
@@ -41,7 +41,7 @@ constrained solve.**
 
 So, per the fallback instruction, the export uses the **archived winning embedding
 directly**, recovered from the gallery dump of the K9c pass this hero was picked from
-(the canonical `results/kill/k9c/k9c.csv`, a later pass of the same driver, ends at a
+(the canonical `results/experiments/k9c/k9c.csv`, a later pass of the same driver, ends at a
 different local optimum on this design, `theta_exact = 0.572` via the same `k9c/x0+B` route,
 and its gallery JSON is that point; the hero geometry survives as `hero2_graph.json` and
 the `hero2_130_sigma_mc_*.json` dumps here, and is re-characterised from them).
@@ -81,7 +81,7 @@ Certificate clauses (`POS /\ NOOVERLAP(eps/2) /\ NOROOT(eps)`, eps=0.3 rad):
 `pos = true`, `nooverlap = true`, `noroot = true`, `valid = true`,
 `min_signed_area = 1.390707882217665`, `n_candidates = 20696`, `n_pairs = 1188`,
 `n_roots_deflated = 0`, `n_roots_inadmissible = 913`, `first_root = -1.0` (no root found
-in range), `theta_1 = 0.15`. Matches `results/kill/k9c/k9c.csv` row
+in range), `theta_1 = 0.15`. Matches `results/experiments/k9c/k9c.csv` row
 `id=130,kind=delaunay,sigma=sigma_mc` (`F=130`, `k9c_eps=k9c_theta=3.14159`,
 `best_src=k9c/x0+B`) to the CSV's printed precision.
 
@@ -107,7 +107,7 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
 ## Reproduction
 
 1. **Dump the exact K9c-population graph** (topology + sigma_mc, bit-identical to what
-   `apps/kill_k9c.jl` builds for `id=130`), same throwaway-utility pattern as hero's
+   `apps/exp_k9c_range_embedding.jl` builds for `id=130`), same throwaway-utility pattern as hero's
    `dump_hero_graph.jl`:
    ```
    julia --project=Kirigami export/hero2/dump_hero2_input.jl 130 800 export/hero2/hero2_input.json
@@ -119,7 +119,7 @@ deployment-range trade-off K9c's summary flagged as a caveat for its top designs
    cannot reproduce it — see above):
    ```
    julia --project=Kirigami export/hero2/reconstruct_k9c_graph.jl 130 800 \
-     results/kill/k9c/gallery/delaunay_130_sigma_mc_closed.json export/hero2/hero2_graph.json
+     results/experiments/k9c/gallery/delaunay_130_sigma_mc_closed.json export/hero2/hero2_graph.json
    ```
    Prints `gallery theta=0 max_mismatch=0` and `max spread across prime-copies ... 5.02e-15`
    (the fold-back sanity check). Output `hero2_graph.json` is a plain graph JSON
@@ -218,6 +218,6 @@ export/hero2/
 `dump_hero2_input.jl`, `reconstruct_k9c_graph.jl`, `characterize_k9c.jl` (the
 throwaway utilities above) were run from the scratch directory, not added to
 the repository or the package — they are graph-topology dump / fold-back /
-measurement plumbing around existing library code (`make_graph` (`Kirigami/src/core/kill_common.jl`),
+measurement plumbing around existing library code (`make_graph` (`Kirigami/src/core/populations.jl`),
 `make_cut`, `characterize`), not new method code or a deliverable.
 `export/hero/` is unmodified.
