@@ -8,7 +8,7 @@
 #                                                              theta_max_X0 (the Eq. (6)
 #                                                              projection, one row per graph)
 #   native pipeline    regime.csv natour_theta / natcol_theta | results/kill/native200/
-#                                                              native200.csv our_theta_exact,
+#                                                              native200_final.csv our_theta_exact,
 #                                                              completed cells only
 #   k9c range-max      regime.csv k9c_theta                   | results/kill/k9c/k9c.csv
 #                                                              k9c_theta
@@ -44,7 +44,7 @@ function collect_arms()
     isfile(k9c) && for r in rows(k9c)
         push!(arms["k9c range-max"], (inum(r, "F"), fnum(r, "k9c_theta") > 1e-9))
     end
-    nat = joinpath(ROOT, "results", "kill", "native200", "native200.csv")
+    nat = joinpath(ROOT, "results", "kill", "native200", "native200_final.csv")
     isfile(nat) && for r in rows(nat)
         r["status"] == "completed" && r["embedding_ok"] == "1" &&
             push!(arms["authors' native pipeline"], (inum(r, "F"), fnum(r, "our_theta_exact") > 1e-9))
