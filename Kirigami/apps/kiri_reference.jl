@@ -3,8 +3,8 @@
 #
 # The eight cases are read from the frozen
 # data/corpus/reference_cases_8.json by default; --regenerate rebuilds them through the
-# tiling generators and the bit-exact MT19937 (kill_common.jl `reference_cases`).
-include(joinpath(@__DIR__, "kill_common.jl"))
+# tiling generators and the bit-exact MT19937 (exp_common.jl `reference_cases`).
+include(joinpath(@__DIR__, "exp_common.jl"))
 
 Base.@kwdef mutable struct RefRow
     name::String = ""

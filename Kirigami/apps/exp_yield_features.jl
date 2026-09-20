@@ -1,4 +1,4 @@
-# kill_yield -- INPUT-SIDE features of the K9c population, for WP2 (why the K9c yield is
+# exp_yield_features -- INPUT-SIDE features of the K9c population, for WP2 (why the K9c yield is
 # not scale-free).
 #
 # REPORT.md Sec. Results records that the K9c method reaches exact Theta_max > 0 on
@@ -16,10 +16,10 @@
 #
 # Two modes:
 #   --mode k9c    ids 0..199 of the K9 population (make_graph(id, 100, 800, 1400)), both
-#                 sigma rules, sigma_def read from the results/kill/k5/sigma cache and the
-#                 Eq. (6) projection read from the results/kill/k6/cache shape cache, i.e.
-#                 EXACTLY the objects kill_k9c.jl uses. No solver is run: the outcomes are
-#                 joined in from results/kill/k9c/k9c.csv on (id, kind, sigma).
+#                 sigma rules, sigma_def read from the results/experiments/k5/sigma cache and the
+#                 Eq. (6) projection read from the results/experiments/k6/cache shape cache, i.e.
+#                 EXACTLY the objects exp_k9c_range_embedding.jl uses. No solver is run: the outcomes are
+#                 joined in from results/experiments/k9c/k9c.csv on (id, kind, sigma).
 #   --mode fresh  ids 1000..1099, held out. sigma_mc from make_graph, sigma_def from
 #                 method::orientation_defect (the library promotion of K5's search, cap
 #                 20|F|, seed 7000 + id), then method::design_range_max at the K9c run's
@@ -28,7 +28,7 @@
 #
 # Rows are flushed as they are produced, so a killed shard leaves usable output.
 #
-#   julia --project=Kirigami Kirigami/apps/kill_yield.jl [--mode k9c] [--out DIR]
+#   julia --project=Kirigami Kirigami/apps/exp_yield_features.jl [--mode k9c] [--out DIR]
 #         [--sigma DIR] [--cache DIR] [--k9c PATH] [--shard S] [--nshards M] [--n 100]
 #         [--id0 1000] [--limit K] [--regenerate]
 #
@@ -39,9 +39,9 @@
 # One deliberate deviation in --mode k9c: the Eq. (6) projection comes from the shape
 # cache when present (`--cache`) and is otherwise SOLVED and cached, where the original
 # K9c run skipped the design (this repo carries no
-# results/kill/k6/cache). Outputs go to results/yield/ by default. `--limit K` stops
+# results/experiments/k6/cache). Outputs go to results/yield/ by default. `--limit K` stops
 # after K graphs of the shard.
-include(joinpath(@__DIR__, "kill_common.jl"))
+include(joinpath(@__DIR__, "exp_common.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
 
@@ -429,8 +429,8 @@ function main(args::Vector{String})
     mode = "k9c"
     outdir = joinpath(REPO, "results", "yield")
     sigmadir = ""
-    cache = joinpath(REPO, "results", "kill", "k6", "cache")
-    k9c_csv = joinpath(REPO, "results", "kill", "k9c", "k9c.csv")
+    cache = joinpath(REPO, "results", "experiments", "k6", "cache")
+    k9c_csv = joinpath(REPO, "results", "experiments", "k9c", "k9c.csv")
     shard = 0; nshards = 1; n_fresh = 100; id0 = 1000
     limit = typemax(Int)
     i = 1

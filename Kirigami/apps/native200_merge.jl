@@ -3,12 +3,12 @@
 # native200_final.csv; nothing is hand-entered.
 #
 #   julia --project=Kirigami Kirigami/apps/native200_merge.jl
-#     [--orig results/kill/native200/native200.csv]
-#     [--rerun results/kill/native200/rerun3600]        (repeatable: any dir of shard_*.csv)
-#     [--rerun results/kill/native200/crashfix3600]
-#     [--grid results/kill/native200/grid.csv]
-#     [--out results/kill/native200/native200_final.csv]
-#     [--md  results/kill/native200/NATIVE200_FINAL.md]
+#     [--orig results/experiments/native200/native200.csv]
+#     [--rerun results/experiments/native200/rerun3600]        (repeatable: any dir of shard_*.csv)
+#     [--rerun results/experiments/native200/crashfix3600]
+#     [--grid results/experiments/native200/grid.csv]
+#     [--out results/experiments/native200/native200_final.csv]
+#     [--md  results/experiments/native200/NATIVE200_FINAL.md]
 #     [--expected 389]   cells the rerun pipeline has to get through
 #
 # Merge rule: a cell's row is the one from the LATEST run that touched it, where
@@ -16,8 +16,8 @@
 # in a `first_status` column.  Cells in the grid that no run ever dispatched come
 # out as status `missing`.
 #
-# Inputs default to this repo's migrated results/kill/native200/; the merged CSV and the
-# report go to results/kill/native200/.
+# Inputs default to this repo's migrated results/experiments/native200/; the merged CSV and the
+# report go to results/experiments/native200/.
 include(joinpath(@__DIR__, "common_app.jl"))
 
 const REPO = normpath(joinpath(@__DIR__, "..", ".."))
@@ -131,8 +131,8 @@ end
 f3(v::Real) = fx(v, 3)
 
 function main(args::Vector{String})
-    indir = joinpath(REPO, "results", "kill", "native200")
-    outdir = joinpath(REPO, "results", "kill", "native200")
+    indir = joinpath(REPO, "results", "experiments", "native200")
+    outdir = joinpath(REPO, "results", "experiments", "native200")
     orig = joinpath(indir, "native200.csv")
     grid = joinpath(indir, "grid.csv")
     out = joinpath(outdir, "native200_final.csv")
@@ -266,7 +266,7 @@ function main(args::Vector{String})
               "finished.**\n\n")
     end
     print(o, "Every number below is computed by `Kirigami/apps/native200_merge.jl` from ",
-          "`results/kill/native200/native200_final.csv`, which is itself merged from ",
+          "`results/experiments/native200/native200_final.csv`, which is itself merged from ",
           "`native200.csv` (the 600 s run), `rerun3600/shard_*.csv` (the 3600 s rerun of the ",
           "timed-out and never-dispatched cells) and `crashfix3600/shard_*.csv` (the 39 ",
           "crashed cells against the F24-patched CLI). One row per (graph id, variant); the ",

@@ -1,12 +1,12 @@
-# apps/native_common.jl -- the per-cell code path of apps/kill_native200.jl, factored out
-# so that a second driver (kill_regime, WP7) can run the authors' full native pipeline and
+# apps/native_common.jl -- the per-cell code path of apps/exp_native200.jl, factored out
+# so that a second driver (exp_regime, WP7) can run the authors' full native pipeline and
 # score it with EXACTLY the same instruments.
 #
 # The authors' CLI is an external program (`cli`), run through `/usr/bin/perl -e 'alarm ...'`
 # so the timeout semantics (and the "timed_out" classification at 0.9 x timeout) are
 # identical for every driver.
 
-include(joinpath(@__DIR__, "kill_common.jl"))
+include(joinpath(@__DIR__, "exp_common.jl"))
 
 # ---- our own referee, identical to K2a/K2b/K5/K6 --------------------------
 referee_theta(c::K.CutStructure, X::Vector{Vec2}, grid::Int = 4000, iters::Int = 50) =

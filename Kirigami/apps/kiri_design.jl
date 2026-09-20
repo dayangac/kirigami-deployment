@@ -14,7 +14,7 @@
 # DETERMINISM. Every solve here is a pure function of (mesh, sigma, X_ini, options,
 # --seed): no clock, no thread pool and no global state enters it, so the same command
 # line gives bit-identical output on the same build.
-include(joinpath(@__DIR__, "kill_common.jl"))
+include(joinpath(@__DIR__, "exp_common.jl"))
 
 function usage()
     println(stderr,
@@ -34,7 +34,7 @@ function usage()
         "  --sigma both  runs mc and def and reports both\n",
         "  --stages/--stage-iters are stage A's continuation stages and L-BFGS\n",
         "  iterations per stage; the defaults 6 / 120 are the K9c run's settings, so\n",
-        "  --seed \$((9300 + 7 * id + which)) reproduces results/kill/k9c/k9c.csv.")
+        "  --seed \$((9300 + 7 * id + which)) reproduces results/experiments/k9c/k9c.csv.")
 end
 
 function certificate_json(v::K.ValidityCertificate)

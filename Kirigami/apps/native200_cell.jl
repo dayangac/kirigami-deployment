@@ -8,10 +8,10 @@
 # writes <out>/input.json (for sigma_mc / sigma_def: the mesh with that
 # orientation field; for `native`: <out>/raw.json without an orientation field --
 # the caller must then run `tuttekiri_cli color raw.json --out input.json`
-# exactly as kill_native200.jl does) and prints id/kind/N/F. The graph and sigma_def
+# exactly as exp_native200.jl does) and prints id/kind/N/F. The graph and sigma_def
 # come from the frozen data/corpus/native200.json (`--sigma DIR` reads the archived K5
 # file instead; `--regenerate` rebuilds the graph through make_graph).
-include(joinpath(@__DIR__, "kill_common.jl"))
+include(joinpath(@__DIR__, "exp_common.jl"))
 
 function main(args::Vector{String})
     args, regenerate = take_regenerate_flag(args)
